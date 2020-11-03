@@ -1,7 +1,9 @@
 # Realness
  Realness - Bunjil Place Outdoor Screen
+ 
+https://bunjilplace2021.github.io/realness/
 
- https://code.wesleydowling.com/realness/
+slack https://bunjilplaceou-l1d3894.slack.com
 
 ## Timeline
 
