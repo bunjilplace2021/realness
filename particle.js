@@ -1,5 +1,5 @@
 class Particle {
-  constructor(x, y, rand, img_, devWidth, devHeight, touchTime) {
+  constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
     this.origposition = createVector(x, y);
     this.position = createVector(map(x, 0, devWidth, 0, width), map(y, 0, devHeight, 0, height));
     this.velocity = createVector();
@@ -29,6 +29,7 @@ class Particle {
     this.touchtime = touchTime;
     this.duration = 0.;
     this.active = false;
+    this.UUID = part_UUID;
 
   }
 

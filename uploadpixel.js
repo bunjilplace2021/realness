@@ -54,6 +54,7 @@ if (mouseX > 0&& mouseX < width-77 && mouseY > 50 && mouseY < height) {
 
   colour = cam.get(width - mouseX, mouseY);
   var data = {
+    uuid: uuid,
     mouseX_loc: mouseX,
     mouseY_loc: mouseY,
     colour_loc: colour,

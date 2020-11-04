@@ -19,6 +19,8 @@ let touchtime;
 var reset = false;
 var eraser_size = 20;
 
+let uuid;
+
 
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
@@ -40,7 +42,7 @@ function preload() {
   if (/android/i.test(navigator.userAgent)) {
     isAndroid = true;
   }
-
+  uuid = guid();
   shaderPreload();
 }
 
@@ -73,6 +75,7 @@ function setup() {
   shaderSetup();
 
   ps = new ParticleSystem(createVector(width / 2, height / 2), img);
+
 }
 
 function draw() {
@@ -91,6 +94,16 @@ function shaderToggle(){
 
 pixelShaderToggle = !pixelShaderToggle;
 
+}
+
+function guid() {
+  //someone else's function
+  //https://slavik.meltser.info/the-efficient-way-to-create-guid-uuid-in-javascript-with-explanation/
+  function _p8(s) {
+    var p = (Math.random().toString(16) + "000000000").substr(2, 8);
+    return s ? "-" + p.substr(0, 4) + "-" + p.substr(4, 4) : p;
+  }
+  return _p8() + _p8(true) + _p8(true) + _p8();
 }
 
 function particle_draw() {

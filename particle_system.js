@@ -6,9 +6,9 @@ class ParticleSystem {
     this.particles = [];
   }
 
-  addParticle(x, y, rand, img, devWidth, devHeight, touchTime) {
+  addParticle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID) {
     if (x !== undefined && y !== undefined) {
-      this.particles.push(new Particle(x, y, rand, img, devWidth, devHeight, touchTime));
+      this.particles.push(new Particle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID));
       particlecount = this.particles.length;
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
