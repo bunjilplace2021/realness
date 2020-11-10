@@ -125,7 +125,7 @@ function infoInstructions() {
 
   instruction_toggle = !instruction_toggle;
   var x = document.getElementById("myLinks");
-  //  icons.classList.toggle("fa-window-close");
+  menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
   //  myInfo.style.display = "block";
   //  myInfo.style.overflowY = "scroll";
