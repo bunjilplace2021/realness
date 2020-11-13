@@ -20,6 +20,7 @@ function shaderSetup() {
 
   // initialize the webcam at the window size
   cam = createCapture(VIDEO);
+  cam.elt.setAttribute('playsinline', '');
   //cam.size(windowWidth, windowHeight);
 
   // hide the html element that createCapture adds to the screen
@@ -41,7 +42,10 @@ function shaderDraw() {
 
   // rect gives us some geometry on the screen
   campg.rect(0,0,width, height);
-    
+
+//  var img = campg.get(mouseX,mouseY);
+//  console.log(img);
+
 }
 
   //image(campg,0,0);

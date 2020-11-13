@@ -1,5 +1,8 @@
 // save this file as sketch.js
 // Sketch One
+
+const globalv = 99;
+
 var s = function( p ) { // p could be any variable name
   var x = 100;
   var y = 100;
@@ -8,6 +11,7 @@ var s = function( p ) { // p could be any variable name
   };
 
   p.draw = function() {
+    console.log(globalv);
     p.background(0);
     p.fill(255);
     p.rect(x,y,50,50);
@@ -30,6 +34,7 @@ var t = function( p ) {
   p.draw = function() {
     p.background(100);
     p.fill(1);
+    console.log(globalv);
     x += speed;
     if(x > p.width){
       x = 0;
