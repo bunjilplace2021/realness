@@ -21,6 +21,7 @@ function shaderSetup() {
   // initialize the webcam at the window size
   cam = createCapture(VIDEO);
   cam.elt.setAttribute('playsinline', '');
+  cam.elt.setAttribute('autoplay', '');
   //cam.size(windowWidth, windowHeight);
 
   // hide the html element that createCapture adds to the screen
