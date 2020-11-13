@@ -132,7 +132,7 @@ function infoInstructions() {
   //  myInfo.style.background = "rgba(255, 255, 255, 0.8)";
 
   if (instruction_toggle) {
-    //   myInfo.style.display = "block";
+    FScreen.style.display = "block";
     //   myInfo.style.background = "rgba(255, 255, 255, 0.8)";
     //   //  myInfo.style.overflowY = "scroll";
   } else {
