@@ -15,7 +15,7 @@ function shaderPreload(){
 
 function shaderSetup() {
   // shaders require WEBGL mode to work
-  campg = createGraphics(windowWidth, windowHeight, WEBGL);
+  campg = createGraphics(cnv.width, cnv.height, WEBGL);
   noStroke();
 
   // initialize the webcam at the window size

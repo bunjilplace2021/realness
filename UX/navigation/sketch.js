@@ -112,11 +112,11 @@ function windowResized() {
 
   if (!isMobile) {
     resizeCanvas(windowWidth, windowHeight);
-    campg.resizeCanvas(windowWidth, windowHeight);
+    campg.resizeCanvas(cnv.width, cnv.height);
   } else {
     let innerh = iosInnerHeight();
     resizeCanvas(windowWidth, innerh);
-    campg.resizeCanvas(windowWidth, innerh);
+    campg.resizeCanvas(cnv.width, cnv.height);
   }
 
 }
