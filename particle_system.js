@@ -15,6 +15,31 @@ class ParticleSystem {
     }
   }
 
+  intersection() {
+
+    let boundary = new Rectangle(0, 0, width, height);
+    let qtree = new QuadTree(boundary, 4);
+
+    for (let particle of this.particles) {
+      let point = new Point(particle.position.x, particle.position.y, particle);
+      qtree.insert(point);
+
+      let range = new Circle(particle.position.x, particle.position.y, particle.radius * 2);
+      let points = qtree.query(range);
+
+      for (let point of points) {
+        let other = point.userData;
+
+//Collision Detection Test
+        if (particle !== other && particle.intersects(other)) {
+          noFill();
+          stroke(255);
+          line(particle.position.x, particle.position.y, other.position.x, other.position.y);
+        }
+      }
+    }
+  }
+
   run() {
     for (let particle of this.particles) {
       particle.run();
@@ -32,22 +57,6 @@ class ParticleSystem {
 
 
 
-  behaviors() {
-    for (let particle of this.particles) {
-      particle.behaviors(mouseX, mouseY);
-
-    }
-  }
-
-
-  return_home() {
-    for (let particle of this.particles) {
-      particle.velocity.x = 0.0;
-      particle.velocity.y = 0.0;
-      particle.acceleration.x = -0.1 * (particle.position.x - particle.home.x);
-      particle.acceleration.y = -0.1 * (particle.position.y - particle.home.y);
-    }
-  }
 
 
 

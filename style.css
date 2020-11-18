@@ -1,5 +1,3 @@
-
-
 html, body {
   height: 100.1%;
   font-size: calc(1em + 1vw);
@@ -21,6 +19,13 @@ canvas {
   display: block;
 }
 
+video {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: -999;
+}
+
 .topnav {
   overflow: hidden;
   position: absolute;
@@ -40,7 +45,7 @@ canvas {
   float: left;
   color: white;
   margin-left: 1em;
-  padding:  .4em;
+  padding: .4em;
   text-decoration: none;
 }
 
@@ -60,12 +65,12 @@ canvas {
   color: white;
 }
 
-.content  {
+.content {
   position: absolute;
   overflow-y: auto;
   center: 0;
   width: 80%;
-  height:70%;
+  height: 70%;
   padding: 1rem;
 }
 
@@ -89,7 +94,7 @@ canvas {
 
 .content #myInfo {
   display: none;
-  background:none;
+  background: none;
   overflow-y: auto;
   padding: 1rem;
   color: black;
@@ -123,43 +128,6 @@ canvas {
     -webkit-overflow-scrolling: touch;
   }
 }
-
-/* @media only screen and (max-width: 600px) and (orientation: portrait) {
-  .topnav a {
-    font-size: 6vw;
-  }
-
-  .content {
-    font-size: 5vw;
-  }
-
-  .animated {
-    font-size: 5vw;
-  }
-
-  .content .fa-instagram {
-    font-size: 7vw;
-  }
-}
-
-@media only screen and (min-width: 1920px) {
-  .topnav a {
-    font-size: 3.5vw;
-  }
-
-  .content {
-    font-size: 2.5vw;
-  }
-
-  .animated {
-    font-size: 3.5vw;
-  }
-
-  .content .fa-instagram {
-    font-size: 3.5vw;
-  }
-} */
-
 
 .fadeOut {
   -webkit-animation-name: fadeOut;

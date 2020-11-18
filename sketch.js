@@ -1,14 +1,15 @@
 var isMobile = false;
 
-var fullscreen_button;
-
 var pixelShaderToggle = false;
 var instruction_toggle = false;
 
+<<<<<<< HEAD
 var text_dict, link, text1, text2, text3;
 var cambuttonX, cambuttonY;
 
 let mouseIsMoving = false;
+=======
+>>>>>>> main
 
 let hideicon = false;
 
@@ -79,15 +80,12 @@ function setup() {
 function draw() {
   particle_draw();
 
-  if (mouseIsMoving == true) {
-    cursor();
-  } else {
-    noCursor();
-  }
 }
 
 function shaderToggle() {
+
   pixelShaderToggle = !pixelShaderToggle;
+
 }
 
 function guid() {
@@ -107,64 +105,41 @@ function particle_draw() {
   background(0);
   blendMode(ADD);
 
+
   noCursor();
+
+  if (!isMobile) {
   push();
   fill(255, 100);
   noStroke();
   ellipseMode(CENTER);
   ellipse(mouseX, mouseY, 40);
   pop();
+}
 
-  // The touches array holds an object for each and every touch
-  // The array length is dynamic and tied to the number of fingers
-  // currently touching
-
-  for (var i = 0; i < touches.length; i++) {
-    if (isMobile == true && touches.length == 1) {
-      mouseIsPressed = false;
-    }
-    if (isMobile == true && touches.length >= 2) {
-      mouseIsPressed = true;
-    }
-  }
 
   ps.run();
+  ps.intersection();
 
-  // if (!pixelShaderToggle && !instruction_toggle) {
-  //
-  // }
-  //
-  // if (pixelShaderToggle || instruction_toggle) {
-  //   ps.return_home();
-  // }
 
-  if (pixelShaderToggle) {
-    shaderDraw();
-  }
+  shaderDraw();
 
-  ps.behaviors();
 
-  // if (pixelShaderToggle) {
-  //   ps.return_home();
-  // }
-
-  stroke(255);
-  noFill();
 }
 
-function touchMoved(event) {
-  return false;
-}
 
 function mousePressed() {
   //sample and upload pixel to firebase
   shaderMousePressed();
 }
 
+
 function keyPressed() {
+
   //Hide hamburger
 
-  if (key == "H" || key == "h") {
+  if (key == 'H' || key == 'h') {
+
     hideicon = !hideicon;
 
     if (hideicon) {
@@ -172,17 +147,10 @@ function keyPressed() {
     } else {
       icons.style.display = "block";
     }
+
   }
 }
 
-function mouseMoved() {
-  mouseIsMoving = true;
-
-  setTimeout(function () {
-    // this is to delay the execution of the code within, this is pure javaScript
-    mouseIsMoving = false;
-  }, 3000); //it takes a time in MS
-}
 
 function windowResized() {
   if (!isMobile) {
@@ -203,18 +171,15 @@ function infoInstructions() {
   icons.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
   myInfo.style.display = "block";
-  //  myInfo.style.overflowY = "scroll";
   myInfo.style.background = "rgba(255, 255, 255, 0.8)";
 
   if (instruction_toggle) {
     myInfo.style.display = "block";
     myInfo.style.background = "rgba(255, 255, 255, 0.8)";
-    //  myInfo.style.overflowY = "scroll";
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
     myLinks.style.display = "none";
-    //  myInfo.style.overflowY = "hidden";
   }
 }
 
