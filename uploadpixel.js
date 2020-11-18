@@ -14,19 +14,13 @@ function shaderSetup() {
   // initialize the webcam at the window size
   cam = createCapture(VIDEO);
   cam.size(windowWidth, windowHeight);
+  cam.elt.setAttribute('playsinline', '');
 
-  // hide the html element that createCapture adds to the screen
-  cam.hide();
   pixelpg = createGraphics(width, height, WEBGL);
 }
 
 function shaderDraw() {
-
-  //blendMode(SCREEN);
-
   radius = 50;
-
-
   let mx = map(mouseX, 0, width, 0, 1);
   let my = map(mouseY, 0, height, 0, 1);
 
@@ -43,14 +37,14 @@ function shaderDraw() {
 
   // rect gives us some geometry on the screen
   pixelpg.rect(0, 0, width, height);
-
-  //imageMode(CENTER);
   image(pixelpg, 0, 0);
 }
 
 function shaderMousePressed() {
 
-if (mouseX > 0&& mouseX < width-77 && mouseY > 50 && mouseY < height) {
+//push to firebase
+
+if (mouseX > 0&& mouseX < width-100 && mouseY > 100 && mouseY < height) {
 
   colour = cam.get(width - mouseX, mouseY);
   var data = {
@@ -71,6 +65,5 @@ if (mouseX > 0&& mouseX < width-77 && mouseY > 50 && mouseY < height) {
 }
 
 function shaderWindowResized() {
-  //resizeCanvas(windowWidth, windowHeight);
   pixelpg.resizeCanvas(windowWidth, windowHeight);
 }

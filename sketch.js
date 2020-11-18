@@ -1,15 +1,8 @@
 var isMobile = false;
 
-var fullscreen_button;
-
 var pixelShaderToggle = false;
 var instruction_toggle = false;
 
-var text_dict, link, text1, text2, text3;
-var cambuttonX, cambuttonY;
-
-
-let mouseIsMoving = false;
 
 let hideicon = false;
 
@@ -82,17 +75,11 @@ function draw() {
 
   particle_draw();
 
-  if (mouseIsMoving == true) {
-    cursor();
-  } else {
-    noCursor();
-  }
-
 }
 
-function shaderToggle(){
+function shaderToggle() {
 
-pixelShaderToggle = !pixelShaderToggle;
+  pixelShaderToggle = !pixelShaderToggle;
 
 }
 
@@ -108,64 +95,31 @@ function guid() {
 
 function particle_draw() {
 
-touchtime = frameCount % 600;  //10 second loop approx
+  touchtime = frameCount % 600; //10 second loop approx
 
   blendMode(BLEND);
   background(0);
   blendMode(ADD);
 
 
- noCursor();
- push();
- fill(255,100);
- noStroke();
- ellipseMode(CENTER);
- ellipse(mouseX,mouseY,40);
- pop();
+  noCursor();
+  push();
+  fill(255, 100);
+  noStroke();
+  ellipseMode(CENTER);
+  ellipse(mouseX, mouseY, 40);
+  pop();
 
-
-  // The touches array holds an object for each and every touch
-  // The array length is dynamic and tied to the number of fingers
-  // currently touching
-
-  for (var i = 0; i < touches.length; i++) {
-
-    if (isMobile == true && touches.length == 1) {
-      mouseIsPressed = false;
-    }
-    if (isMobile == true && touches.length >= 2) {
-      mouseIsPressed = true;
-    }
-
-  }
 
   ps.run();
-
-  // if (!pixelShaderToggle && !instruction_toggle) {
-  //
-  // }
-  //
-  // if (pixelShaderToggle || instruction_toggle) {
-  //   ps.return_home();
-  // }
+  ps.intersection();
 
   if (pixelShaderToggle) {
-     shaderDraw();
-   }
+    shaderDraw();
+  }
 
-  ps.behaviors();
-
-  // if (pixelShaderToggle) {
-  //   ps.return_home();
-  // }
-
-  stroke(255);
-  noFill();
 }
 
-function touchMoved(event) {
-  return false;
-}
 
 function mousePressed() {
 
@@ -174,31 +128,23 @@ function mousePressed() {
 }
 
 
-function keyPressed(){
+function keyPressed() {
 
   //Hide hamburger
 
-  if (key == 'H' || key == 'h' ){
+  if (key == 'H' || key == 'h') {
 
     hideicon = !hideicon;
 
     if (hideicon) {
-    icons.style.display = "none";
-  }else{
-    icons.style.display = "block";
-  }
+      icons.style.display = "none";
+    } else {
+      icons.style.display = "block";
+    }
 
   }
 }
 
-function mouseMoved() {
-  mouseIsMoving = true;
-
-  setTimeout(function() { // this is to delay the execution of the code within, this is pure javaScript
-    mouseIsMoving = false;
-  }, 3000) //it takes a time in MS
-
-}
 
 function windowResized() {
 
@@ -222,18 +168,15 @@ function infoInstructions() {
   icons.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
   myInfo.style.display = "block";
-  //  myInfo.style.overflowY = "scroll";
   myInfo.style.background = "rgba(255, 255, 255, 0.8)";
 
   if (instruction_toggle) {
     myInfo.style.display = "block";
     myInfo.style.background = "rgba(255, 255, 255, 0.8)";
-    //  myInfo.style.overflowY = "scroll";
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
     myLinks.style.display = "none";
-    //  myInfo.style.overflowY = "hidden";
   }
 
 }
