@@ -117,9 +117,9 @@ function particle_draw() {
   ps.run();
   ps.intersection();
 
-  if (pixelShaderToggle) {
-    shaderDraw();
-  }
+
+  shaderDraw();
+
 
 }
 

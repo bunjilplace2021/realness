@@ -20,7 +20,7 @@ function shaderSetup() {
 }
 
 function shaderDraw() {
-  radius = 50;
+  radius = 5;
   let mx = map(mouseX, 0, width, 0, 1);
   let my = map(mouseY, 0, height, 0, 1);
 
@@ -37,7 +37,11 @@ function shaderDraw() {
 
   // rect gives us some geometry on the screen
   pixelpg.rect(0, 0, width, height);
-  image(pixelpg, 0, 0);
+
+  if (pixelShaderToggle) {
+    image(pixelpg, 0, 0);
+  }
+
 }
 
 function shaderMousePressed() {
@@ -46,7 +50,7 @@ function shaderMousePressed() {
 
 if (mouseX > 0&& mouseX < width-100 && mouseY > 100 && mouseY < height) {
 
-  colour = cam.get(width - mouseX, mouseY);
+  colour = pixelpg.get(mouseX, mouseY);
   var data = {
     uuid: uuid,
     mouseX_loc: mouseX,
