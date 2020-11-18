@@ -4,11 +4,12 @@ import regeneratorRuntime from "regenerator-runtime";
 
 // UTILITIES
 import { fetchSample, mapValue } from "./utilityFunctions";
+const AudioContext = window.AudioContext || window.webkitAudioContext;
 
 let globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let synths = [];
 let f = new FireBaseAudio();
-const numSources = 2;
+const numSources = 5;
 f.listAll();
 
 const loadSynths = async () => {
@@ -32,12 +33,13 @@ setTimeout(() => {
     await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
     synth.masterBus.gain.value = 1 / synths.length / 2;
     synth.masterPan.pan.value = 2 / synths.length - 1;
-    synth.randomStarts();
+
     synth.randomLoop(30);
     synth.lowpassFilter(1, 1);
     synth.setVolume(0);
     synth.reverb(true);
-    synth.play(1);
+    // synth.play();
+    // synth.randomStarts();
   });
   document.querySelector("body").onclick = () => {
     synths.forEach((synth) => {
@@ -52,6 +54,7 @@ setTimeout(() => {
 }, 5000);
 
 let pollValues = setInterval(() => {
+  console.log(ps);
   if (ps && ps.particles) {
     synths.forEach((synth) => {
       synth.setDetune(
@@ -95,3 +98,8 @@ let pollValues = setInterval(() => {
     });
   }
 }, 200);
+
+setTimeout(() => {
+  console.log("clearing Timer");
+  clearInterval(pollValues);
+}, 50000);

@@ -39,7 +39,8 @@ module.exports = {
   mode: "development",
   entry: __dirname + "/src/app/index.js", // webpack entry point. Module to start building dependency graph
   output: {
-    path: path.resolve(__dirname),
+    path: path.resolve(__dirname, "sound/"),
+    filename: "soundmain.js",
   },
   devServer: {
     compress: true,

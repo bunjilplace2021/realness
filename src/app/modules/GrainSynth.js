@@ -45,7 +45,7 @@ class GrainSynth {
     });
   }
   //  triggers
-  async play() {
+  async play(startTime = 0) {
     Transport.start();
     for (const grain of this.grains) {
       const gain = new Gain();
@@ -56,7 +56,8 @@ class GrainSynth {
     //  wait for grains to load before starting
     const grainPromises = this.grains.map((grain) => this.isGrainLoaded(grain));
     await Promise.all(grainPromises);
-    this.grains.forEach((grain) => grain.start(now()));
+
+    this.grains.forEach(async (grain, i) => grain.start(i, i + startTime));
   }
   stop() {
     Transport.stop();
