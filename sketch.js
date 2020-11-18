@@ -103,12 +103,15 @@ function particle_draw() {
 
 
   noCursor();
+
+  if (!isMobile) {
   push();
   fill(255, 100);
   noStroke();
   ellipseMode(CENTER);
   ellipse(mouseX, mouseY, 40);
   pop();
+}
 
 
   ps.run();
