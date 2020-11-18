@@ -12,6 +12,7 @@ import {
   LFO,
   LowpassCombFilter,
   Filter,
+  start,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -31,12 +32,22 @@ class GrainSynth {
     this.master = Destination;
     this.presets = [];
     this.setupMaster();
+    // evenly ditribute volumes to master
+    for (const grain of this.grains) {
+      const gain = new Gain();
+      gain.gain.rampTo(1 / this.numVoices, 0.01);
+      grain.loop = true;
+      grain.connect(gain).connect(this.masterBus);
+    }
   }
   setupMaster() {
     this.masterBus = new Gain({ units: "gain" });
     this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
     this.masterBus.toDestination();
     this.pitchShift();
+  }
+  async startContext() {
+    await start();
   }
   isGrainLoaded(grain) {
     return new Promise((resolve, reject) => {
@@ -47,16 +58,10 @@ class GrainSynth {
   //  triggers
   async play(startTime = 0) {
     Transport.start();
-    for (const grain of this.grains) {
-      const gain = new Gain();
-      gain.gain.rampTo(1 / this.numVoices, 0.01);
-      grain.loop = true;
-      grain.connect(gain).connect(this.masterBus);
-    }
+    this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
     //  wait for grains to load before starting
     const grainPromises = this.grains.map((grain) => this.isGrainLoaded(grain));
     await Promise.all(grainPromises);
-
     this.grains.forEach(async (grain, i) => grain.start(i, i + startTime));
   }
   stop() {
@@ -295,6 +300,9 @@ class GrainSynth {
   }
   setVolume(val) {
     this.masterBus.gain.setValueAtTime(val, this.toneContext.currentTime);
+  }
+  rampVolume(val, time) {
+    this.masterBus.gain.rampTo(val, time);
   }
 }
 

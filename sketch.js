@@ -3,14 +3,6 @@ var isMobile = false;
 var pixelShaderToggle = false;
 var instruction_toggle = false;
 
-<<<<<<< HEAD
-var text_dict, link, text1, text2, text3;
-var cambuttonX, cambuttonY;
-
-let mouseIsMoving = false;
-=======
->>>>>>> main
-
 let hideicon = false;
 
 let ps, img;
@@ -79,13 +71,10 @@ function setup() {
 
 function draw() {
   particle_draw();
-
 }
 
 function shaderToggle() {
-
   pixelShaderToggle = !pixelShaderToggle;
-
 }
 
 function guid() {
@@ -105,41 +94,32 @@ function particle_draw() {
   background(0);
   blendMode(ADD);
 
-
   noCursor();
 
   if (!isMobile) {
-  push();
-  fill(255, 100);
-  noStroke();
-  ellipseMode(CENTER);
-  ellipse(mouseX, mouseY, 40);
-  pop();
-}
-
+    push();
+    fill(255, 100);
+    noStroke();
+    ellipseMode(CENTER);
+    ellipse(mouseX, mouseY, 40);
+    pop();
+  }
 
   ps.run();
   ps.intersection();
 
-
   shaderDraw();
-
-
 }
-
 
 function mousePressed() {
   //sample and upload pixel to firebase
   shaderMousePressed();
 }
 
-
 function keyPressed() {
-
   //Hide hamburger
 
-  if (key == 'H' || key == 'h') {
-
+  if (key == "H" || key == "h") {
     hideicon = !hideicon;
 
     if (hideicon) {
@@ -147,10 +127,8 @@ function keyPressed() {
     } else {
       icons.style.display = "block";
     }
-
   }
 }
-
 
 function windowResized() {
   if (!isMobile) {

@@ -7,14 +7,19 @@ let radius, colour;
 
 function shaderPreload() {
   // load the shader
-  pixelShader = loadShader('shader/effect.vert', 'shader/pixelfrag.frag');
+  pixelShader = loadShader("shader/effect.vert", "shader/pixelfrag.frag");
 }
 
 function shaderSetup() {
   // initialize the webcam at the window size
-  cam = createCapture(VIDEO);
+  try {
+    cam = createCapture(VIDEO);
+  } catch (error) {
+    console.log(error);
+  }
+
   cam.size(windowWidth, windowHeight);
-  cam.elt.setAttribute('playsinline', '');
+  cam.elt.setAttribute("playsinline", "");
 
   pixelpg = createGraphics(width, height, WEBGL);
 }
@@ -28,12 +33,11 @@ function shaderDraw() {
   pixelpg.shader(pixelShader);
 
   // lets just send the cam to our shader as a uniform
-  pixelShader.setUniform('tex0', cam);
-  pixelShader.setUniform('resolution', [width, height]);
-  pixelShader.setUniform('radius', radius);
-  pixelShader.setUniform('u_time', frameCount * 0.05);
-  pixelShader.setUniform('u_mouse', [mx, my]);
-
+  pixelShader.setUniform("tex0", cam);
+  pixelShader.setUniform("resolution", [width, height]);
+  pixelShader.setUniform("radius", radius);
+  pixelShader.setUniform("u_time", frameCount * 0.05);
+  pixelShader.setUniform("u_mouse", [mx, my]);
 
   // rect gives us some geometry on the screen
   pixelpg.rect(0, 0, width, height);
@@ -41,31 +45,28 @@ function shaderDraw() {
   if (pixelShaderToggle) {
     image(pixelpg, 0, 0);
   }
-
 }
 
 function shaderMousePressed() {
+  //push to firebase
 
-//push to firebase
+  if (mouseX > 0 && mouseX < width - 100 && mouseY > 100 && mouseY < height) {
+    colour = pixelpg.get(mouseX, mouseY);
+    var data = {
+      uuid: uuid,
+      mouseX_loc: mouseX,
+      mouseY_loc: mouseY,
+      colour_loc: colour,
+      deviceWidth: width,
+      deviceHeight: height,
+      touchTime: touchtime,
+    };
 
-if (mouseX > 0&& mouseX < width-100 && mouseY > 100 && mouseY < height) {
+    var test = database.ref("test3");
 
-  colour = pixelpg.get(mouseX, mouseY);
-  var data = {
-    uuid: uuid,
-    mouseX_loc: mouseX,
-    mouseY_loc: mouseY,
-    colour_loc: colour,
-    deviceWidth: width,
-    deviceHeight: height,
-    touchTime: touchtime
+    test.push(data);
+    // console.log(data);
   }
-
-  var test = database.ref('test3');
-
-  test.push(data);
-  console.log(data);
-}
 }
 
 function shaderWindowResized() {
