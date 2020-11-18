@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/wezzahd/realness#readme",
   "dependencies": {
-    "audio-buffer-utils": "^5.1.2",
     "firebase": "^8.0.2",
     "tone": "^14.7.58"
   },
