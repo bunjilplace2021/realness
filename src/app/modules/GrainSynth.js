@@ -38,7 +38,7 @@ class GrainSynth {
     }
     this.setupMaster();
     // evenly ditribute volumes to master
-    grains.forEach((grain) => {
+    this.grains.forEach((grain) => {
       const gain = new Gain();
       gain.gain.rampTo(1 / this.numVoices, 0.01);
       grain.loop = true;
@@ -233,7 +233,7 @@ class GrainSynth {
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
       overlap: this.randArrayFromRange(numGrains, 0.5, 1),
-      grainSize: this.randArrayFromRange(numGrains, 0.8, 1),
+      grainSize: this.randArrayFromRange(numGrains, 0.001, 1),
       // loopStart: this.randArrayFromRange(
       //   numGrains,
       //   0,

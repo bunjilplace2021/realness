@@ -23,7 +23,6 @@ class FireBaseAudio {
     };
     // Initialize Firebase
     firebase.initializeApp(this.firebaseConfig);
-    firebase.analytics();
 
     this.storage = firebase.storage();
     this.storageRef = this.storage.ref();
@@ -41,7 +40,7 @@ class FireBaseAudio {
     this.audioFile = await ChosenFile.getDownloadURL();
   }
   async fetchSample(url) {
-    return fetch(url)
+    return fetch(url, { cors: "opaque" })
       .then((response) => response.arrayBuffer())
       .then((arrayBuffer) => this.audioCtx.decodeAudioData(arrayBuffer))
       .catch((err) => console.log(err));

@@ -7,7 +7,9 @@ import MasteBus from "./modules/MasterBus";
 import MasterBus from "./modules/MasterBus";
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
-let globalAudioCtx = new AudioContext();
+let globalAudioCtx = new AudioContext({
+  latencyHint: "playback",
+});
 let masterBus;
 let synths = [];
 let synthsLoaded = false;
@@ -27,6 +29,8 @@ const reloadBuffers = () => {
     synth.buffer.copyToChannel(floatBuf, 0, 0);
   });
 };
+
+//  method to download samples from Firebase and load them into buffers
 const loadSynths = async () => {
   for (let i = 0; i < numSources; i++) {
     await f.getSample();
@@ -99,10 +103,12 @@ let pollValues = () => {
 };
 
 const muteButton = document.querySelector("#mute");
-
+// allow unmuting once synths loaded from firebase
 synthsLoaded ? (muteButton.disabled = false) : null;
+
 muteButton.onclick = () => {
   if (synthsLoaded) {
+    //  if synths are loaded, start audio and change DOM element
     if (muteButton.classList.contains("fa-volume-off")) {
       muteButton.classList.remove("fa-volume-off");
       muteButton.classList.add("fa-volume-up");
@@ -113,8 +119,10 @@ muteButton.onclick = () => {
     if (!synths[synths.length - 1].isPlaying) {
       startAudio();
     } else {
+      // or stop the synths
       synths.forEach((synth) => {
         synth.stop();
+        synth.isPlaying = false;
       });
     }
   }
