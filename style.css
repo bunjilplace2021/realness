@@ -54,6 +54,9 @@ video {
   float: right;
   visibility: visible;
 }
+#mute {
+  min-width: 36px;
+}
 
 .topnav a:hover {
   background-color: white;

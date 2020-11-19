@@ -43,6 +43,9 @@ module.exports = {
     filename: "soundmain.js",
   },
   devServer: {
+    before: (app, server) => {
+      server._watch(path.join(__dirname, "."));
+    },
     publicPath: "/sound",
     contentBase: path.resolve(__dirname, "."),
     compress: true,

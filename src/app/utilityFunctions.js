@@ -9,3 +9,18 @@ export async function fetchSample(url, ctx) {
 export function mapValue(input, inMin, inMax, outMin, outMax) {
   return ((input - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
+
+export function waitForVariable(variable) {
+  const checkforVariable = (variable) => {
+    return new Promise((resolve, reject) => {
+      if (variable === "undefined" || variable === null || variable === 0) {
+        reject(false);
+      } else {
+        resolve(variable);
+      }
+    });
+  };
+  const pollingTimer = setInterval(checkforVariable, 100);
+  {
+  }
+}

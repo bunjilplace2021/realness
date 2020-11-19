@@ -6,7 +6,6 @@ import {
   GrainPlayer,
   Reverb,
   PitchShift,
-  Transport,
   Loop,
   Panner,
   LFO,
@@ -26,6 +25,8 @@ class GrainSynth {
     this.numVoices = voices;
     this.buffer = buffer;
     this.toneContext = new Context(ctx);
+
+    this.transport = this.toneContext.transport;
     for (let i = 0; i < this.numVoices; i++) {
       this.grains[i] = new GrainPlayer(this.buffer);
     }
@@ -39,6 +40,7 @@ class GrainSynth {
       grain.loop = true;
       grain.connect(gain).connect(this.masterBus);
     }
+    this.isPlaying = false;
   }
   setupMaster() {
     this.masterBus = new Gain({ units: "gain" });
@@ -57,19 +59,21 @@ class GrainSynth {
   }
   //  triggers
   async play(startTime = 0) {
-    Transport.start();
+    this.transport.start();
     this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
     //  wait for grains to load before starting
     const grainPromises = this.grains.map((grain) => this.isGrainLoaded(grain));
     await Promise.all(grainPromises);
     this.grains.forEach(async (grain, i) => grain.start(i, i + startTime));
+    this.isPlaying = true;
   }
   stop() {
-    Transport.stop();
+    this.transport.stop();
     this.grains.forEach((grain) => {
       grain.stop();
     });
     this.masterBus.gain.setValueAtTime(0, this.toneContext.currentTime);
+    this.isPlaying = false;
   }
   kill() {
     this.grains.forEach((grain) => grain.dispose());
