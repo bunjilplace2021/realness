@@ -12,40 +12,44 @@ import {
   LowpassCombFilter,
   Filter,
   start,
+  Chorus,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
 
+// TODO: SORT OUT EFFECTS CHAIN
 // TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
 // TODO: ADD FILTER: FREQUENCY CAN BE CONTROLLED BY PARTICLE BLOOM
 // TODO: ADD PRESETS LOADED FROM JSON
 class GrainSynth {
   constructor(buffer, ctx, voices = 2) {
     this.grains = [];
+    this.presets = [];
+    this.isPlaying = false;
     this.numVoices = voices;
     this.buffer = buffer;
     this.toneContext = new Context(ctx);
-
     this.transport = this.toneContext.transport;
+    this.dest = Destination;
+    this.effectsChain = [];
+    this.grainOutput = new Gain(1);
     for (let i = 0; i < this.numVoices; i++) {
       this.grains[i] = new GrainPlayer(this.buffer);
     }
-    this.master = Destination;
-    this.presets = [];
     this.setupMaster();
     // evenly ditribute volumes to master
-    for (const grain of this.grains) {
+    grains.forEach((grain) => {
       const gain = new Gain();
       gain.gain.rampTo(1 / this.numVoices, 0.01);
       grain.loop = true;
-      grain.connect(gain).connect(this.masterBus);
-    }
-    this.isPlaying = false;
+      grain.connect(gain).connect(this.grainOutput);
+    });
   }
   setupMaster() {
     this.masterBus = new Gain({ units: "gain" });
     this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
     this.masterBus.toDestination();
+    this.grainOutput.connect(this.masterBus);
     this.pitchShift();
   }
   async startContext() {
@@ -53,7 +57,7 @@ class GrainSynth {
   }
   isGrainLoaded(grain) {
     return new Promise((resolve, reject) => {
-      grain.onerror && reject("coudln't load grains");
+      grain.onerror && reject("couldn't load grains");
       grain.loaded && resolve(grain.loaded);
     });
   }
@@ -81,14 +85,17 @@ class GrainSynth {
     this.grains.forEach((grain) => grain.dispose());
   }
   //  effects
+  chainEffect(effect) {
+    this.grainOutput.disconnect();
+    this.effectsChain.push(effect);
+    console.log(this.effectsChain);
+    this.grainOutput.chain(...this.effectsChain, this.masterBus);
+  }
   pitchShift() {
-    this.masterBus.disconnect(Destination);
     this.pitchShifter = new PitchShift(0);
-    this.masterPan = new Panner();
     // higher windowsize sounds better!
     this.pitchShifter.windowSize = 1;
-    this.masterBus.chain(this.masterPan, this.pitchShifter);
-    this.pitchShifter.toDestination();
+    this.chainEffect(this.pitchShifter);
   }
   detuneLFO() {
     this.grains.forEach((grain) => {
@@ -103,7 +110,6 @@ class GrainSynth {
   }
   swellLFO() {
     // console.log(this.masterBus);
-
     this.volumeLFO = new LFO({
       frequency: Math.random().toFixed(2) / 4,
       max: 0.5,
@@ -114,17 +120,16 @@ class GrainSynth {
   }
   async reverb(reverbSwitch) {
     if (reverbSwitch) {
-      this.masterEffect = new Reverb({
+      this.masterReverb = new Reverb({
         preDelay: 0.1,
         decay: 4,
         wet: 1,
       });
       //   console.log(this.masterEffect);
-
-      await this.masterEffect.generate();
-      this.pitchShifter.chain(this.masterEffect, Destination);
+      await this.masterReverb.generate();
+      this.masterBus.chain(this.masterReverb, Destination);
     } else {
-      this.masterEffect.disconnect(Destination);
+      this.masterReverb && this.masterReverb.disconnect();
     }
   }
   interpolateBetween(from, to, step) {
@@ -203,23 +208,19 @@ class GrainSynth {
   randArrayFromRange(length, min, max) {
     return Array.from({ length }, () => this.randRange(min, max));
   }
+  chainEffect(effect) {
+    this.masterBus.disconnect();
+    this.effectsChain.push(effect);
+    this.masterBus.chain(...this.effectsChain, this.dest);
+  }
   lowpassFilter(frequency, resonance) {
-    // this.pitchShifter.disconnect(Destination);
-    this.filter = new Filter({
-      type: "lowpass",
-      frequency: frequency,
-      rolloff: -24,
-      Q: resonance,
-      gain: 0.5,
-    });
-    this.masterBus.chain(this.masterPan, this.filter, this.pitchShifter);
+    this.filter = new Filter(frequency, "lowpass", -24, resonance);
+    this.chainEffect(this.filter);
   }
 
   feedbackCombFilter() {
-    this.pitchShifter.disconnect(Destination);
     this.combFilter = new LowpassCombFilter(0.5, 0.9, 1000);
-    this.masterBus.chain(this.combFilter, this.pitchShifter);
-    this.pitchShifter.connect(Destination);
+    this.chainEffect(this.combFilter);
   }
   randomInterpolate() {
     // find out how many grains are playing

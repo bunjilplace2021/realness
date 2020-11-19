@@ -3,11 +3,12 @@ import FireBaseAudio from "./modules/FirebaseAudio";
 import regeneratorRuntime from "regenerator-runtime";
 // UTILITIES
 import { fetchSample, mapValue } from "./utilityFunctions";
-import { Transport } from "tone";
-import { Tone } from "tone/build/esm/core/Tone";
+import MasteBus from "./modules/MasterBus";
+import MasterBus from "./modules/MasterBus";
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 let globalAudioCtx = new AudioContext();
+let masterBus;
 let synths = [];
 let synthsLoaded = false;
 let f = new FireBaseAudio();
@@ -44,25 +45,28 @@ const startAudio = async () => {
   if (globalAudioCtx.state !== "running") {
     await globalAudioCtx.resume();
   }
+  masterBus = new MasterBus(globalAudioCtx);
+
   synths.forEach(async (synth, i) => {
     await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
     if (!synth.isPlaying) {
       synth.masterBus.gain.value = 1 / synths.length / 2;
-      synth.masterPan.pan.value = 2 / synths.length - 1;
-      synth.lowpassFilter(0, 1);
-      synth.rampVolume(0.3, globalAudioCtx.currentTime + 10);
-      synth.reverb(true);
+      synth.rampVolume(1, globalAudioCtx.currentTime + 10);
       synth.play(globalAudioCtx.currentTime + i * 0.05);
+      await masterBus.connectSource(synth.masterBus);
     }
   });
+  // masterBus.lowpassFilter(100, 1);
+  masterBus.reverb(true);
+  console.log(masterBus);
   document.querySelector("body").onclick = () => {
     synths.forEach((synth) => {
       synth.randomInterpolate();
     });
   };
-  synths[0].transport.scheduleRepeat((time) => {
-    pollValues();
-  }, 1);
+  // synths[0].transport.scheduleRepeat((time) => {
+  //   pollValues();
+  // }, 0.1);
 
   synths[0].transport.scheduleRepeat((time) => {
     reloadBuffers();
@@ -70,13 +74,12 @@ const startAudio = async () => {
 };
 loadSynths();
 
-setTimeout(() => {
-  // pollValues();
-}, 10000);
-
 let pollValues = () => {
   if (ps && ps.particles) {
-    let { radius, maxradius } = ps.particles[ps.particles.length - 1];
+    let { radius, maxradius } = ps.particles[
+      ~~Math.random() * ps.particles.length
+    ];
+
     synths.forEach((synth) => {
       console.log();
       synth.setDetune(mapValue(radius, 0, maxradius, -100, 100));
@@ -107,13 +110,13 @@ muteButton.onclick = () => {
       muteButton.classList.add("fa-volume-off");
       muteButton.classList.remove("fa-volume-up");
     }
-    synths.forEach((synth) => {
-      if (!synth.isPlaying) {
-        startAudio();
-      } else {
+    if (!synths[synths.length - 1].isPlaying) {
+      startAudio();
+    } else {
+      synths.forEach((synth) => {
         synth.stop();
-      }
-    });
+      });
+    }
   }
 };
 

@@ -49,7 +49,7 @@ module.exports = {
     publicPath: "/sound",
     contentBase: path.resolve(__dirname, "."),
     compress: true,
-    host: "0.0.0.0",
+    host: "localhost",
     port: 9000,
     hot: true,
     stats: "errors-only",
