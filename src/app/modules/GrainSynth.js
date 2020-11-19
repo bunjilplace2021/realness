@@ -58,13 +58,15 @@ class GrainSynth {
     });
   }
   //  triggers
-  async play(startTime = 0) {
+  async play(startTime = 1) {
     this.transport.start();
     this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
     //  wait for grains to load before starting
     const grainPromises = this.grains.map((grain) => this.isGrainLoaded(grain));
     await Promise.all(grainPromises);
-    this.grains.forEach(async (grain, i) => grain.start(i, i + startTime));
+    this.grains.forEach(async (grain, i) =>
+      grain.start(`+${i}`, i + startTime)
+    );
     this.isPlaying = true;
   }
   stop() {
@@ -202,7 +204,7 @@ class GrainSynth {
     return Array.from({ length }, () => this.randRange(min, max));
   }
   lowpassFilter(frequency, resonance) {
-    this.pitchShifter.disconnect(Destination);
+    // this.pitchShifter.disconnect(Destination);
     this.filter = new Filter({
       type: "lowpass",
       frequency: frequency,
@@ -210,9 +212,7 @@ class GrainSynth {
       Q: resonance,
       gain: 0.5,
     });
-    this.filter.connect(this.masterBus);
-    this.masterBus.connect(this.pitchShifter);
-    this.pitchShifter.connect(Destination);
+    this.masterBus.chain(this.masterPan, this.filter, this.pitchShifter);
   }
 
   feedbackCombFilter() {

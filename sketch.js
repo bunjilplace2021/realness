@@ -69,8 +69,19 @@ function setup() {
   ps = new ParticleSystem(createVector(width / 2, height / 2), img);
 }
 
+function drawFPS() {
+  push();
+  noStroke();
+  let fps = ~~frameRate();
+  fill(255, 255, 255);
+  textSize(20);
+  text("FPS: " + fps, 72, 32);
+  pop();
+}
+
 function draw() {
   particle_draw();
+  drawFPS();
 }
 
 function shaderToggle() {
