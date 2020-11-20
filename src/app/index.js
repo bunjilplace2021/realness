@@ -1,10 +1,12 @@
 import GrainSynth from "./modules/GrainSynth";
 import FireBaseAudio from "./modules/FirebaseAudio";
+import FMSynth from "./modules/UISynth";
 import { Context } from "tone";
 import regeneratorRuntime from "regenerator-runtime";
 // UTILITIES
 import { fetchSample, mapValue, isBetween } from "./utilityFunctions";
 import MasterBus from "./modules/MasterBus";
+import UISynth from "./modules/UISynth";
 
 let globalAudioCtx = new Context({
   latencyHint: "playback",
@@ -12,8 +14,10 @@ let globalAudioCtx = new Context({
 let masterBus;
 let synths = [];
 let synthsLoaded = false;
+const u = new UISynth();
 let f = new FireBaseAudio();
-const numSources = 5;
+const uiNotes = ["C4", "E4", "G4"];
+const numSources = 4;
 // list all samples in database
 f.listAll();
 
@@ -41,15 +45,26 @@ const loadSynths = async () => {
     }
   }
   synthsLoaded = true;
+
+  muteButton.disabled = false;
+  muteButton.classList.remove("disabled");
+
   console.log("Voices loaded");
 };
+
+document.querySelectorAll("a").forEach((elt) => {
+  elt.onclick = () => {
+    u.play(uiNotes[~~Math.random * uiNotes.length]);
+  };
+});
 
 const startAudio = async () => {
   if (globalAudioCtx.state !== "running") {
     await globalAudioCtx.resume();
   }
-  masterBus = new MasterBus(globalAudioCtx);
 
+  masterBus = new MasterBus(globalAudioCtx);
+  masterBus.connectSource(u.master);
   synths.forEach(async (synth, i) => {
     await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
     if (!synth.isPlaying) {
@@ -63,6 +78,7 @@ const startAudio = async () => {
   });
 
   masterBus.reverb(true, 0.1, 1, 0.7);
+  u.play();
   console.log(masterBus);
   document.querySelector("body").onclick = () => {
     synths.forEach((synth) => {
@@ -95,7 +111,6 @@ let pollValues = () => {
 
 const muteButton = document.querySelector("#mute");
 // allow unmuting once synths loaded from firebase
-synthsLoaded ? (muteButton.disabled = false) : null;
 
 muteButton.onclick = () => {
   if (synthsLoaded) {

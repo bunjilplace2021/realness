@@ -55,6 +55,7 @@ video {
   visibility: visible;
 }
 #mute {
+  transition: opacity 0.3s ease-out;
   min-width: 36px;
 }
 
@@ -139,6 +140,11 @@ video {
   -o-animation-name: fadeOut;
   -ms-animation-name: fadeOut;
   animation-name: fadeOut;
+}
+
+/* CLASS FOR DISABLED BUTTONS -- USED FOR MUTE BUTTON */
+.disabled {
+  opacity: 0.2;
 }
 
 @keyframes fadeOut {
