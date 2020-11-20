@@ -53,9 +53,9 @@ const loadSynths = async () => {
 };
 
 document.querySelectorAll("a").forEach((elt) => {
-  elt.onclick = () => {
+  elt.addEventListener("click", () => {
     u.play(uiNotes[~~Math.random * uiNotes.length]);
-  };
+  });
 });
 
 const startAudio = async () => {
