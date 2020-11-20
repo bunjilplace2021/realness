@@ -77,7 +77,7 @@ const startAudio = async () => {
     }
   });
 
-  masterBus.reverb(true, 0.1, 1, 0.7);
+  masterBus.reverb(true, 0.1, 4, 0.7);
   u.play();
   console.log(masterBus);
   document.querySelector("body").onclick = () => {
