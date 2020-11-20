@@ -11,7 +11,7 @@ class Particle {
     this.rand = floor(random(0, 3));
     this.img = img_;
     this.radius = 0.0;
-    this.resize = 0.5;
+    this.resize = 0.2 * int(random(1,3));
     this.maxradius = height;
     this.selected = false;
     this.origWidth = devWidth;
@@ -49,6 +49,13 @@ class Particle {
 
 
   update() {
+
+    this.position.x = round(this.position.x/100);
+    this.position.x = this.position.x*100;
+    this.position.y = round(this.position.y/100);
+    this.position.y = this.position.y*100;
+
+
     this.lifespan -= 0.0;
 
     this.colour(this.rand);
@@ -63,8 +70,8 @@ class Particle {
     }
 
     if (this.duration > 500 && this.active == true) {
-      this.lifespan -= 1.0;
-      this.fill_alpha -= 1.0;
+      this.lifespan -= 0.2 * (this.rand+1);
+      this.fill_alpha -= 0.2 * (this.rand+1);
     }
     if (this.lifespan <= 0.5 && this.active == true) {
       this.radius = 0.;
