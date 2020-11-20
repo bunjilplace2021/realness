@@ -80,11 +80,6 @@ function setup() {
 
   ps = new ParticleSystem(createVector(width / 2, height / 2), img);
 
-  detectWebcam(function(hasWebcam) {
-    webcam = hasWebcam;
-    //console.log(webcam);
-    console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
-  })
 
 }
 
