@@ -68,17 +68,22 @@ const startAudio = async () => {
   synths.forEach(async (synth, i) => {
     await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
     if (!synth.isPlaying) {
-      synth.masterBus.gain.value = 1 / synths.length / 2;
+      synth.masterBus.gain.value = 1 / synths.length;
       synth.rampVolume(1, globalAudioCtx.currentTime + 10);
       synth.filter.type = "lowpass";
-      synth.filter.frequency.value = (i + 1) * 1000;
-      synth.filter.Q.value = 1;
+      synth.filter.frequency.value = (i + 1) * 500;
+      if (synth.filter.frequency.value < 500) {
+        synth.filter.Q.value = 4;
+      } else {
+        synth.filter.Q.value = 1.5;
+      }
+
       synth.play(globalAudioCtx.currentTime + i * 0.05);
       await masterBus.connectSource(synth.filter);
       synth.masterBus.disconnect();
     }
   });
-
+  masterBus.delay(50, 0.9);
   masterBus.reverb(true, 0.1, 4, 0.7);
   u.play();
 

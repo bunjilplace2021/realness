@@ -6,6 +6,7 @@ import {
   Destination,
   Filter,
   Chorus,
+  Compressor,
 } from "tone";
 
 class MasterBus {
@@ -14,7 +15,13 @@ class MasterBus {
     this.ctx = new Context(ctx);
     this.masterBus = new Gain(1);
     this.dest = Destination;
-    this.masterBus.connect(this.dest);
+    this.limiter = new Compressor({
+      ratio: 8,
+      threshold: -24,
+      release: 1,
+      attack: 0.001,
+    });
+    this.masterBus.connect(this.limiter).connect(this.dest);
   }
   test() {
     var oscillator = this.ctx.createOscillator();
@@ -40,7 +47,10 @@ class MasterBus {
   chainEffect(effect) {
     this.masterBus.disconnect(this.dest);
     this.effectsChain.push(effect);
-    this.masterBus.chain(...this.effectsChain, this.dest);
+    this.masterBus
+      .connect(...this.effectsChain)
+      .connect(this.limiter)
+      .connect(this.dest);
   }
   removeEffect(effect) {
     this.masterBus.disconnect(effect);
