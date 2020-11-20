@@ -70,24 +70,27 @@ const startAudio = async () => {
     if (!synth.isPlaying) {
       synth.masterBus.gain.value = 1 / synths.length / 2;
       synth.rampVolume(1, globalAudioCtx.currentTime + 10);
-      // synth.lowpassFilter(100, 1);
+      synth.filter.type = "lowpass";
+      synth.filter.frequency.value = (i + 1) * 1000;
+      synth.filter.Q.value = 1;
       synth.play(globalAudioCtx.currentTime + i * 0.05);
-      await masterBus.connectSource(synth.grainOutput);
+      await masterBus.connectSource(synth.filter);
       synth.masterBus.disconnect();
     }
   });
 
   masterBus.reverb(true, 0.1, 4, 0.7);
   u.play();
+
   console.log(masterBus);
   document.querySelector("body").onclick = () => {
     synths.forEach((synth) => {
       synth.randomInterpolate();
     });
   };
-  // synths[0].transport.scheduleRepeat((time) => {
-  //   pollValues();
-  // }, 0.5);
+  synths[0].transport.scheduleRepeat((time) => {
+    pollValues();
+  }, 1);
 
   synths[0].transport.scheduleRepeat((time) => {
     reloadBuffers();
@@ -98,9 +101,12 @@ loadSynths();
 let pollValues = () => {
   if (ps && ps.particles) {
     let { radius, maxradius } = ps.particles[ps.particles.length - 1];
-    console.log(radius, maxradius);
-    synths.forEach((synth) => {
+    synths.forEach((synth, i) => {
       synth.setGrainSize(mapValue(radius, 0, maxradius, 0.01, 0.1));
+      synth.filter.frequency.rampTo(
+        (i + 1) * mapValue(radius, 0, maxradius, 100, 1000),
+        5
+      );
       if (isBetween(radius, maxradius - 50, maxradius)) {
         console.log("reached max radius");
         synth.randomInterpolate();

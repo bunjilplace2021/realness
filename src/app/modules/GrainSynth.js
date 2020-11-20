@@ -33,6 +33,7 @@ class GrainSynth {
     this.dest = Destination;
     this.effectsChain = [];
     this.grainOutput = new Gain(1);
+    this.filter = new Filter(1000, "lowpass", -24, 1);
     for (let i = 0; i < this.numVoices; i++) {
       this.grains[i] = new GrainPlayer(this.buffer);
     }
@@ -44,11 +45,12 @@ class GrainSynth {
       grain.loop = true;
       grain.connect(gain).connect(this.grainOutput);
     });
+    this.grainOutput.connect(this.filter);
   }
   setupMaster() {
     this.masterBus = new Gain(1, { units: "gain" });
     this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
-    this.grainOutput.connect(this.masterBus);
+    this.filter.connect(this.masterBus);
     this.masterBus.toDestination();
     this.pitchShift();
   }
@@ -86,13 +88,12 @@ class GrainSynth {
   }
   //  effects
   chainEffect(effect) {
-    this.masterBus.disconnect(this.dest);
     this.effectsChain.push(effect);
     this.masterBus.chain(...this.effectsChain, this.dest);
   }
 
   pitchShift() {
-    this.pitchShifter = new PitchShift(0);
+    this.pitchShifter = new PitchShift(-12);
     // higher windowsize sounds better!
     this.pitchShifter.windowSize = 1;
     this.chainEffect(this.pitchShifter);
@@ -202,7 +203,7 @@ class GrainSynth {
       // grain.loopStart = valuesObject.loopStart[i];
       // grain.loopEnd = valuesObject.loopEnd[i];
       grain.playbackRate = valuesObject.playbackRate[i];
-      grain.reverse = Math.random() < 0.5;
+      grain.reverse = Math.random() < 0.2;
     });
   }
   randArrayFromRange(length, min, max) {
@@ -210,7 +211,6 @@ class GrainSynth {
   }
 
   lowpassFilter(frequency, resonance) {
-    this.filter = new Filter(frequency, "lowpass", -24, resonance);
     this.chainEffect(this.filter);
   }
 
@@ -230,17 +230,7 @@ class GrainSynth {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
       overlap: this.randArrayFromRange(numGrains, 0.5, 1),
       grainSize: this.randArrayFromRange(numGrains, 0.01, 0.1),
-      // loopStart: this.randArrayFromRange(
-      //   numGrains,
-      //   0,
-      //   this.grains[0].buffer.duration
-      // ),
-      // loopEnd: this.randArrayFromRange(
-      //   numGrains,
-      //   0,
-      //   this.grains[0].buffer.duration
-      // ),
-      playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.5),
+      playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.1),
     };
     this.setPitchShift(this.randRange(-12, 12));
     //set values to random values

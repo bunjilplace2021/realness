@@ -15,7 +15,7 @@ class ParticleSystem {
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
     }
-    if (this.particles.length > 50){
+    if (this.particles.length > 50) {
       this.particles.splice(0, 1);
     }
   }
@@ -40,20 +40,9 @@ class ParticleSystem {
 
         //Collision Detection Test
         if (particle !== other && particle.intersects(other)) {
-<<<<<<< HEAD
-          noFill();
-          stroke(255);
-          line(
-            particle.position.x,
-            particle.position.y,
-            other.position.x,
-            other.position.y
-          );
-=======
           // noFill();
           // stroke(255);
           // line(particle.position.x, particle.position.y, other.position.x, other.position.y);
->>>>>>> main
         }
       }
     }
