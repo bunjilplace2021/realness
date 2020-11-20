@@ -1,6 +1,5 @@
 import GrainSynth from "./modules/GrainSynth";
 import FireBaseAudio from "./modules/FirebaseAudio";
-import FMSynth from "./modules/UISynth";
 import { Context } from "tone";
 import regeneratorRuntime from "regenerator-runtime";
 // UTILITIES
