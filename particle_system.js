@@ -8,7 +8,9 @@ class ParticleSystem {
 
   addParticle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID) {
     if (x !== undefined && y !== undefined) {
-      this.particles.push(new Particle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID));
+      this.particles.push(
+        new Particle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID)
+      );
       particlecount = this.particles.length;
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
@@ -16,7 +18,6 @@ class ParticleSystem {
   }
 
   intersection() {
-
     let boundary = new Rectangle(0, 0, width, height);
     let qtree = new QuadTree(boundary, 4);
 
@@ -24,17 +25,26 @@ class ParticleSystem {
       let point = new Point(particle.position.x, particle.position.y, particle);
       qtree.insert(point);
 
-      let range = new Circle(particle.position.x, particle.position.y, particle.radius * 2);
+      let range = new Circle(
+        particle.position.x,
+        particle.position.y,
+        particle.radius * 2
+      );
       let points = qtree.query(range);
 
       for (let point of points) {
         let other = point.userData;
 
-//Collision Detection Test
+        //Collision Detection Test
         if (particle !== other && particle.intersects(other)) {
           noFill();
           stroke(255);
-          line(particle.position.x, particle.position.y, other.position.x, other.position.y);
+          line(
+            particle.position.x,
+            particle.position.y,
+            other.position.x,
+            other.position.y
+          );
         }
       }
     }
@@ -46,7 +56,7 @@ class ParticleSystem {
     }
 
     // Filter removes any elements of the array that do not pass the test
-    this.particles = this.particles.filter(particle => !particle.isDead());
+    this.particles = this.particles.filter((particle) => !particle.isDead());
   }
 
   applyForce(f) {
@@ -54,10 +64,4 @@ class ParticleSystem {
       particle.applyForce(f);
     }
   }
-
-
-
-
-
-
 }

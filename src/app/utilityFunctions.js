@@ -24,3 +24,7 @@ export function waitForVariable(variable) {
   {
   }
 }
+
+export function isBetween(x, min, max) {
+  return x >= min && x <= max;
+}

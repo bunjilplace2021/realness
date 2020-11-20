@@ -1,20 +1,19 @@
 import GrainSynth from "./modules/GrainSynth";
 import FireBaseAudio from "./modules/FirebaseAudio";
+import { Context } from "tone";
 import regeneratorRuntime from "regenerator-runtime";
 // UTILITIES
-import { fetchSample, mapValue } from "./utilityFunctions";
-import MasteBus from "./modules/MasterBus";
+import { fetchSample, mapValue, isBetween } from "./utilityFunctions";
 import MasterBus from "./modules/MasterBus";
 
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-let globalAudioCtx = new AudioContext({
+let globalAudioCtx = new Context({
   latencyHint: "playback",
 });
 let masterBus;
 let synths = [];
 let synthsLoaded = false;
 let f = new FireBaseAudio();
-const numSources = 3;
+const numSources = 5;
 // list all samples in database
 f.listAll();
 
@@ -56,12 +55,14 @@ const startAudio = async () => {
     if (!synth.isPlaying) {
       synth.masterBus.gain.value = 1 / synths.length / 2;
       synth.rampVolume(1, globalAudioCtx.currentTime + 10);
+      // synth.lowpassFilter(100, 1);
       synth.play(globalAudioCtx.currentTime + i * 0.05);
-      await masterBus.connectSource(synth.masterBus);
+      await masterBus.connectSource(synth.grainOutput);
+      synth.masterBus.disconnect();
     }
   });
-  // masterBus.lowpassFilter(100, 1);
-  masterBus.reverb(true);
+
+  masterBus.reverb(true, 0.1, 1, 0.7);
   console.log(masterBus);
   document.querySelector("body").onclick = () => {
     synths.forEach((synth) => {
@@ -70,7 +71,7 @@ const startAudio = async () => {
   };
   // synths[0].transport.scheduleRepeat((time) => {
   //   pollValues();
-  // }, 0.1);
+  // }, 0.5);
 
   synths[0].transport.scheduleRepeat((time) => {
     reloadBuffers();
@@ -80,21 +81,11 @@ loadSynths();
 
 let pollValues = () => {
   if (ps && ps.particles) {
-    let { radius, maxradius } = ps.particles[
-      ~~Math.random() * ps.particles.length
-    ];
-
+    let { radius, maxradius } = ps.particles[ps.particles.length - 1];
+    console.log(radius, maxradius);
     synths.forEach((synth) => {
-      console.log();
-      synth.setDetune(mapValue(radius, 0, maxradius, -100, 100));
-      // synth.setLoopStart(
-      //   mapValue(radius, 0, maxradius, 0.001, synth.buffer.duration)
-      // );
-      if (synth.filter) {
-        // synth.filter.frequency.value = mapValue(radius, 0, maxradius, 0, 100);
-      }
-      synth.setVolume(mapValue(radius, 0, maxradius, 0.5, 0.7));
-      if (radius > maxradius - 50) {
+      synth.setGrainSize(mapValue(radius, 0, maxradius, 0.01, 0.1));
+      if (isBetween(radius, maxradius - 50, maxradius)) {
         console.log("reached max radius");
         synth.randomInterpolate();
       }

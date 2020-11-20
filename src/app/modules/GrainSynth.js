@@ -46,10 +46,10 @@ class GrainSynth {
     });
   }
   setupMaster() {
-    this.masterBus = new Gain({ units: "gain" });
+    this.masterBus = new Gain(1, { units: "gain" });
     this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
-    this.masterBus.toDestination();
     this.grainOutput.connect(this.masterBus);
+    this.masterBus.toDestination();
     this.pitchShift();
   }
   async startContext() {
@@ -86,11 +86,11 @@ class GrainSynth {
   }
   //  effects
   chainEffect(effect) {
-    this.grainOutput.disconnect();
+    this.masterBus.disconnect(this.dest);
     this.effectsChain.push(effect);
-    console.log(this.effectsChain);
-    this.grainOutput.chain(...this.effectsChain, this.masterBus);
+    this.masterBus.chain(...this.effectsChain, this.dest);
   }
+
   pitchShift() {
     this.pitchShifter = new PitchShift(0);
     // higher windowsize sounds better!
@@ -208,11 +208,7 @@ class GrainSynth {
   randArrayFromRange(length, min, max) {
     return Array.from({ length }, () => this.randRange(min, max));
   }
-  chainEffect(effect) {
-    this.masterBus.disconnect();
-    this.effectsChain.push(effect);
-    this.masterBus.chain(...this.effectsChain, this.dest);
-  }
+
   lowpassFilter(frequency, resonance) {
     this.filter = new Filter(frequency, "lowpass", -24, resonance);
     this.chainEffect(this.filter);
@@ -233,7 +229,7 @@ class GrainSynth {
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
       overlap: this.randArrayFromRange(numGrains, 0.5, 1),
-      grainSize: this.randArrayFromRange(numGrains, 0.001, 1),
+      grainSize: this.randArrayFromRange(numGrains, 0.01, 0.1),
       // loopStart: this.randArrayFromRange(
       //   numGrains,
       //   0,
@@ -244,7 +240,7 @@ class GrainSynth {
       //   0,
       //   this.grains[0].buffer.duration
       // ),
-      playbackRate: this.randArrayFromRange(numGrains, 0.1, 0.5),
+      playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.5),
     };
     this.setPitchShift(this.randRange(-12, 12));
     //set values to random values

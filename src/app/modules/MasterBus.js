@@ -29,18 +29,18 @@ class MasterBus {
     try {
       this.source = source;
       source.connect(this.masterBus);
-      console.log("connected source!");
+      return true;
     } catch (error) {
-      console.log(error);
+      return false;
     }
   }
   chorus(freq = 0.1, delay = 9, depth = 0.9) {
     this.chorus = new Chorus(freq, delay, depth);
   }
   chainEffect(effect) {
-    this.source && this.source.disconnect();
+    this.masterBus.disconnect(this.dest);
     this.effectsChain.push(effect);
-    this.source.chain(...this.effectsChain, this.masterBus);
+    this.masterBus.chain(...this.effectsChain, this.dest);
   }
   removeEffect(effect) {
     this.masterBus.disconnect(effect);
@@ -55,12 +55,12 @@ class MasterBus {
     this.masterDelay = new Delay(time, fbk);
     this.chainEffect(this.masterDelay);
   }
-  async reverb(reverbSwitch) {
+  async reverb(reverbSwitch, preDelay = 0.3, decay = 4, wet = 1) {
     if (reverbSwitch) {
       this.masterReverb = new Reverb({
-        preDelay: 0.3,
-        decay: 4,
-        wet: 1,
+        preDelay,
+        decay,
+        wet,
       });
       await this.masterReverb.generate();
       this.chainEffect(this.masterReverb);
