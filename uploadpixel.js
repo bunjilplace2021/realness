@@ -46,26 +46,29 @@ function shaderDraw() {
 
 function shaderMousePressed() {
 
-//push to firebase
+  //push to firebase
 
-if (mouseX > 0&& mouseX < width-100 && mouseY > 100 && mouseY < height) {
+  if (mouseX > 0 && mouseX < width - 100 && mouseY > 100 && mouseY < height) {
 
-  colour = pixelpg.get(mouseX, mouseY);
-  var data = {
-    uuid: uuid,
-    mouseX_loc: mouseX,
-    mouseY_loc: mouseY,
-    colour_loc: colour,
-    deviceWidth: width,
-    deviceHeight: height,
-    touchTime: touchtime
+    colour = pixelpg.get(mouseX, mouseY);
+    var data = {
+      uuid: uuid,
+      mouseX_loc: mouseX,
+      mouseY_loc: mouseY,
+      colour_loc: colour,
+      deviceWidth: width,
+      deviceHeight: height,
+      touchTime: touchtime
+    }
+
+    var test = database.ref('test3');
+
+
+    if (webcam) {
+      test.push(data);
+      console.log(data);
+    }
   }
-
-  var test = database.ref('test3');
-
-  test.push(data);
-  console.log(data);
-}
 }
 
 function shaderWindowResized() {
