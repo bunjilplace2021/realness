@@ -13,6 +13,11 @@ var eraser_size = 20;
 
 let uuid;
 
+<<<<<<< HEAD
+=======
+let webcam = false;
+
+>>>>>>> main
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
   var cnv_y = (windowHeight - height) / 2;
@@ -39,6 +44,20 @@ function preload() {
   }
   uuid = guid();
   shaderPreload();
+
+  detectWebcam(function(hasWebcam) {
+    webcam = hasWebcam;
+    //console.log(webcam);
+    console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
+  })
+}
+
+function detectWebcam(callback) {  //check if webcam device exists and/or permission granted by device label
+  let md = navigator.mediaDevices;
+  if (!md || !md.enumerateDevices) return callback(false);
+  md.enumerateDevices().then(devices => {
+    callback(devices.some(device => '' != device.label));
+  })
 }
 
 function setup() {
