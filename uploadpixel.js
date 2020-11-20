@@ -50,6 +50,13 @@ function shaderMousePressed() {
 
   if (mouseX > 0 && mouseX < width - 100 && mouseY > 100 && mouseY < height) {
 
+
+    detectWebcam(function(hasWebcam) {
+      webcam = hasWebcam;
+      //console.log(webcam);
+      console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
+    })
+
     colour = pixelpg.get(mouseX, mouseY);
     var data = {
       uuid: uuid,

@@ -39,11 +39,7 @@ function preload() {
   uuid = guid();
   shaderPreload();
 
-  detectWebcam(function(hasWebcam) {
-    webcam = hasWebcam;
-    //console.log(webcam);
-    console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
-  })
+
 }
 
 function detectWebcam(callback) {  //check if webcam device exists and/or permission granted by device label
@@ -83,6 +79,12 @@ function setup() {
   shaderSetup();
 
   ps = new ParticleSystem(createVector(width / 2, height / 2), img);
+
+  detectWebcam(function(hasWebcam) {
+    webcam = hasWebcam;
+    //console.log(webcam);
+    console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
+  })
 
 }
 
