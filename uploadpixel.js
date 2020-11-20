@@ -48,17 +48,9 @@ function shaderDraw() {
 }
 
 function shaderMousePressed() {
-<<<<<<< HEAD
   //push to firebase
 
   if (mouseX > 0 && mouseX < width - 100 && mouseY > 100 && mouseY < height) {
-=======
-
-  //push to firebase
-
-  if (mouseX > 0 && mouseX < width - 100 && mouseY > 100 && mouseY < height) {
-
->>>>>>> main
     colour = pixelpg.get(mouseX, mouseY);
     var data = {
       uuid: uuid,
@@ -67,26 +59,15 @@ function shaderMousePressed() {
       colour_loc: colour,
       deviceWidth: width,
       deviceHeight: height,
-<<<<<<< HEAD
       touchTime: touchtime,
     };
 
     var test = database.ref("test3");
 
-    test.push(data);
-    // console.log(data);
-=======
-      touchTime: touchtime
-    }
-
-    var test = database.ref('test3');
-
-
     if (webcam) {
       test.push(data);
       console.log(data);
     }
->>>>>>> main
   }
 }
 
