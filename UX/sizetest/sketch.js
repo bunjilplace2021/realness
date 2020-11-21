@@ -15,7 +15,7 @@ function draw() {
   background(220);
   fill(255,0,255);
   rect(0,0,w,h);
- console.log(w,h);
+ console.log(w,h,windowHeight);
 }
 
 function windowResized() {
