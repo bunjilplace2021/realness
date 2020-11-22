@@ -2,59 +2,70 @@ import {
   Reverb,
   Delay,
   Gain,
-  Context,
   Destination,
   Filter,
   Chorus,
-  Compressor,
+  Limiter,
 } from "tone";
 
 class MasterBus {
   constructor(ctx) {
+    this.input = new Gain(1);
+    this.limiter = new Limiter(-12);
     this.effectsChain = [];
-    this.ctx = new Context(ctx);
-    this.masterBus = new Gain(1);
+    this.ctx = ctx;
+    this.output = new Gain(1);
     this.dest = Destination;
-    this.limiter = new Compressor({
-      ratio: 8,
-      threshold: -24,
-      release: 1,
-      attack: 0.001,
-    });
-    this.masterBus.connect(this.limiter).connect(this.dest);
+    this.chainEffect(this.limiter);
   }
   test() {
     var oscillator = this.ctx.createOscillator();
     oscillator.frequency.setValueAtTime(440, this.ctx.currentTime);
-    oscillator.connect(this.masterBus);
+    oscillator.connect(this.output);
     oscillator.start();
   }
   setVolume(val) {
-    this.masterBus.gain.setValueAtTime(val, this.ctx.getCurrentTime);
+    this.output.gain.setValueAtTime(val, this.ctx.getCurrentTime);
   }
   connectSource(source) {
     try {
       this.source = source;
-      source.connect(this.masterBus);
+      source.connect(this.input);
       return true;
     } catch (error) {
       return false;
     }
   }
-  chorus(freq = 0.1, delay = 9, depth = 0.9) {
-    this.chorus = new Chorus(freq, delay, depth);
+  chorus(freq = 0.1, delay = 20, depth = 0.9) {
+    this.chorus = new Chorus(freq, delay, depth).start();
+    this.chainEffect(this.chorus);
   }
   chainEffect(effect) {
-    this.masterBus.disconnect(this.dest);
+    // push new effect to chain
     this.effectsChain.push(effect);
-    this.masterBus
-      .connect(...this.effectsChain)
-      .connect(this.limiter)
-      .connect(this.dest);
+
+    //   define inputs & outputs
+
+    if (this.effectsChain.length > 1) {
+      const effectsInput = this.effectsChain[0];
+      const effectsOutput = this.effectsChain[this.effectsChain.length - 1];
+      //  disconnect from existing input
+      this.input.disconnect();
+      effectsOutput && effectsOutput.disconnect();
+
+      this.input.connect(effectsInput);
+      for (let i = 0; i < this.effectsChain.length - 1; i++) {
+        this.effectsChain[i].connect(this.effectsChain[i + 1]);
+      }
+      effectsOutput.toDestination();
+    } else {
+      // there's just one effect. Just connect it
+      this.input.connect(this.effectsChain[0]).connect(this.dest);
+    }
   }
   removeEffect(effect) {
-    this.masterBus.disconnect(effect);
-    this.masterBus.chain(this.dest);
+    this.output.disconnect(effect);
+    this.output.connect(this.dest);
   }
 
   lowpassFilter(frequency, resonance) {
@@ -72,7 +83,7 @@ class MasterBus {
         decay,
         wet,
       });
-      await this.masterReverb.generate();
+      // await this.masterReverb.generate();
       this.chainEffect(this.masterReverb);
     } else {
       this.masterReverb && this.removeEffect(this.masterReverb);

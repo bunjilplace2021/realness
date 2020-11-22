@@ -1,5 +1,4 @@
 import firebase from "firebase/app";
-
 import "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 class FireBaseAudio {
@@ -10,7 +9,7 @@ class FireBaseAudio {
   // get total number of database entries
   // loadrandom
   // read into Blob/AudioUrl
-  constructor() {
+  constructor(ctx) {
     this.firebaseConfig = {
       // Your web app's Firebase configuration
       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -25,7 +24,7 @@ class FireBaseAudio {
     };
     // Initialize Firebase
     firebase.initializeApp(this.firebaseConfig);
-
+    this.audioCtx = ctx;
     this.storage = firebase.storage();
     this.storageRef = this.storage.ref();
     this.audioRef = this.storageRef.child(`audio-${uuidv4()}.mp3`);

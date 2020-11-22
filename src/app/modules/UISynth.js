@@ -6,7 +6,7 @@ class UISynth {
         attack: 0,
         decay: 0.1,
         sustain: 1.0,
-        release: 0.2,
+        release: 0.1,
       },
       harmonicity: 2,
     });

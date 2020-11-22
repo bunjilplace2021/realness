@@ -28,12 +28,12 @@ class GrainSynth {
     this.isPlaying = false;
     this.numVoices = voices;
     this.buffer = buffer;
-    this.toneContext = new Context(ctx);
+    this.toneContext = ctx;
     this.transport = this.toneContext.transport;
     this.dest = Destination;
     this.effectsChain = [];
     this.grainOutput = new Gain(1);
-    this.filter = new Filter(1000, "lowpass", -24, 1);
+    this.filter = new Filter(10000, "lowpass", -24, 1);
     for (let i = 0; i < this.numVoices; i++) {
       this.grains[i] = new GrainPlayer(this.buffer);
     }
@@ -48,14 +48,11 @@ class GrainSynth {
     this.grainOutput.connect(this.filter);
   }
   setupMaster() {
-    this.masterBus = new Gain(1, { units: "gain" });
-    this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
-    this.filter.connect(this.masterBus);
-    this.masterBus.toDestination();
+    this.output = new Gain(1, { units: "gain" });
+    this.output.gain.setValueAtTime(0.8 / this.numVoices, now());
+    this.filter.connect(this.output);
+    this.output.connect(this.dest);
     this.pitchShift();
-  }
-  async startContext() {
-    await start();
   }
   isGrainLoaded(grain) {
     return new Promise((resolve, reject) => {
@@ -66,7 +63,7 @@ class GrainSynth {
   //  triggers
   async play(startTime = 1) {
     this.transport.start();
-    this.masterBus.gain.setValueAtTime(0.8 / this.numVoices, now());
+    this.output.gain.setValueAtTime(0.8 / this.numVoices, now());
     //  wait for grains to load before starting
     const grainPromises = this.grains.map((grain) => this.isGrainLoaded(grain));
     await Promise.all(grainPromises);
@@ -80,7 +77,7 @@ class GrainSynth {
     this.grains.forEach((grain) => {
       grain.stop();
     });
-    this.masterBus.gain.setValueAtTime(0, this.toneContext.currentTime);
+    this.output.gain.setValueAtTime(0, this.toneContext.currentTime);
     this.isPlaying = false;
   }
   kill() {
@@ -88,8 +85,24 @@ class GrainSynth {
   }
   //  effects
   chainEffect(effect) {
+    // push new effect to chain
     this.effectsChain.push(effect);
-    this.masterBus.chain(...this.effectsChain, this.dest);
+
+    //   define inputs & outputs
+
+    if (this.effectsChain.length > 1) {
+      const effectsInput = this.effectsChain[0];
+      const effectsOutput = this.effectsChain[this.effectsChain.length - 1];
+      //  disconnect from existing input
+      this.input.disconnect();
+      effectsOutput && effectsOutput.disconnect();
+
+      this.input.connect(effectsInput);
+      for (let i = 0; i < this.effectsChain.length - 1; i++) {
+        this.effectsChain[i].connect(this.effectsChain[i + 1]);
+      }
+      effectsOutput.connect(this.dest);
+    }
   }
 
   pitchShift() {
@@ -110,13 +123,13 @@ class GrainSynth {
     });
   }
   swellLFO() {
-    // console.log(this.masterBus);
+    // console.log(this.output);
     this.volumeLFO = new LFO({
       frequency: Math.random().toFixed(2) / 4,
       max: 0.5,
     });
     // console.log(this.volumeLFO);
-    this.volumeLFO.connect(this.masterBus.gain);
+    this.volumeLFO.connect(this.output.gain);
     this.volumeLFO.start();
   }
   async reverb(reverbSwitch) {
@@ -128,7 +141,7 @@ class GrainSynth {
       });
       //   console.log(this.masterEffect);
       await this.masterReverb.generate();
-      this.masterBus.chain(this.masterReverb, Destination);
+      this.output.chain(this.masterReverb, Destination);
     } else {
       this.masterReverb && this.masterReverb.disconnect();
     }
@@ -227,12 +240,11 @@ class GrainSynth {
 
     // generate random values
     const randomValues = {
-      detune: this.randArrayFromRange(numGrains, -1000, 100),
-      overlap: this.randArrayFromRange(numGrains, 0.5, 1),
-      grainSize: this.randArrayFromRange(numGrains, 0.01, 0.1),
+      detune: this.randArrayFromRange(numGrains, -1000, 1000),
+      overlap: this.randArrayFromRange(numGrains, 0.1, 1),
+      grainSize: this.randArrayFromRange(numGrains, 0.01, 0.05),
       playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.1),
     };
-    this.setPitchShift(this.randRange(-12, 12));
     //set values to random values
     // TODO: Interpolate between current and random values
     this.setCurrentValues(randomValues);
@@ -290,10 +302,10 @@ class GrainSynth {
     this.grains.forEach((grain) => (grain.loopEnd = val));
   }
   setVolume(val) {
-    this.masterBus.gain.setValueAtTime(val, this.toneContext.currentTime);
+    this.output.gain.setValueAtTime(val, this.toneContext.currentTime);
   }
   rampVolume(val, time) {
-    this.masterBus.gain.rampTo(val, time);
+    this.output.gain.rampTo(val, time);
   }
 }
 
