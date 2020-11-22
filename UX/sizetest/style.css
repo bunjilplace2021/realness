@@ -1,9 +1,29 @@
+
 html, body {
+  height: 100.1%;
+  font-size: calc(1em + 1vw);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  overflow: hidden;
+  /* Hide scrollbars */
+  /* This centers our sketch horizontally. */
+  justify-content: center;
+  /* This centers our sketch vertically. */
+  align-items: center;
+  font-family: "Avenir Next", "Avenir", "Nunito Sans", sans-serif;
+}
+
+
+
+/* html, body {
   width: 100vw;
   height: 100vh;
   margin: 0;
   padding: 0;
-}
+} */
 canvas {
   display: block;
 }
