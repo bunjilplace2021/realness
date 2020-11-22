@@ -15,7 +15,7 @@ class ParticleSystem {
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
     }
-    if (this.particles.length > 50) {
+    if (this.particles.length > 30 && !particle.active) {
       this.particles.splice(0, 1);
     }
   }
