@@ -1,6 +1,7 @@
 import { FMSynth, Gain, now } from "tone";
 class UISynth {
-  constructor() {
+  constructor(ctx) {
+    this.ctx = ctx;
     this.uiSynth = new FMSynth({
       envelope: {
         attack: 0,

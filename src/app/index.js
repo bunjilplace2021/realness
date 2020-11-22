@@ -4,29 +4,44 @@ import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
 // GLOBAL VARIABLES
-import { Context, Signal } from "tone";
+import {
+  Context,
+  AMSynth,
+  AMOscillator,
+  FMOscillator,
+  Follower,
+  Filter,
+} from "tone";
 
-console.log(Signal);
 // UTILITIES
 import {
   fetchSample,
   mapValue,
   isBetween,
   resampleBuffer,
-  normalizeArray,
 } from "./utilityFunctions";
 import regeneratorRuntime from "regenerator-runtime";
 
 let globalAudioCtx = new Context({
   latencyHint: "playback",
+  lookAhead: 2,
 });
 let masterBus;
 let synths = [];
 let synthsLoaded = false;
-const u = new UISynth();
+const u = new UISynth(globalAudioCtx);
 let f = new FireBaseAudio(globalAudioCtx);
 const uiNotes = ["C4", "E4", "G4"];
-const numSources = 2;
+
+// number of different sources to use
+const numSources = 3;
+const subOsc = new FMOscillator({
+  frequency: 40,
+  harmonicity: 0.5,
+  detune: 0,
+});
+// number of voices per synth
+const numVoices = 1;
 const muteButton = document.querySelector("#mute");
 // list all samples in database
 f.listAll();
@@ -34,19 +49,14 @@ f.listAll();
 const reloadBuffers = () => {
   // fetch new samples from database and load them into existing buffers
   synths.forEach(async (synth) => {
-    console.log("reloading buffers");
     await f.getSample();
     const buf = await fetchSample(f.audioFile, globalAudioCtx);
     const resampled = await resampleBuffer(buf, 22050);
-
     const floatBuf = new Float32Array(resampled.length);
-
     resampled.copyFromChannel(floatBuf, 0, 0);
-
     synth.buffer.copyToChannel(floatBuf, 0, 0);
     synth.randomStarts();
     synth.rampVolume(1, globalAudioCtx.currentTime + 10);
-    console.log(synth.buffer);
   });
 };
 // method to play UI sounds
@@ -64,12 +74,10 @@ const loadSynths = async () => {
     await f.getSample();
     // fetch random samples from database
     const buf = await fetchSample(f.audioFile, globalAudioCtx);
-
     const resampledBuf = await resampleBuffer(buf, 22050);
-
     if (f.audioFile) {
       console.log("Loaded GrainSynth " + (i + 1));
-      synths.push(new GrainSynth(resampledBuf, globalAudioCtx, numSources));
+      synths.push(new GrainSynth(resampledBuf, globalAudioCtx, numVoices));
     }
   }
   synthsLoaded = true;
@@ -95,8 +103,10 @@ const startAudio = async () => {
     if (!synth.isPlaying) {
       // setup synth parameters
       // synth.output.gain.value = 1 / synths.length;
+      synth.grains.forEach((grain) => (grain.volume.value = 4));
       synth.rampVolume(1, globalAudioCtx.currentTime + 10);
       synth.filter.type = "lowpass";
+      synth.filter.gain.value = 40;
       synth.filter.frequency.value = (i + 1) * 200;
       console.log(synth.filter.frequency);
 
@@ -112,11 +122,19 @@ const startAudio = async () => {
       // connect the synth output to the master processing bus
       synth.output.disconnect(synth.dest);
       masterBus.connectSource(synth.output);
-      synth.swellLFO();
     }
   });
+  subOsc.filter = new Filter();
+  // masterBus.output.connect(follower);
 
-  // masterBus.chorus(0.01, 50, 0.5);
+  masterBus.connectSource(subOsc);
+  subOsc.volume.value = -64;
+  subOsc.volume.targetRampTo(-40, 10);
+  subOsc.filter.frequency.value = 50;
+  subOsc.start();
+  masterBus.lowpassFilter(1000, 1);
+  masterBus.filter.gain.value = 40;
+  // masterBus.chorus(0.01, 50, 0.9);
   masterBus.reverb(true, 0.1, 4, 0.7);
 
   u.play();
@@ -134,6 +152,7 @@ const startAudio = async () => {
   synths[0].transport.scheduleRepeat((time) => {
     reloadBuffers();
   }, 30);
+  subOscLoop();
 };
 
 const pollValues = () => {
@@ -151,6 +170,13 @@ const pollValues = () => {
       }
     });
   }
+};
+
+const subOscLoop = () => {
+  synths[0].transport.scheduleRepeat((time) => {
+    subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -4, -4), 30);
+    subOsc.harmonicity.rampTo(mapValue(Math.random(), 0, 1, 0.5, 0.8), 30);
+  }, 30);
 };
 
 // allow unmuting once synths loaded from firebase

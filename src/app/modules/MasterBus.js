@@ -14,6 +14,7 @@ class MasterBus {
     this.limiter = new Limiter(-12);
     this.effectsChain = [];
     this.ctx = ctx;
+    console.log(this.ctx);
     this.output = new Gain(1);
     this.dest = Destination;
     this.chainEffect(this.limiter);

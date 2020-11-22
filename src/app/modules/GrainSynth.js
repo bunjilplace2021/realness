@@ -1,6 +1,7 @@
 import {
   Destination,
   now,
+  setContext,
   Gain,
   GrainPlayer,
   Reverb,
@@ -13,6 +14,7 @@ import {
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
+import { forEach } from "async";
 
 // TODO: SORT OUT EFFECTS CHAIN
 // TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
@@ -25,11 +27,15 @@ class GrainSynth {
     this.isPlaying = false;
     this.numVoices = voices;
     this.buffer = buffer;
+    this.nodes = [];
     this.toneContext = ctx;
     this.transport = this.toneContext.transport;
     this.dest = Destination;
     this.effectsChain = [];
+
+    //  make nodes
     this.grainOutput = new Gain(1);
+    this.grainOutput.name = "Grain Output";
     this.filter = new Filter(10000, "lowpass", -24, 1);
     this.compressor = new Compressor({
       ratio: 8,
@@ -37,30 +43,43 @@ class GrainSynth {
       release: 1,
       attack: 0.003,
     });
-    this.pitchShifter = new PitchShift(-12);
+    this.pitchShifter = new PitchShift({
+      pitch: -12,
+      channelCount: 1,
+    });
     for (let i = 0; i < this.numVoices; i++) {
       this.grains[i] = new GrainPlayer(this.buffer);
+      this.grains[i].buffer.toMono();
+      this.grains[i].channelCount = 1;
     }
+
     this.setupMaster();
     // evenly ditribute volumes to master
     this.grains.forEach(async (grain) => {
-      const gain = new Gain();
-      gain.gain.rampTo(1 / this.numVoices, 0.01);
       grain.loop = true;
-      grain.connect(gain).connect(this.grainOutput);
+      grain.connect(this.grainOutput);
     });
     this.grainOutput.connect(this.filter);
   }
 
+  setToMono() {
+    Object.entries(this).forEach((entry) => {
+      const classNode = entry[1];
+      if (typeof classNode === "object" && classNode.channelCount) {
+        classNode.channelCount = 1;
+      }
+    });
+  }
   setupMaster() {
-    this.output = new Gain(1, { units: "gain" });
+    this.output = new Gain(1);
+    this.output.name = "Output";
     this.output.gain.setValueAtTime(0.8 / this.numVoices, now());
     this.pitchShifter.windowSize = 1;
     this.filter.connect(this.compressor);
     this.compressor.connect(this.pitchShifter);
     this.pitchShifter.connect(this.output);
     this.output.connect(this.dest);
-
+    this.setToMono();
     // higher windowsize sounds better!
   }
   isGrainLoaded(grain) {
@@ -254,7 +273,7 @@ class GrainSynth {
     //set values to random values
     // TODO: Interpolate between current and random values
     this.setCurrentValues(randomValues);
-    console.log(this.grains);
+    // console.log(this.grains);
   }
 
   // Setup random loop
