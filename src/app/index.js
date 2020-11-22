@@ -4,15 +4,21 @@ import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
 // GLOBAL VARIABLES
-import { Context, Distortion } from "tone";
+import { Context, Signal } from "tone";
 
+console.log(Signal);
 // UTILITIES
-import { fetchSample, mapValue, isBetween } from "./utilityFunctions";
+import {
+  fetchSample,
+  mapValue,
+  isBetween,
+  resampleBuffer,
+  normalizeArray,
+} from "./utilityFunctions";
 import regeneratorRuntime from "regenerator-runtime";
 
 let globalAudioCtx = new Context({
   latencyHint: "playback",
-  sampleRate: 48000,
 });
 let masterBus;
 let synths = [];
@@ -31,11 +37,16 @@ const reloadBuffers = () => {
     console.log("reloading buffers");
     await f.getSample();
     const buf = await fetchSample(f.audioFile, globalAudioCtx);
-    const floatBuf = new Float32Array(buf.length);
-    buf.copyFromChannel(floatBuf, 0, 0);
+    const resampled = await resampleBuffer(buf, 22050);
+
+    const floatBuf = new Float32Array(resampled.length);
+
+    resampled.copyFromChannel(floatBuf, 0, 0);
+
     synth.buffer.copyToChannel(floatBuf, 0, 0);
     synth.randomStarts();
     synth.rampVolume(1, globalAudioCtx.currentTime + 10);
+    console.log(synth.buffer);
   });
 };
 // method to play UI sounds
@@ -53,9 +64,12 @@ const loadSynths = async () => {
     await f.getSample();
     // fetch random samples from database
     const buf = await fetchSample(f.audioFile, globalAudioCtx);
+
+    const resampledBuf = await resampleBuffer(buf, 22050);
+
     if (f.audioFile) {
       console.log("Loaded GrainSynth " + (i + 1));
-      synths.push(new GrainSynth(buf, globalAudioCtx, numSources));
+      synths.push(new GrainSynth(resampledBuf, globalAudioCtx, numSources));
     }
   }
   synthsLoaded = true;
@@ -83,23 +97,27 @@ const startAudio = async () => {
       // synth.output.gain.value = 1 / synths.length;
       synth.rampVolume(1, globalAudioCtx.currentTime + 10);
       synth.filter.type = "lowpass";
-      // synth.filter.frequency.value = (i + 1) * 1000;
+      synth.filter.frequency.value = (i + 1) * 200;
+      console.log(synth.filter.frequency);
+
+      synth.setPitchShift(-12 / (i + 1));
       // if lower frequency value, higher resonance for low-end drones
       if (synth.filter.frequency.value < 500) {
-        synth.filter.Q.value = 4;
+        synth.filter.Q.value = 2;
       } else {
-        synth.filter.Q.value = 1.5;
+        synth.filter.Q.value = 0.5;
       }
       // start the synths
       synth.play(globalAudioCtx.currentTime + i * 0.05);
       // connect the synth output to the master processing bus
       synth.output.disconnect(synth.dest);
       masterBus.connectSource(synth.output);
+      synth.swellLFO();
     }
   });
 
-  masterBus.chorus(0.01, 50, 0.5);
-  masterBus.reverb(true, 0.1, 2, 0.7);
+  // masterBus.chorus(0.01, 50, 0.5);
+  masterBus.reverb(true, 0.1, 4, 0.7);
 
   u.play();
   //  if user clicks, randomize synth parameters
@@ -111,7 +129,7 @@ const startAudio = async () => {
   // // loop to poll paprticle system values
   synths[0].transport.scheduleRepeat((time) => {
     pollValues();
-  }, 1);
+  }, 10);
   // loop to reload samples every 30 seconds approx
   synths[0].transport.scheduleRepeat((time) => {
     reloadBuffers();
@@ -122,9 +140,9 @@ const pollValues = () => {
   if (ps && ps.particles) {
     let { radius, maxradius } = ps.particles[ps.particles.length - 1];
     synths.forEach((synth, i) => {
-      synth.setGrainSize(mapValue(radius, 0, maxradius, 0.01, 0.1));
+      synth.setGrainSize(mapValue(radius, 0, maxradius, 0.01, 0.05));
       synth.filter.frequency.rampTo(
-        (i + 1) * mapValue(radius, 0, maxradius, 100, 20000),
+        (i + 1) * mapValue(radius, 0, maxradius, 100, 1000),
         20
       );
       if (isBetween(radius, maxradius - 50, maxradius)) {

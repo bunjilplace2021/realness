@@ -1,9 +1,9 @@
 class Recorder {
-  constructor(length = 800, sources = 1) {
+  constructor(length = 800, sources = 1, ctx) {
     this.length = length;
     this.getPermissions();
     //instantiate audiocontext
-    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    this.audioCtx = ctx;
 
     this.numSources = sources;
   }

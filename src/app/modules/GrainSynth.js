@@ -1,5 +1,4 @@
 import {
-  Context,
   Destination,
   now,
   Gain,
@@ -7,12 +6,10 @@ import {
   Reverb,
   PitchShift,
   Loop,
-  Panner,
   LFO,
   LowpassCombFilter,
   Filter,
-  start,
-  Chorus,
+  Compressor,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -34,12 +31,19 @@ class GrainSynth {
     this.effectsChain = [];
     this.grainOutput = new Gain(1);
     this.filter = new Filter(10000, "lowpass", -24, 1);
+    this.compressor = new Compressor({
+      ratio: 8,
+      threshold: -24,
+      release: 1,
+      attack: 0.003,
+    });
+    this.pitchShifter = new PitchShift(-12);
     for (let i = 0; i < this.numVoices; i++) {
       this.grains[i] = new GrainPlayer(this.buffer);
     }
     this.setupMaster();
     // evenly ditribute volumes to master
-    this.grains.forEach((grain) => {
+    this.grains.forEach(async (grain) => {
       const gain = new Gain();
       gain.gain.rampTo(1 / this.numVoices, 0.01);
       grain.loop = true;
@@ -47,12 +51,17 @@ class GrainSynth {
     });
     this.grainOutput.connect(this.filter);
   }
+
   setupMaster() {
     this.output = new Gain(1, { units: "gain" });
     this.output.gain.setValueAtTime(0.8 / this.numVoices, now());
-    this.filter.connect(this.output);
+    this.pitchShifter.windowSize = 1;
+    this.filter.connect(this.compressor);
+    this.compressor.connect(this.pitchShifter);
+    this.pitchShifter.connect(this.output);
     this.output.connect(this.dest);
-    this.pitchShift();
+
+    // higher windowsize sounds better!
   }
   isGrainLoaded(grain) {
     return new Promise((resolve, reject) => {
@@ -63,13 +72,13 @@ class GrainSynth {
   //  triggers
   async play(startTime = 1) {
     this.transport.start();
-    this.output.gain.setValueAtTime(0.8 / this.numVoices, now());
+    this.output.gain.setValueAtTime(1 / this.numVoices, now());
     //  wait for grains to load before starting
     const grainPromises = this.grains.map((grain) => this.isGrainLoaded(grain));
     await Promise.all(grainPromises);
-    this.grains.forEach(async (grain, i) =>
-      grain.start(`+${i}`, i + startTime)
-    );
+    this.grains.forEach(async (grain, i) => {
+      grain.start(`+${i}`, i + startTime);
+    });
     this.isPlaying = true;
   }
   stop() {
@@ -105,12 +114,7 @@ class GrainSynth {
     }
   }
 
-  pitchShift() {
-    this.pitchShifter = new PitchShift(-12);
-    // higher windowsize sounds better!
-    this.pitchShifter.windowSize = 1;
-    this.chainEffect(this.pitchShifter);
-  }
+  pitchShift() {}
   detuneLFO() {
     this.grains.forEach((grain) => {
       const detuneLFO = new LFO({
@@ -199,11 +203,13 @@ class GrainSynth {
       "loopEnd",
       "playbackRate",
     ];
+
     grainParams.forEach((grainParam) => {
       currentValues.push(
         (currentValues[grainParam] = this.getGrainValues(grainParam))
       );
     });
+
     return currentValues;
   }
 
@@ -240,14 +246,15 @@ class GrainSynth {
 
     // generate random values
     const randomValues = {
-      detune: this.randArrayFromRange(numGrains, -1000, 1000),
-      overlap: this.randArrayFromRange(numGrains, 0.1, 1),
+      detune: this.randArrayFromRange(numGrains, -1000, 100),
+      overlap: this.randArrayFromRange(numGrains, 0.8, 1),
       grainSize: this.randArrayFromRange(numGrains, 0.01, 0.05),
-      playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.1),
+      playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
     };
     //set values to random values
     // TODO: Interpolate between current and random values
     this.setCurrentValues(randomValues);
+    console.log(this.grains);
   }
 
   // Setup random loop
