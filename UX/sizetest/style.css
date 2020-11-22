@@ -1,6 +1,9 @@
 
 html, body {
-  height: 100.1%;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
   font-size: calc(1em + 1vw);
 }
 
@@ -16,14 +19,6 @@ body {
   font-family: "Avenir Next", "Avenir", "Nunito Sans", sans-serif;
 }
 
-
-
-/* html, body {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-} */
 canvas {
   display: block;
 }
