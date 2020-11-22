@@ -1,12 +1,4 @@
-import {
-  Reverb,
-  Delay,
-  Gain,
-  Destination,
-  Filter,
-  Chorus,
-  Limiter,
-} from "tone";
+import { Reverb, Delay, Gain, Filter, Chorus, Limiter } from "tone";
 
 class MasterBus {
   constructor(ctx) {
@@ -16,7 +8,7 @@ class MasterBus {
     this.ctx = ctx;
     console.log(this.ctx);
     this.output = new Gain(1);
-    this.dest = Destination;
+    this.dest = this.ctx.destination;
     this.chainEffect(this.limiter);
   }
   test() {

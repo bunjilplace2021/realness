@@ -4,7 +4,7 @@ import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
 // GLOBAL VARIABLES
-import { Context, FMOscillator, Filter, Noise } from "tone";
+import { Context, FMOscillator, Filter, Noise, setContext } from "tone";
 
 // UTILITIES
 import {
@@ -14,12 +14,19 @@ import {
   resampleBuffer,
 } from "./utilityFunctions";
 import regeneratorRuntime from "regenerator-runtime";
-import { Tone } from "tone/build/esm/core/Tone";
 
+const isMobile = window.innerWidth < 600;
+let sampleRate = isMobile ? 11025 : 22050;
 let globalAudioCtx = new Context({
   latencyHint: "playback",
-  lookAhead: 2,
+  lookAhead: 1,
+  sampleRate: 22050,
+  updateInterval: 1,
+  name: "Playback Context",
+  bufferSize: 2048,
 });
+
+setContext(globalAudioCtx);
 let masterBus;
 let synths = [];
 let synthsLoaded = false;
@@ -28,29 +35,32 @@ let f = new FireBaseAudio(globalAudioCtx);
 const uiNotes = ["C4", "E4", "G4"];
 
 // number of different sources to use
-const numSources = 3;
+const numSources = isMobile ? 1 : 3;
+
+// number of voices per synth
+const numVoices = isMobile ? 1 : 2;
+const muteButton = document.querySelector("#mute");
+// list all samples in database
+f.listAll();
 const subOsc = new FMOscillator({
   frequency: 40,
   harmonicity: 0.5,
   detune: 0,
 });
-// number of voices per synth
-const numVoices = 1;
-const muteButton = document.querySelector("#mute");
-// list all samples in database
-f.listAll();
 
 const reloadBuffers = () => {
   // fetch new samples from database and load them into existing buffers
   synths.forEach(async (synth) => {
     await f.getSample();
     const buf = await fetchSample(f.audioFile, globalAudioCtx);
-    const resampled = await resampleBuffer(buf, 22050);
+    const resampled = await resampleBuffer(buf, sampleRate);
     const floatBuf = new Float32Array(resampled.length);
     resampled.copyFromChannel(floatBuf, 0, 0);
     synth.buffer.copyToChannel(floatBuf, 0, 0);
     synth.randomStarts();
     synth.rampVolume(1, globalAudioCtx.currentTime + 10);
+    synth.randomInterpolate();
+    console.log("reloaded buffers");
   });
 };
 // method to play UI sounds
@@ -62,13 +72,28 @@ const UISound = () => {
   });
 };
 
+const subOscillator = () => {
+  subOsc.filter = new Filter();
+  subOsc.connect(subOsc.filter);
+  const noise = new Noise({
+    type: "pink",
+    volume: -12,
+  });
+  noise.connect(subOsc.filter);
+  masterBus.connectSource(subOsc.filter);
+  subOsc.volume.value = -48;
+  subOsc.volume.targetRampTo(-34, 10);
+  subOsc.filter.frequency.value = 80;
+  noise.start("+1");
+  subOsc.start("+1");
+};
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
   for (let i = 0; i < numSources; i++) {
     await f.getSample();
     // fetch random samples from database
     const buf = await fetchSample(f.audioFile, globalAudioCtx);
-    const resampledBuf = await resampleBuffer(buf, 22050);
+    const resampledBuf = await resampleBuffer(buf, sampleRate);
     if (f.audioFile) {
       console.log("Loaded GrainSynth " + (i + 1));
       synths.push(new GrainSynth(resampledBuf, globalAudioCtx, numVoices));
@@ -118,20 +143,11 @@ const startAudio = async () => {
       masterBus.connectSource(synth.output);
     }
   });
-  subOsc.filter = new Filter();
-  subOsc.connect(subOsc.filter);
-  const noise = new Noise("pink");
-  noise.connect(subOsc.filter);
-  noise.start();
-  masterBus.connectSource(subOsc.filter);
-  subOsc.volume.value = -64;
-  subOsc.volume.targetRampTo(-40, 10);
-  subOsc.filter.frequency.value = 80;
-  subOsc.start();
-  masterBus.lowpassFilter(2000, 1);
+  subOscillator();
+  masterBus.lowpassFilter(5000, 1);
   masterBus.filter.gain.value = 40;
   masterBus.chorus(0.01, 300, 0.9);
-  // masterBus.reverb(true, 0.1, 4, 0.7);
+  !isMobile && masterBus.reverb(true, 0.1, 4, 0.7);
 
   u.play();
   //  if user clicks, randomize synth parameters
@@ -156,10 +172,10 @@ const pollValues = () => {
     let { radius, maxradius } = ps.particles[ps.particles.length - 1];
     synths.forEach((synth, i) => {
       synth.setGrainSize(mapValue(radius, 0, maxradius, 0.01, 0.05));
-      synth.filter.frequency.rampTo(
-        (i + 1) * mapValue(radius, 0, maxradius, 100, 1000),
-        20
-      );
+
+      let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 880);
+      console.log(filterFreq);
+      synth.filter.frequency.rampTo(filterFreq, 10);
       if (isBetween(radius, maxradius - 50, maxradius)) {
         console.log("reached max radius");
         synth.randomInterpolate();

@@ -1,7 +1,5 @@
 import {
-  Destination,
   now,
-  setContext,
   Gain,
   GrainPlayer,
   Reverb,
@@ -30,7 +28,8 @@ class GrainSynth {
     this.nodes = [];
     this.toneContext = ctx;
     this.transport = this.toneContext.transport;
-    this.dest = Destination;
+    this.dest = this.toneContext.destination;
+    this.dest.name = "Grainsynth Destination";
     this.effectsChain = [];
 
     //  make nodes
@@ -48,7 +47,11 @@ class GrainSynth {
       channelCount: 1,
     });
     for (let i = 0; i < this.numVoices; i++) {
-      this.grains[i] = new GrainPlayer(this.buffer);
+      this.grains[i] = new GrainPlayer(this.buffer, {
+        context: this.ctx,
+        normalize: true,
+      });
+      console.log(this.grains[i]);
       this.grains[i].buffer.toMono();
       this.grains[i].channelCount = 1;
     }
@@ -79,7 +82,7 @@ class GrainSynth {
     this.compressor.connect(this.pitchShifter);
     this.pitchShifter.connect(this.output);
     this.output.connect(this.dest);
-    this.setToMono();
+
     // higher windowsize sounds better!
   }
   isGrainLoaded(grain) {
@@ -164,7 +167,7 @@ class GrainSynth {
       });
       //   console.log(this.masterEffect);
       await this.masterReverb.generate();
-      this.output.chain(this.masterReverb, Destination);
+      this.output.chain(this.masterReverb, this.dest);
     } else {
       this.masterReverb && this.masterReverb.disconnect();
     }
@@ -262,7 +265,7 @@ class GrainSynth {
 
     // get all the current values for params
     const currentValues = this.getCurrentValues();
-    console.log(currentValues);
+    // console.log(currentValues);
     // generate random values
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
