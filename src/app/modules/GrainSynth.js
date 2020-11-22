@@ -36,7 +36,7 @@ class GrainSynth {
     //  make nodes
     this.grainOutput = new Gain(1);
     this.grainOutput.name = "Grain Output";
-    this.filter = new Filter(10000, "lowpass", -24, 1);
+    this.filter = new Filter(10000, "lowpass", -24, 4);
     this.compressor = new Compressor({
       ratio: 8,
       threshold: -24,
@@ -190,7 +190,7 @@ class GrainSynth {
   randomStarts() {
     this.grains.forEach((grain) => {
       grain.stop();
-      grain.loopStart = Math.random() * grain.buffer.duration;
+
       grain.start(now(), Math.random() * grain.buffer.duration);
     });
   }
@@ -239,7 +239,7 @@ class GrainSynth {
       grain.overlap = valuesObject.overlap[i];
       grain.grainSize = valuesObject.grainSize[i];
       // grain.loopStart = valuesObject.loopStart[i];
-      // grain.loopEnd = valuesObject.loopEnd[i];
+      grain.loopEnd = valuesObject.loopEnd[i];
       grain.playbackRate = valuesObject.playbackRate[i];
       grain.reverse = Math.random() < 0.2;
     });
@@ -262,13 +262,18 @@ class GrainSynth {
 
     // get all the current values for params
     const currentValues = this.getCurrentValues();
-
+    console.log(currentValues);
     // generate random values
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
-      overlap: this.randArrayFromRange(numGrains, 0.8, 1),
-      grainSize: this.randArrayFromRange(numGrains, 0.01, 0.05),
+      overlap: this.randArrayFromRange(numGrains, 0.9, 1),
+      grainSize: this.randArrayFromRange(numGrains, 0.001, 0.05),
       playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
+      loopEnd: this.randArrayFromRange(
+        numGrains,
+        0,
+        this.grains[0].buffer.duration
+      ),
     };
     //set values to random values
     // TODO: Interpolate between current and random values

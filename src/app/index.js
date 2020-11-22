@@ -4,14 +4,7 @@ import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
 // GLOBAL VARIABLES
-import {
-  Context,
-  AMSynth,
-  AMOscillator,
-  FMOscillator,
-  Follower,
-  Filter,
-} from "tone";
+import { Context, FMOscillator, Filter, Noise } from "tone";
 
 // UTILITIES
 import {
@@ -21,6 +14,7 @@ import {
   resampleBuffer,
 } from "./utilityFunctions";
 import regeneratorRuntime from "regenerator-runtime";
+import { Tone } from "tone/build/esm/core/Tone";
 
 let globalAudioCtx = new Context({
   latencyHint: "playback",
@@ -107,9 +101,8 @@ const startAudio = async () => {
       synth.rampVolume(1, globalAudioCtx.currentTime + 10);
       synth.filter.type = "lowpass";
       synth.filter.gain.value = 40;
-      synth.filter.frequency.value = (i + 1) * 200;
-      console.log(synth.filter.frequency);
-
+      synth.filter.frequency.value = 440 * (i + 1);
+      synth.setDetune((i + 1) * 220 - numSources * 220);
       synth.setPitchShift(-12 / (i + 1));
       // if lower frequency value, higher resonance for low-end drones
       if (synth.filter.frequency.value < 500) {
@@ -117,6 +110,7 @@ const startAudio = async () => {
       } else {
         synth.filter.Q.value = 0.5;
       }
+      console.log(synth.filter.frequency.value);
       // start the synths
       synth.play(globalAudioCtx.currentTime + i * 0.05);
       // connect the synth output to the master processing bus
@@ -125,17 +119,19 @@ const startAudio = async () => {
     }
   });
   subOsc.filter = new Filter();
-  // masterBus.output.connect(follower);
-
-  masterBus.connectSource(subOsc);
+  subOsc.connect(subOsc.filter);
+  const noise = new Noise("pink");
+  noise.connect(subOsc.filter);
+  noise.start();
+  masterBus.connectSource(subOsc.filter);
   subOsc.volume.value = -64;
   subOsc.volume.targetRampTo(-40, 10);
-  subOsc.filter.frequency.value = 50;
+  subOsc.filter.frequency.value = 80;
   subOsc.start();
-  masterBus.lowpassFilter(1000, 1);
+  masterBus.lowpassFilter(2000, 1);
   masterBus.filter.gain.value = 40;
-  // masterBus.chorus(0.01, 50, 0.9);
-  masterBus.reverb(true, 0.1, 4, 0.7);
+  masterBus.chorus(0.01, 300, 0.9);
+  // masterBus.reverb(true, 0.1, 4, 0.7);
 
   u.play();
   //  if user clicks, randomize synth parameters
@@ -174,7 +170,7 @@ const pollValues = () => {
 
 const subOscLoop = () => {
   synths[0].transport.scheduleRepeat((time) => {
-    subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -4, -4), 30);
+    subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -40, 40), 30);
     subOsc.harmonicity.rampTo(mapValue(Math.random(), 0, 1, 0.5, 0.8), 30);
   }, 30);
 };
