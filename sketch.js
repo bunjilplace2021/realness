@@ -82,7 +82,6 @@ function setup() {
 
 function draw() {
   particle_draw();
-  drawFPS();
 }
 
 function shaderToggle() {
