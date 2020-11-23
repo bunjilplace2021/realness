@@ -48,11 +48,7 @@ class GrainSynth {
       channelCount: 1,
     });
     for (let i = 0; i < this.numVoices; i++) {
-      this.grains[i] = new GrainPlayer(this.buffer, {
-        context: this.ctx,
-        normalize: true,
-      });
-      // this.grains[i]._clock = this.clock;
+      this.grains[i] = new GrainPlayer(this.buffer);
       this.grains[i].buffer.toMono();
       this.grains[i].channelCount = 1;
     }
@@ -66,11 +62,11 @@ class GrainSynth {
     this.grainOutput.connect(this.filter);
   }
 
-  setToMono() {
+  getNodes() {
     Object.entries(this).forEach((entry) => {
-      const classNode = entry[1];
-      if (typeof classNode === "object" && classNode.channelCount) {
-        classNode.channelCount = 1;
+      const node = entry[1];
+      if (typeof node === "object" && node.connect) {
+        console.log(node);
       }
     });
   }
@@ -79,8 +75,8 @@ class GrainSynth {
     this.output.name = "Output";
     this.output.gain.setValueAtTime(0.8 / this.numVoices, now());
     this.pitchShifter.windowSize = 1;
-    this.filter.connect(this.compressor);
-    this.compressor.connect(this.pitchShifter);
+    this.filter.connect(this.pitchShifter);
+    // this.compressor.connect(this.pitchShifter);
     this.pitchShifter.connect(this.output);
     this.output.connect(this.dest);
 

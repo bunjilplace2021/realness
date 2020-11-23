@@ -1,3 +1,6 @@
+import { filter } from "async";
+import { EQ3 } from "tone";
+
 // load an audiourl to a buffer
 export async function fetchSample(url, ctx) {
   return fetch(url)
@@ -18,21 +21,6 @@ export function normalizeArray(arr, min, max) {
   });
 }
 
-export function waitForVariable(variable) {
-  const checkforVariable = (variable) => {
-    return new Promise((resolve, reject) => {
-      if (variable === "undefined" || variable === null || variable === 0) {
-        reject(false);
-      } else {
-        resolve(variable);
-      }
-    });
-  };
-  const pollingTimer = setInterval(checkforVariable, 100);
-  {
-  }
-}
-
 export function isBetween(x, min, max) {
   return x >= min && x <= max;
 }
@@ -42,32 +30,39 @@ export function resampleBuffer(input, target_rate) {
     if (typeof target_rate != "number" && target_rate <= 0) {
       reject("Samplerate is not a number");
     }
-    var resampling_ratio = input.sampleRate / target_rate;
-    var final_length = input.length * resampling_ratio;
-    var off = new OfflineAudioContext(
+    let resampling_ratio = input.sampleRate / target_rate;
+    let final_length = input.length * resampling_ratio;
+    let off = new OfflineAudioContext(
       input.numberOfChannels,
       final_length,
       target_rate
     );
-
-    var source = off.createBufferSource();
+    // NORMALIZE AND FILTER BUFFERS
+    let source = off.createBufferSource();
+    const bufferMax = Math.max(...input.getChannelData(0));
+    const diff = 0.8 - bufferMax;
+    const gainNode = off.createGain();
+    gainNode.gain.value = diff;
     source.buffer = input;
-    source.connect(off.destination);
+    source.connect(gainNode);
+    gainNode.connect(off.destination);
     source.start(0);
+
     try {
-      const newBuf = await off.startRendering();
-      resolve(newBuf);
+      resolve(await off.startRendering());
     } catch (error) {
       reject(error);
     }
   });
 }
 
-export function getNodes() {
-  Object.entries(this).forEach((entry) => {
-    const classNode = entry[1];
-    if (typeof classNode === "object" && classNode.channelCount) {
-      classNode.channelCount = 1;
+export function getNodes(obj) {
+  Object.entries(obj).forEach((entry) => {
+    if (entry[1] !== null) {
+      const node = entry[1];
+      console.log(typeof node);
+      if (typeof node === "object") {
+      }
     }
   });
 }
