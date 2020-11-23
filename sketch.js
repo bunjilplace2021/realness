@@ -21,6 +21,16 @@ function centerCanvas() {
   cnv.position(cnv_x, cnv_y);
 }
 
+function drawFPS() {
+  push();
+  noStroke();
+  let fps = Math.floor(frameRate());
+  fill(255);
+  textSize(20);
+  text("FPS: " + fps, 72, 32);
+  pop();
+}
+
 p5.disableFriendlyErrors = true; // disables FES
 
 function preload() {
@@ -82,6 +92,7 @@ function setup() {
 
 function draw() {
   particle_draw();
+  drawFPS();
 }
 
 function shaderToggle() {

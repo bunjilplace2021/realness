@@ -4,7 +4,14 @@ import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
 // GLOBAL VARIABLES
-import { Context, FMOscillator, Filter, Noise, setContext } from "tone";
+import {
+  getContext,
+  Context,
+  FMOscillator,
+  Filter,
+  Noise,
+  setContext,
+} from "tone";
 
 // UTILITIES
 import {
@@ -15,17 +22,21 @@ import {
 } from "./utilityFunctions";
 import regeneratorRuntime from "regenerator-runtime";
 
+// suspend auto generated audio context from tone import
+getContext().rawContext.suspend();
+
 const isMobile = window.innerWidth < 600;
-let sampleRate = isMobile ? 11025 : 22050;
+let sampleRate = isMobile ? 11025 : 44100;
+
+// create own audio context
 let globalAudioCtx = new Context({
   latencyHint: "playback",
   lookAhead: 1,
-  sampleRate: 22050,
   updateInterval: 1,
-  name: "Playback Context",
-  bufferSize: 2048,
+  bufferSize: 1024,
 });
-
+globalAudioCtx.name = "Playback Context";
+// set that context as the global tone.js context
 setContext(globalAudioCtx);
 let masterBus;
 let synths = [];
@@ -146,10 +157,9 @@ const startAudio = async () => {
   subOscillator();
   masterBus.lowpassFilter(5000, 1);
   masterBus.filter.gain.value = 40;
-  masterBus.chorus(0.01, 300, 0.9);
+  // masterBus.chorus(0.01, 300, 0.9);
   !isMobile && masterBus.reverb(true, 0.1, 4, 0.7);
 
-  u.play();
   //  if user clicks, randomize synth parameters
   document.querySelector("body").onclick = () => {
     synths.forEach((synth) => {
@@ -172,15 +182,11 @@ const pollValues = () => {
     let { radius, maxradius } = ps.particles[ps.particles.length - 1];
     synths.forEach((synth, i) => {
       synth.setGrainSize(mapValue(radius, 0, maxradius, 0.01, 0.05));
-
+      synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
       let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 880);
-      console.log(filterFreq);
       synth.filter.frequency.rampTo(filterFreq, 10);
-      if (isBetween(radius, maxradius - 50, maxradius)) {
-        console.log("reached max radius");
-        synth.randomInterpolate();
-      }
     });
+    subOsc.filter.frequency.rampTo(mapValue(radius, 0, maxradius, 50, 120), 10);
   }
 };
 

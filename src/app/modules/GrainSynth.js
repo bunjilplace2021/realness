@@ -9,17 +9,19 @@ import {
   LowpassCombFilter,
   Filter,
   Compressor,
+  getContext,
+  Clock,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
 import { forEach } from "async";
 
-// TODO: SORT OUT EFFECTS CHAIN
 // TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
-// TODO: ADD FILTER: FREQUENCY CAN BE CONTROLLED BY PARTICLE BLOOM
 // TODO: ADD PRESETS LOADED FROM JSON
 class GrainSynth {
   constructor(buffer, ctx, voices = 2) {
+    getContext().rawContext.suspend();
+
     this.grains = [];
     this.presets = [];
     this.isPlaying = false;
@@ -31,7 +33,6 @@ class GrainSynth {
     this.dest = this.toneContext.destination;
     this.dest.name = "Grainsynth Destination";
     this.effectsChain = [];
-
     //  make nodes
     this.grainOutput = new Gain(1);
     this.grainOutput.name = "Grain Output";
@@ -51,7 +52,7 @@ class GrainSynth {
         context: this.ctx,
         normalize: true,
       });
-      console.log(this.grains[i]);
+      // this.grains[i]._clock = this.clock;
       this.grains[i].buffer.toMono();
       this.grains[i].channelCount = 1;
     }
@@ -135,8 +136,10 @@ class GrainSynth {
       effectsOutput.connect(this.dest);
     }
   }
+  setClockFrequency(val) {
+    this.grains.forEach((grain) => (grain._clock.frequency.value = val));
+  }
 
-  pitchShift() {}
   detuneLFO() {
     this.grains.forEach((grain) => {
       const detuneLFO = new LFO({
@@ -278,6 +281,7 @@ class GrainSynth {
         this.grains[0].buffer.duration
       ),
     };
+    this.setClockFrequency(Math.random());
     //set values to random values
     // TODO: Interpolate between current and random values
     this.setCurrentValues(randomValues);

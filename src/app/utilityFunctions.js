@@ -39,9 +39,6 @@ export function isBetween(x, min, max) {
 
 export function resampleBuffer(input, target_rate) {
   return new Promise(async (resolve, reject) => {
-    // if (typeof input !== "AudioBuffer") {
-    //   reject("not AudioBuffer");
-    // }
     if (typeof target_rate != "number" && target_rate <= 0) {
       reject("Samplerate is not a number");
     }
@@ -62,6 +59,15 @@ export function resampleBuffer(input, target_rate) {
       resolve(newBuf);
     } catch (error) {
       reject(error);
+    }
+  });
+}
+
+export function getNodes() {
+  Object.entries(this).forEach((entry) => {
+    const classNode = entry[1];
+    if (typeof classNode === "object" && classNode.channelCount) {
+      classNode.channelCount = 1;
     }
   });
 }
