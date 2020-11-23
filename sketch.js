@@ -16,6 +16,8 @@ let uuid;
 
 let webcam = false;
 
+let array_limit = 30;
+
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
   var cnv_y = (windowHeight - height) / 2;

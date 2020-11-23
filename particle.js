@@ -13,11 +13,11 @@ class Particle {
     this.radius = 0.0;
     this.resize = 0.2 * int(random(1,3));
     this.maxradius = height;
-    this.selected = false;
     this.origWidth = devWidth;
     this.origHeight = devHeight;
     this.touchtime = touchTime;
     this.duration = 0.;
+    this.alive = true;
     this.active = false;
     this.UUID = part_UUID;
 
@@ -55,8 +55,8 @@ class Particle {
     this.position.y = round(this.position.y/100);
     this.position.y = this.position.y*100;
 
-
     this.lifespan -= 0.0;
+
 
     this.colour(this.rand);
 
@@ -104,7 +104,7 @@ class Particle {
   }
 
   isDead() {
-    if (reset == true) {
+    if (!this.alive  && !this.active) {
       return true;
     } else {
       return false;
