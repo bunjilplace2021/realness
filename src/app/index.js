@@ -11,6 +11,7 @@ import {
   Filter,
   Noise,
   setContext,
+  Follower,
 } from "tone";
 
 // UTILITIES
@@ -90,7 +91,7 @@ const subOscillator = () => {
   subOsc.connect(subOsc.filter);
   const noise = new Noise({
     type: "pink",
-    volume: -12,
+    volume: -14,
   });
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
@@ -126,6 +127,8 @@ const startAudio = async () => {
     await globalAudioCtx.resume();
   }
   // setup master effects bus
+  const follower = new Follower();
+
   masterBus = new MasterBus(globalAudioCtx);
   masterBus.connectSource(u.master);
   // main synth setup loop
@@ -150,15 +153,20 @@ const startAudio = async () => {
         synth.filter.Q.value = 0.5;
       }
       // start the synths
+      synth.randomInterpolate();
       synth.play(globalAudioCtx.currentTime + i * 0.05);
       // connect the synth output to the master processing bus
       synth.output.disconnect(synth.dest);
+
+      synth.output.connect(follower);
       masterBus.connectSource(synth.output);
     }
   });
+
   subOscillator();
   masterBus.lowpassFilter(5000, 1);
-  masterBus.filter.gain.value = 30;
+  follower.connect(subOsc.frequency);
+  masterBus.filter.gain.value = 20;
   !isMobile && masterBus.chorus(0.01, 300, 0.9);
   !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
 
@@ -189,13 +197,16 @@ const pollValues = () => {
       let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 1100);
       synth.filter.frequency.rampTo(filterFreq, 10);
     });
-    subOsc.filter.frequency.rampTo(mapValue(radius, 0, maxradius, 50, 120), 10);
+    subOsc.filter.frequency.rampTo(
+      mapValue(~~radius, 0, ~~maxradius, 50, 120),
+      10
+    );
   }
 };
 
 const subOscLoop = () => {
   synths[0].transport.scheduleRepeat((time) => {
-    subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -40, 40), 30);
+    subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -100, 100), 30);
     subOsc.harmonicity.rampTo(mapValue(Math.random(), 0, 1, 0.5, 2), 30);
   }, 30);
 };

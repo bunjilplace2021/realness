@@ -3,7 +3,7 @@ import { Reverb, Delay, Gain, Filter, Chorus, Limiter } from "tone";
 class MasterBus {
   constructor(ctx) {
     this.input = new Gain(1);
-    this.limiter = new Limiter(-12);
+    this.limiter = new Limiter(0);
     this.effectsChain = [];
     this.ctx = ctx;
     console.log(this.ctx);

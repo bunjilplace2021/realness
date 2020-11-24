@@ -40,7 +40,7 @@ export function resampleBuffer(input, target_rate) {
     // NORMALIZE AND FILTER BUFFERS
     let source = off.createBufferSource();
     const bufferMax = Math.max(...input.getChannelData(0));
-    const diff = 0.8 - bufferMax;
+    const diff = 0.7 - bufferMax;
     const gainNode = off.createGain();
     gainNode.gain.value = diff;
     source.buffer = input;

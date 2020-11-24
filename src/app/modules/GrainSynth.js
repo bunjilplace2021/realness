@@ -11,6 +11,7 @@ import {
   Compressor,
   getContext,
   Clock,
+  AutoWah,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -132,8 +133,10 @@ class GrainSynth {
       effectsOutput.connect(this.dest);
     }
   }
-  setClockFrequency(val) {
-    this.grains.forEach((grain) => (grain._clock.frequency.value = val));
+  setClockFrequency(val, time) {
+    this.grains.forEach((grain) =>
+      grain._clock.frequency.targetRampTo(val, time)
+    );
   }
 
   detuneLFO() {
@@ -277,7 +280,7 @@ class GrainSynth {
         this.grains[0].buffer.duration
       ),
     };
-    this.setClockFrequency(Math.random());
+    this.setClockFrequency(Math.random() * 5, 10);
     //set values to random values
     // TODO: Interpolate between current and random values
     this.setCurrentValues(randomValues);
@@ -310,6 +313,7 @@ class GrainSynth {
       (grain) => (grain.detune = Math.random() * val - offset)
     );
   }
+
   getDetune() {}
   getGrainValues(key) {
     const values = [];
