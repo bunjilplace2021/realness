@@ -28,7 +28,7 @@ function gotData(data) {
 
   var test = data.val();
 	var keys = Object.keys(test);
-	ps.addParticle(test.mouseX_loc, test.mouseY_loc, 0, test.colour_loc, test.deviceWidth,test.deviceHeight, test.touchTime);
+	ps.addParticle(test.mouseX_loc, test.mouseY_loc, 0, test.colour_loc, test.deviceWidth,test.deviceHeight, test.touchTime,test.uuid);
 
 }
 

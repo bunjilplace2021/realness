@@ -40,16 +40,22 @@ class ParticleSystem {
     }
   }
 
+  resize_window() {
+    for (let particle of this.particles) {
+      particle.resize_window();
+    }
+  }
+
   run() {
     for (let particle of this.particles) {
       particle.run();
 
-//remove particles if array limit exceeded.
-         for (let i = this.particles.length -1 ; i > array_limit; i--) {
-          this.particles[i-array_limit].alive = false;
-           }
+      //remove particles if array limit exceeded.
+      for (let i = this.particles.length - 1; i > array_limit; i--) {
+        this.particles[i - array_limit].alive = false;
+      }
 
- }
+    }
     this.particles = this.particles.filter(particle => !particle.isDead());
   }
 
