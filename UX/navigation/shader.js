@@ -8,7 +8,7 @@ let cam;
 
 let campg
 
-function shaderPreload(){
+function shaderPreload() {
   // load the shader
   camShader = loadShader('shader/effect.vert', 'shader/effect.frag');
 }
@@ -39,24 +39,30 @@ function shaderDraw() {
 
   // lets just send the cam to our shader as a uniform
   camShader.setUniform('tex0', cam);
-  camShader.setUniform('u_resolution', [width,height]);
+  camShader.setUniform('u_resolution', [width, height]);
 
-  if (isMobile && height > width){ //mobile device orientation check
-  camShader.setUniform('u_devicecamres', [cam.width,cam.height]);
-}else{
-  camShader.setUniform('u_devicecamres', [cam.height,cam.width]);
-}
+  if (!isMobile) {
+    camShader.setUniform('u_devicecamres', [cam.width, cam.height]);
+  } else {
+    if (height > width) {
+      camShader.setUniform('u_devicecamres', [cam.width, cam.height]);
+    } else {
+      camShader.setUniform('u_devicecamres', [cam.height, cam.width]);
+    }
+  }
+
+
 
 
   // rect gives us some geometry on the screen
-  campg.rect(0,0,width, height);
+  campg.rect(0, 0, width, height);
 
-//  var img = campg.get(mouseX,mouseY);
-//  console.log(img);
+  //  var img = campg.get(mouseX,mouseY);
+  //  console.log(img);
 
 }
 
-  //image(campg,0,0);
+//image(campg,0,0);
 
 // function windowResized(){
 //   resizeCanvas(windowWidth, windowHeight);
