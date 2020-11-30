@@ -41,6 +41,7 @@ function shaderDraw() {
   camShader.setUniform('tex0', cam);
   camShader.setUniform('u_resolution', [width,height]);
   camShader.setUniform('u_devicecamres', [cam.width,cam.height]);
+  console.log(cam.width,cam.height);
 
   // rect gives us some geometry on the screen
   campg.rect(0,0,width, height);
