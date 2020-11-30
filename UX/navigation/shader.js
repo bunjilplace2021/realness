@@ -40,8 +40,13 @@ function shaderDraw() {
   // lets just send the cam to our shader as a uniform
   camShader.setUniform('tex0', cam);
   camShader.setUniform('u_resolution', [width,height]);
+
+  if (isMobile && height > width){ //mobile device orientation check
   camShader.setUniform('u_devicecamres', [cam.width,cam.height]);
-  console.log(cam.width,cam.height);
+}else{
+  camShader.setUniform('u_devicecamres', [cam.height,cam.width]);
+}
+
 
   // rect gives us some geometry on the screen
   campg.rect(0,0,width, height);
