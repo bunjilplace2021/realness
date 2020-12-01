@@ -181,17 +181,14 @@ function windowResized() {
 function infoInstructions() {
 
   instruction_toggle = !instruction_toggle;
-  var x = document.getElementById("myLinks");
+
   menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
-  //  myInfo.style.display = "block";
-  //  myInfo.style.overflowY = "scroll";
-  //  myInfo.style.background = "rgba(255, 255, 255, 0.8)";
+
 
   if (instruction_toggle) {
     FScreen.style.display = "block";
-    //   myInfo.style.background = "rgba(255, 255, 255, 0.8)";
-    //   //  myInfo.style.overflowY = "scroll";
+
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
@@ -230,10 +227,11 @@ function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
 
 //   if (pixelShaderToggle){
-//   top.style.background =  "rgba(0, 0, 0, 0.4)";
+//     myLinks.style.background = "rgba(0, 0, 0, 0.4)";
 // }else{
-//   top.style.background =  "rgba(0, 0, 0, 0.0)";
-// }
+//
+//   myLinks.style.background = "rgba(0, 0, 0, 0.0)";
+//}
   }
 
 
