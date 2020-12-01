@@ -15,12 +15,7 @@ import {
 } from "tone";
 
 // UTILITIES
-import {
-  fetchSample,
-  mapValue,
-  getNodes,
-  resampleBuffer,
-} from "./utilityFunctions";
+import { fetchSample, mapValue, resampleBuffer } from "./utilityFunctions";
 import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
@@ -116,8 +111,11 @@ const loadSynths = async () => {
     }
   }
   synthsLoaded = true;
+
+  muteButton.className = "";
+  muteButton.classList.add("fa", "fa-volume-off");
   muteButton.disabled = false;
-  muteButton.classList.remove("disabled");
+  // muteButton.classList.remove("disabled");
   console.log("Voices loaded");
 };
 
@@ -141,7 +139,7 @@ const startAudio = async () => {
       // setup synth parameters
       // synth.output.gain.value = 1 / synths.length;
       synth.grains.forEach((grain) => (grain.volume.value = 2));
-      synth.output.gain.value = 1;
+      synth.output.gain.value = 0.8;
       synth.filter.type = "lowpass";
       synth.filter.gain.value = 10;
       synth.filter.frequency.value = 880 * (i + 1);
@@ -162,14 +160,12 @@ const startAudio = async () => {
       masterBus.connectSource(synth.output);
     }
   });
-
   subOscillator();
   masterBus.lowpassFilter(5000, 1);
   follower.connect(subOsc.frequency);
   masterBus.filter.gain.value = 20;
   !isMobile && masterBus.chorus(0.01, 300, 0.9);
   !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
-
   //  if user clicks, randomize synth parameters and play a UI sound
   document.querySelector("body").onclick = () => {
     u.play(uiNotes[~~Math.random * uiNotes.length]);
@@ -213,7 +209,6 @@ const subOscLoop = () => {
 };
 
 // allow unmuting once synths loaded from firebase
-
 muteButton.onclick = () => {
   if (synthsLoaded) {
     //  if synths are loaded, start audio and change DOM element
@@ -237,7 +232,6 @@ muteButton.onclick = () => {
 };
 
 //  MAIN ///
-
 // load synths!
 loadSynths();
 UISound();

@@ -6,7 +6,7 @@ class MasterBus {
     this.limiter = new Limiter(0);
     this.effectsChain = [];
     this.ctx = ctx;
-    console.log(this.ctx);
+
     this.output = new Gain(1);
     this.dest = this.ctx.destination;
     this.chainEffect(this.limiter);
@@ -36,9 +36,7 @@ class MasterBus {
   chainEffect(effect) {
     // push new effect to chain
     this.effectsChain.push(effect);
-
     //   define inputs & outputs
-
     if (this.effectsChain.length > 1) {
       const effectsInput = this.effectsChain[0];
       const effectsOutput = this.effectsChain[this.effectsChain.length - 1];
