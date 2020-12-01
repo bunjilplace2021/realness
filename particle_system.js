@@ -15,12 +15,15 @@ class ParticleSystem {
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
     }
+<<<<<<< HEAD
     // LP QUICK FIX - Added loop to check if particle is active
     this.particles.forEach((particle) => {
       if (this.particles.length > 30 && !particle.active) {
         this.particles.splice(0, 1);
       }
     });
+=======
+>>>>>>> main
   }
 
   intersection() {
@@ -51,13 +54,28 @@ class ParticleSystem {
     }
   }
 
+  resize_window() {
+    for (let particle of this.particles) {
+      particle.resize_window();
+    }
+  }
+
   run() {
     for (let particle of this.particles) {
       particle.run();
-    }
 
+<<<<<<< HEAD
     // Filter removes any elements of the array that do not pass the test
     this.particles = this.particles.filter((particle) => !particle.isDead());
+=======
+      //remove particles if array limit exceeded.
+      for (let i = this.particles.length - 1; i > array_limit; i--) {
+        this.particles[i - array_limit].alive = false;
+      }
+
+    }
+    this.particles = this.particles.filter(particle => !particle.isDead());
+>>>>>>> main
   }
 
   applyForce(f) {
@@ -65,4 +83,8 @@ class ParticleSystem {
       particle.applyForce(f);
     }
   }
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
 }

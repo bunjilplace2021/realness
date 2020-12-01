@@ -16,32 +16,19 @@ function firebasesetup(){
 
 	database = firebase.database();
 
-	var ref = database.ref('test3');
+	var ref = database.ref('test3').limitToLast(array_limit);
 	ref.on('child_added', gotData, errData);
+
+	//feedRef = firebase.database().ref().child('feed').child(user_id).limitToLast(100);
+
 
 }
 
-
-// function setup() {
-//   createCanvas(640, 480);
-// 	firebasesetup();
-//
-// }
-
 function gotData(data) {
-	//console.log(data.val());
+
   var test = data.val();
-  // // Grab the keys to iterate over the object
-var keys = Object.keys(test);
-
-//let mouseXdata = test.mouseX_loc;
-//console.log(test);
-
-//ps.addParticle(map(test.mouseX_loc,0,640,0,width), map(test.mouseY_loc,0,480,0,height), 0, test.colour_loc);
-ps.addParticle(test.mouseX_loc, test.mouseY_loc, 0, test.colour_loc, test.deviceWidth,test.deviceHeight, test.touchTime);
-//test[0].imageData
-
-
+	var keys = Object.keys(test);
+	ps.addParticle(test.mouseX_loc, test.mouseY_loc, 0, test.colour_loc, test.deviceWidth,test.deviceHeight, test.touchTime,test.uuid);
 
 }
 
