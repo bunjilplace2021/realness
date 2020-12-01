@@ -30,20 +30,21 @@ const isMobile = window.innerWidth < 600;
 let sampleRate = isMobile ? 11025 : 44100;
 
 // create own audio context
-let globalAudioCtx = new Context({
+let soundtrackAudioCtx = new Context({
   latencyHint: "playback",
   lookAhead: 1,
   updateInterval: 1,
   bufferSize: 1024,
 });
-globalAudioCtx.name = "Playback Context";
+
+soundtrackAudioCtx.name = "Playback Context";
 // set that context as the global tone.js context
-setContext(globalAudioCtx);
+setContext(soundtrackAudioCtx);
 let masterBus;
 let synths = [];
 let synthsLoaded = false;
-const u = new UISynth(globalAudioCtx);
-let f = new FireBaseAudio(globalAudioCtx);
+const u = new UISynth(soundtrackAudioCtx);
+let f = new FireBaseAudio(soundtrackAudioCtx);
 const uiNotes = ["C4", "E4", "G4"];
 
 // number of different sources to use
@@ -64,7 +65,7 @@ const reloadBuffers = () => {
   // fetch new samples from database and load them into existing buffers
   synths.forEach(async (synth) => {
     await f.getSample();
-    const buf = await fetchSample(f.audioFile, globalAudioCtx);
+    const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
     const resampled = await resampleBuffer(buf, sampleRate);
     let floatBuf = new Float32Array(resampled.length);
     resampled.copyFromChannel(floatBuf, 0, 0);
@@ -72,7 +73,7 @@ const reloadBuffers = () => {
     // purge buffer
     floatBuf = null;
     synth.randomStarts();
-    synth.rampVolume(1, globalAudioCtx.currentTime + 10);
+    synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
     synth.randomInterpolate();
     console.log("reloaded buffers");
   });
@@ -107,11 +108,11 @@ const loadSynths = async () => {
   for (let i = 0; i < numSources; i++) {
     await f.getSample();
     // fetch random samples from database
-    const buf = await fetchSample(f.audioFile, globalAudioCtx);
+    const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
     const resampledBuf = await resampleBuffer(buf, sampleRate);
     if (f.audioFile) {
       console.log("Loaded GrainSynth " + (i + 1));
-      synths.push(new GrainSynth(resampledBuf, globalAudioCtx, numVoices));
+      synths.push(new GrainSynth(resampledBuf, soundtrackAudioCtx, numVoices));
     }
   }
   synthsLoaded = true;
@@ -123,14 +124,14 @@ const loadSynths = async () => {
 // method to start audio
 const startAudio = async () => {
   // don't start audio unless the context is running -- requires user gesture
-  if (globalAudioCtx.state !== "running") {
-    await globalAudioCtx.resume();
+  if (soundtrackAudioCtx.state !== "running") {
+    await soundtrackAudioCtx.resume();
   }
   // setup master effects bus
   const follower = new Follower();
 
-  masterBus = new MasterBus(globalAudioCtx);
-  masterBus.connectSource(u.master);
+  masterBus = new MasterBus(soundtrackAudioCtx);
+  u.master.connect(masterBus.dest);
   // main synth setup loop
   synths.forEach(async (synth, i) => {
     // wait for all of the individual grains to load
@@ -154,10 +155,9 @@ const startAudio = async () => {
       }
       // start the synths
       synth.randomInterpolate();
-      synth.play(globalAudioCtx.currentTime + i * 0.05);
+      synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
       // connect the synth output to the master processing bus
       synth.output.disconnect(synth.dest);
-
       synth.output.connect(follower);
       masterBus.connectSource(synth.output);
     }
@@ -170,8 +170,9 @@ const startAudio = async () => {
   !isMobile && masterBus.chorus(0.01, 300, 0.9);
   !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
 
-  //  if user clicks, randomize synth parameters
+  //  if user clicks, randomize synth parameters and play a UI sound
   document.querySelector("body").onclick = () => {
+    u.play(uiNotes[~~Math.random * uiNotes.length]);
     synths.forEach((synth) => {
       synth.randomInterpolate();
     });
@@ -185,7 +186,7 @@ const startAudio = async () => {
     reloadBuffers();
   }, 30);
   subOscLoop();
-  // getNodes(globalAudioCtx);
+  // getNodes(soundtrackAudioCtx);
 };
 
 const pollValues = () => {
