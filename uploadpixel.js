@@ -1,38 +1,55 @@
 let pixelShader;
 let cam;
 let pixelpg;
-let radius, colour;
+let colour;
+let lerp_amount = 0;
 
 //load shader for camera module
 
 function shaderPreload() {
   // load the shader
-  pixelShader = loadShader('shader/effect.vert', 'shader/pixelfrag.frag');
+  pixelShader = loadShader('shader/effect.vert', 'shader/effect.frag');
 }
 
 function shaderSetup() {
   // initialize the webcam at the window size
   cam = createCapture(VIDEO);
-  cam.size(windowWidth, windowHeight);
   cam.elt.setAttribute('playsinline', '');
 
-  pixelpg = createGraphics(width, height, WEBGL);
+  pixelpg = createGraphics(cnv.width, cnv.height, WEBGL);
+
 }
 
 function shaderDraw() {
-  radius = 5;
-  let mx = map(mouseX, 0, width, 0, 1);
-  let my = map(mouseY, 0, height, 0, 1);
 
   // shader() sets the active shader with our shader
   pixelpg.shader(pixelShader);
 
-  // lets just send the cam to our shader as a uniform
+if (pixelShaderToggle){
+  if (lerp_amount < 50){
+  lerp_amount = lerp_amount + 1;
+  }
+}else{
+  if (lerp_amount >= 0){
+  lerp_amount = lerp_amount - 1;
+}
+
+}
+
+
   pixelShader.setUniform('tex0', cam);
-  pixelShader.setUniform('resolution', [width, height]);
-  pixelShader.setUniform('radius', radius);
-  pixelShader.setUniform('u_time', frameCount * 0.05);
-  pixelShader.setUniform('u_mouse', [mx, my]);
+  pixelShader.setUniform('u_resolution', [width, height]);
+  pixelShader.setUniform('u_lerp', map(lerp_amount, 0,50,0,1));
+  // lets just send the cam to our shader as a uniform
+  if (!isMobile) { //check camera and device orientation on mobile
+    pixelShader.setUniform('u_devicecamres', [cam.width, cam.height]);
+  } else {
+    if (height > width) {
+      pixelShader.setUniform('u_devicecamres', [cam.width, cam.height]);
+    } else {
+      pixelShader.setUniform('u_devicecamres', [cam.height, cam.width]);
+    }
+  }
 
 
   // rect gives us some geometry on the screen
