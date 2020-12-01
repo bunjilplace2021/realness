@@ -2,6 +2,7 @@ var isMobile = false;
 
 var pixelShaderToggle = false;
 var instruction_toggle = false;
+var didactic_toggle = false;
 
 
 let hideicon = false;
@@ -206,11 +207,11 @@ function didactic() {
   didactic_toggle = !didactic_toggle;
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  myInfo.style.background = "rgba(255, 255, 255, 0.8)";
+  myInfo.style.background = "rgba(0, 0, 0, 0.6)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    myInfo.style.background = "rgba(255, 255, 255, 0.8)";
+    myInfo.style.background = "rgba(0, 0, 0, 0.6)";
     //  myInfo.style.overflowY = "scroll";
 
   } else {
@@ -227,7 +228,15 @@ function volumemute() {
 
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
-}
+
+//   if (pixelShaderToggle){
+//   top.style.background =  "rgba(0, 0, 0, 0.4)";
+// }else{
+//   top.style.background =  "rgba(0, 0, 0, 0.0)";
+// }
+  }
+
+
 
 
 
