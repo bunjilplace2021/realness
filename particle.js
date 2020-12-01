@@ -145,7 +145,6 @@ class Particle {
     fill(this.fill_col);
     ellipseMode(CENTER);
     ellipse(this.position.x, this.position.y, this.radius);
-
     pop();
   }
 

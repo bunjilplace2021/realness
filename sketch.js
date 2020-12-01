@@ -179,29 +179,62 @@ function windowResized() {
 
 function infoInstructions() {
 
-  //CSS Didatics
-
   instruction_toggle = !instruction_toggle;
   var x = document.getElementById("myLinks");
-  icons.classList.toggle("fa-window-close");
+  menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
-  myInfo.style.display = "block";
-  myInfo.style.background = "rgba(255, 255, 255, 0.8)";
+  //  myInfo.style.display = "block";
+  //  myInfo.style.overflowY = "scroll";
+  //  myInfo.style.background = "rgba(255, 255, 255, 0.8)";
 
   if (instruction_toggle) {
-    myInfo.style.display = "block";
-    myInfo.style.background = "rgba(255, 255, 255, 0.8)";
+    FScreen.style.display = "block";
+    //   myInfo.style.background = "rgba(255, 255, 255, 0.8)";
+    //   //  myInfo.style.overflowY = "scroll";
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
     myLinks.style.display = "none";
+    myInfo.style.overflowY = "hidden";
+    didactic_toggle = false;
   }
 
 }
 
+function didactic() {
+
+  didactic_toggle = !didactic_toggle;
+  myInfo.style.display = "block";
+  myInfo.style.overflowY = "scroll";
+  myInfo.style.background = "rgba(255, 255, 255, 0.8)";
+
+  if (didactic_toggle) {
+    myInfo.style.display = "block";
+    myInfo.style.background = "rgba(255, 255, 255, 0.8)";
+    //  myInfo.style.overflowY = "scroll";
+
+  } else {
+    myInfo.style.display = "none";
+    myInfo.style.background = "none";
+    myInfo.style.overflowY = "hidden";
+
+  }
+}
+
+function volumemute() {
+  volicons.classList.toggle("fa-volume-mute");
+}
+
+function cameratoggle() {
+  pixelShaderToggle = !pixelShaderToggle;
+}
+
+
+
 function fullScreenMenu() {
   let fs = fullscreen();
   fullscreen(!fs);
+  fullicons.classList.toggle("fa-expand");
   document.body.scrollTop = 0; // <-- pull the page back up to the top
   document.body.style.overflow = 'hidden';
 }
