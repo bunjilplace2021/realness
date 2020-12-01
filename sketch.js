@@ -131,10 +131,7 @@ function particle_draw() {
 
   ps.run();
   ps.intersection();
-<<<<<<< HEAD
-=======
   ps.resize_window();
->>>>>>> main
 
   shaderDraw();
 }
@@ -167,11 +164,6 @@ function windowResized() {
   }
 
   shaderWindowResized();
-<<<<<<< HEAD
-=======
-
-
->>>>>>> main
 }
 
 function infoInstructions() {
