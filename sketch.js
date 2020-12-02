@@ -169,12 +169,14 @@ function windowResized() {
 
   if (!isMobile) {
     resizeCanvas(windowWidth, windowHeight);
+    shaderWindowResized(windowWidth, windowHeight);
   } else {
     let innerh = iosInnerHeight();
     resizeCanvas(windowWidth, innerh);
+    shaderWindowResized(windowWidth, innerh);
   }
 
-  shaderWindowResized();
+  
 
 
 }

@@ -108,6 +108,6 @@ function shaderMousePressed() {
 }
 
 
-function shaderWindowResized() {
-  pixelpg.resizeCanvas(windowWidth, windowHeight);
+function shaderWindowResized(w,h) {
+  pixelpg.resizeCanvas(w, h);
 }
