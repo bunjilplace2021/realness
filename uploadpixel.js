@@ -1,17 +1,25 @@
 let pixelShader;
 let cam;
 let pixelpg;
-let radius, colour;
+let colour;
+let lerp_amount = 0;
+let menu_loc = false;
+
 
 //load shader for camera module
 
 function shaderPreload() {
   // load the shader
+<<<<<<< HEAD
   pixelShader = loadShader("shader/effect.vert", "shader/pixelfrag.frag");
+=======
+  pixelShader = loadShader('shader/effect.vert', 'shader/effect.frag');
+>>>>>>> main
 }
 
 function shaderSetup() {
   // initialize the webcam at the window size
+<<<<<<< HEAD
   try {
     cam = createCapture(VIDEO);
   } catch (error) {
@@ -20,24 +28,46 @@ function shaderSetup() {
 
   cam.size(windowWidth, windowHeight);
   cam.elt.setAttribute("playsinline", "");
+=======
+  cam = createCapture(VIDEO);
+  cam.elt.setAttribute('playsinline', '');
+>>>>>>> main
 
-  pixelpg = createGraphics(width, height, WEBGL);
+  pixelpg = createGraphics(cnv.width, cnv.height, WEBGL);
+
 }
 
 function shaderDraw() {
-  radius = 5;
-  let mx = map(mouseX, 0, width, 0, 1);
-  let my = map(mouseY, 0, height, 0, 1);
 
   // shader() sets the active shader with our shader
   pixelpg.shader(pixelShader);
 
+  if (pixelShaderToggle) {
+    if (lerp_amount < 50) {
+      lerp_amount = lerp_amount + 1;
+    }
+  } else {
+    if (lerp_amount >= 0) {
+      lerp_amount = lerp_amount - 1;
+    }
+
+  }
+
+
+  pixelShader.setUniform('tex0', cam);
+  pixelShader.setUniform('u_resolution', [width, height]);
+  pixelShader.setUniform('u_lerp', map(lerp_amount, 0, 50, 0, 1));
   // lets just send the cam to our shader as a uniform
-  pixelShader.setUniform("tex0", cam);
-  pixelShader.setUniform("resolution", [width, height]);
-  pixelShader.setUniform("radius", radius);
-  pixelShader.setUniform("u_time", frameCount * 0.05);
-  pixelShader.setUniform("u_mouse", [mx, my]);
+  if (!isMobile) { //check camera and device orientation on mobile
+    pixelShader.setUniform('u_devicecamres', [cam.width, cam.height]);
+  } else {
+    if (height > width) {
+      pixelShader.setUniform('u_devicecamres', [cam.width, cam.height]);
+    } else {
+      pixelShader.setUniform('u_devicecamres', [cam.height, cam.width]);
+    }
+  }
+
 
   // rect gives us some geometry on the screen
   pixelpg.rect(0, 0, width, height);
@@ -50,6 +80,7 @@ function shaderDraw() {
 function shaderMousePressed() {
   //push to firebase
 
+<<<<<<< HEAD
   if (mouseX > 0 && mouseX < width - 100 && mouseY > 100 && mouseY < height) {
     detectWebcam(function (hasWebcam) {
       webcam = hasWebcam;
@@ -69,13 +100,48 @@ function shaderMousePressed() {
     };
 
     var test = database.ref("test3");
+=======
 
-    if (webcam) {
-      test.push(data);
-      console.log(data);
-    }
+
+
+  detectWebcam(function(hasWebcam) {
+    webcam = hasWebcam;
+    //console.log(webcam);
+    console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
+  })
+
+  colour = pixelpg.get(mouseX, mouseY);
+  var data = {
+    uuid: uuid,
+    mouseX_loc: mouseX,
+    mouseY_loc: mouseY,
+    colour_loc: colour,
+    deviceWidth: width,
+    deviceHeight: height,
+    touchTime: touchtime
+  }
+
+  var test = database.ref('test3');
+
+  //do not upload pixel if location under menu element check
+>>>>>>> main
+
+  let rect = document.getElementById("top").getBoundingClientRect();
+
+
+  if (mouseY >= rect.top && mouseY <= rect.bottom) {
+    menu_loc = true;
+  } else {
+    menu_loc = false;
+  }
+
+
+  if (webcam && !menu_loc) {
+    test.push(data);
+    console.log(data);
   }
 }
+
 
 function shaderWindowResized() {
   pixelpg.resizeCanvas(windowWidth, windowHeight);

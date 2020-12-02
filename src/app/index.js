@@ -30,7 +30,6 @@ getContext().rawContext.suspend();
 const isMobile = window.innerWidth < 600;
 let sampleRate = isMobile ? 11025 : 44100;
 
-soundLog(sampleRate);
 // create own audio context
 let soundtrackAudioCtx = new Context({
   latencyHint: "playback",
@@ -154,7 +153,7 @@ const loadSynths = async () => {
   }
   synthsLoaded = true;
 
-  muteButton.className = "";
+  muteButton.classList = [];
   muteButton.classList.add("fa", "fa-volume-off");
   muteButton.disabled = false;
   // muteButton.classList.remove("disabled");

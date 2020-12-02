@@ -1,6 +1,7 @@
 class Particle {
   constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
     this.origposition = createVector(x, y);
+<<<<<<< HEAD
     this.map_position = createVector(
       map(x, 0, devWidth, 0, width),
       map(y, 0, devHeight, 0, height)
@@ -9,6 +10,10 @@ class Particle {
       round(this.map_position.x / 100) * 100,
       round(this.map_position.y / 100) * 100
     );
+=======
+    this.map_position = createVector(map(x, 0, devWidth, 0, width), map(y, 0, devHeight, 0, height));
+    this.position = createVector((round(this.map_position.x / 100)) * 100, (round(this.map_position.y / 100)) * 100);
+>>>>>>> main
     this.resize_position = createVector();
     this.velocity = createVector();
     this.acceleration = createVector();
@@ -22,7 +27,13 @@ class Particle {
     this.origWidth = devWidth;
     this.origHeight = devHeight;
     this.touchtime = touchTime;
+<<<<<<< HEAD
     this.duration = 0;
+=======
+    this.duration = 0.;
+    this.timer = 0.;
+    this.timermax = 150;
+>>>>>>> main
     this.alive = true;
     this.active = false;
     this.UUID = part_UUID;
@@ -39,6 +50,7 @@ class Particle {
     this.fill_col = this.col_array[rand];
     this.stroke_col = this.col_array[rand];
 
+<<<<<<< HEAD
     if (
       this.firstrun &&
       this.UUID == uuid &&
@@ -52,8 +64,35 @@ class Particle {
         map(this.duration, 0, 200, 0, 1)
       );
       // console.log(this.fill_col);
+=======
+    if (pixelShaderToggle) {
+      if (this.timer < this.timermax) {
+        this.timer = this.timer + 1;
+      }
+    }else{
+
+      if (this.timer >= 0) {
+        this.timer = this.timer - 1;
+      }
+    }
+
+    if (this.UUID == uuid) {
+      this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
+      this.fill_col = lerpColor(this.fill_col, this.col, map(this.timer, 0, this.timermax, 0, 1));
+    } else {
+      this.col = color(0, this.fill_alpha);
+      this.fill_col = lerpColor(this.fill_col, this.col, map(this.timer, 0, this.timermax, 0, 1));
+    }
+
+
+    //first click - white and lerps to color
+    if (this.firstrun && this.UUID == uuid && this.active && this.duration <= 200) {
+      this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
+      this.fill_col = lerpColor(this.col, this.fill_col, map(this.duration, 0, 200, 0, 1));
+>>>>>>> main
     }
   }
+
 
   run() {
     this.update();
@@ -71,6 +110,7 @@ class Particle {
   }
 
   resize_window() {
+<<<<<<< HEAD
     this.resize_position.x = map(
       this.origposition.x,
       0,
@@ -87,6 +127,14 @@ class Particle {
     );
     this.resize_position.x = round(this.resize_position.x / 100) * 100;
     this.resize_position.y = round(this.resize_position.y / 100) * 100;
+=======
+
+    this.resize_position.x = map(this.origposition.x, 0, this.origWidth, 0, width);
+    this.resize_position.y = map(this.origposition.y, 0, this.origHeight, 0, height);
+    this.resize_position.x = (round(this.resize_position.x / 100)) * 100;
+    this.resize_position.y = (round(this.resize_position.y / 100)) * 100;
+
+>>>>>>> main
 
     this.velocity.x = 0;
     this.velocity.y = 0;
@@ -95,6 +143,10 @@ class Particle {
   }
 
   update() {
+<<<<<<< HEAD
+=======
+
+>>>>>>> main
     // this.position.x = (round(this.position.x / 100))*100;
     // this.position.y = (round(this.position.y / 100))*100;
 
@@ -137,14 +189,12 @@ class Particle {
   // Method to display
   display() {
     this.fill_col.setAlpha(this.fill_alpha);
-    this.stroke_col.setAlpha(this.lifespan);
 
     push();
     noStroke();
     fill(this.fill_col);
     ellipseMode(CENTER);
     ellipse(this.position.x, this.position.y, this.radius);
-
     pop();
   }
 
