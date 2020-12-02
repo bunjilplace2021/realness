@@ -117,10 +117,11 @@ function particle_draw() {
   blendMode(ADD);
 
 
-  noCursor();
 
   if (!isMobile) {
   push();
+  noCursor();
+
   fill(255, 100);
   noStroke();
   ellipseMode(CENTER);
@@ -155,9 +156,9 @@ function keyPressed() {
     hideicon = !hideicon;
 
     if (hideicon) {
-      icons.style.display = "none";
+      menuicon.style.display = "none";
     } else {
-      icons.style.display = "block";
+      menuicon.style.display = "block";
     }
 
   }
