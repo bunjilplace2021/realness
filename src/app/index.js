@@ -1,5 +1,6 @@
 import GrainSynth from "./modules/GrainSynth";
 import FireBaseAudio from "./modules/FirebaseAudio";
+import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
@@ -40,6 +41,10 @@ let synths = [];
 let synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx);
 let f = new FireBaseAudio(soundtrackAudioCtx);
+
+const recordLength = 2000;
+let r = new Recorder(recordLength, soundtrackAudioCtx);
+
 const uiNotes = ["C4", "E4", "G4"];
 
 // number of different sources to use
@@ -48,6 +53,21 @@ const numSources = isMobile ? 1 : 3;
 // number of voices per synth
 const numVoices = isMobile ? 1 : 2;
 const muteButton = document.querySelector("#mute");
+const recordButton = document.querySelector("#recordButton");
+
+recordButton.onclick = async () => {
+  recordButton.classList.toggle("red");
+  await r.getPermissions();
+  console.log("got permissions");
+  const blob = await r.recordChunks();
+  console.log(blob);
+  await r.loadToBuffer();
+  setTimeout(() => {
+    r.decodedBuffer && recordButton.classList.remove("red");
+    reloadBuffers(r.decodedBuffer);
+  }, recordLength);
+};
+
 // list all samples in database
 
 const subOsc = new FMOscillator({
@@ -56,23 +76,40 @@ const subOsc = new FMOscillator({
   detune: 0,
 });
 
-const reloadBuffers = () => {
+const reloadBuffers = (customBuffer = null) => {
   // fetch new samples from database and load them into existing buffers
-  synths.forEach(async (synth) => {
-    await f.getSample();
-    const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-    const resampled = await resampleBuffer(buf, sampleRate);
-    let floatBuf = new Float32Array(resampled.length);
-    resampled.copyFromChannel(floatBuf, 0, 0);
-    synth.buffer.copyToChannel(floatBuf, 0, 0);
-    // purge buffer
-    floatBuf = null;
-    synth.randomStarts();
-    synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
-    synth.randomInterpolate();
-    console.log("reloaded buffers");
-  });
+  if (!customBuffer) {
+    synths.forEach(async (synth) => {
+      await f.getSample();
+      const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+      const resampled = await resampleBuffer(buf, sampleRate);
+      let floatBuf = new Float32Array(resampled.length);
+      resampled.copyFromChannel(floatBuf, 0, 0);
+      synth.buffer.copyToChannel(floatBuf, 0, 0);
+      // purge buffer
+      floatBuf = null;
+      synth.randomStarts();
+      synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
+      synth.randomInterpolate();
+      console.log("reloaded buffers");
+    });
+  } else {
+    synths.forEach((synth) => {
+      let floatBuf = new Float32Array(customBuffer.length);
+      customBuffer.copyFromChannel(floatBuf, 0, 0);
+      synth.buffer.copyToChannel(floatBuf, 0, 0);
+      // purge buffer
+      floatBuf = null;
+      synth.randomStarts();
+      synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
+      synth.randomInterpolate();
+      synth.setRate(1);
+      synth.setPitchShift(12);
+      console.log("loaded custom buffers");
+    });
+  }
 };
+
 // method to play UI sounds
 const UISound = () => {
   document.querySelectorAll("a").forEach((elt) => {
@@ -129,7 +166,7 @@ const startAudio = async () => {
   const follower = new Follower();
 
   masterBus = new MasterBus(soundtrackAudioCtx);
-  u.master.connect(masterBus.dest);
+  masterBus.connectSource(u.master);
   // main synth setup loop
   synths.forEach(async (synth, i) => {
     // wait for all of the individual grains to load
@@ -178,9 +215,13 @@ const startAudio = async () => {
     pollValues();
   }, 10);
   // loop to reload samples every 30 seconds approx
-  synths[0].transport.scheduleRepeat((time) => {
-    reloadBuffers();
-  }, 30);
+
+  if (!r.decodedBuffer) {
+    synths[0].transport.scheduleRepeat((time) => {
+      reloadBuffers();
+    }, 30);
+  }
+
   subOscLoop();
   // getNodes(soundtrackAudioCtx);
 };

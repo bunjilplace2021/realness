@@ -10,6 +10,7 @@ class UISynth {
         release: 0.1,
       },
       harmonicity: 2,
+      volume: -12,
     });
 
     this.master = new Gain(0.1);
@@ -17,7 +18,11 @@ class UISynth {
   }
   play(note) {
     this.uiSynth.harmonicity.value = Math.random() * 12;
-    this.uiSynth.triggerAttackRelease(note, 0.02);
+    try {
+      this.uiSynth.triggerAttackRelease(note, 0.1, "+0.01");
+    } catch (error) {
+      console.warn(error);
+    }
   }
 }
 

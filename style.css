@@ -56,6 +56,20 @@ video {
   float: right;
   visibility: visible;
 }
+
+#recordButton {
+  padding-left: 1rem;
+  text-align: center;
+  min-width: 36px;
+}
+#recordButton:hover {
+  opacity: 0.5;
+  transition: opacity 0.3s ease-out;
+}
+.red {
+  color: red;
+}
+
 #mute {
   transition: opacity 0.3s ease-out;
   min-width: 36px;
