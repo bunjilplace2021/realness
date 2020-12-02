@@ -66,3 +66,10 @@ export function getNodes(obj) {
     }
   });
 }
+
+export function soundLog(str) {
+  console.log(
+    `%cSound: ${str}`,
+    "color:#233E82; font-family:'Arial';color:white; font-weight: 500; background:black;"
+  );
+}

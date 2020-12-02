@@ -31,7 +31,7 @@ class Recorder {
       setTimeout(() => {
         this.mediaRecorder.stop();
         this.recording = false;
-        console.log("stopped recorder");
+        // console.log("stopped recorder");
       }, this.length);
 
       this.mediaRecorder.addEventListener("stop", () => {

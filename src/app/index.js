@@ -4,6 +4,7 @@ import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
+// !TODO: GRAPH GAIN STAGING!!!
 // GLOBAL VARIABLES
 import {
   getContext,
@@ -12,11 +13,15 @@ import {
   Filter,
   Noise,
   setContext,
-  Follower,
 } from "tone";
 
 // UTILITIES
-import { fetchSample, mapValue, resampleBuffer } from "./utilityFunctions";
+import {
+  fetchSample,
+  mapValue,
+  resampleBuffer,
+  soundLog,
+} from "./utilityFunctions";
 import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
@@ -25,6 +30,7 @@ getContext().rawContext.suspend();
 const isMobile = window.innerWidth < 600;
 let sampleRate = isMobile ? 11025 : 44100;
 
+soundLog(sampleRate);
 // create own audio context
 let soundtrackAudioCtx = new Context({
   latencyHint: "playback",
@@ -58,13 +64,14 @@ const recordButton = document.querySelector("#recordButton");
 recordButton.onclick = async () => {
   recordButton.classList.toggle("red");
   await r.getPermissions();
-  console.log("got permissions");
+  soundLog("got permissions");
   const blob = await r.recordChunks();
-  console.log(blob);
+  soundLog(blob);
   await r.loadToBuffer();
   setTimeout(() => {
     r.decodedBuffer && recordButton.classList.remove("red");
     reloadBuffers(r.decodedBuffer);
+    f.uploadSample(r.audioBlob);
   }, recordLength);
 };
 
@@ -81,6 +88,7 @@ const reloadBuffers = (customBuffer = null) => {
   if (!customBuffer) {
     synths.forEach(async (synth) => {
       await f.getSample();
+
       const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
       const resampled = await resampleBuffer(buf, sampleRate);
       let floatBuf = new Float32Array(resampled.length);
@@ -91,7 +99,7 @@ const reloadBuffers = (customBuffer = null) => {
       synth.randomStarts();
       synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
       synth.randomInterpolate();
-      console.log("reloaded buffers");
+      soundLog("reloaded buffers");
     });
   } else {
     synths.forEach((synth) => {
@@ -101,11 +109,8 @@ const reloadBuffers = (customBuffer = null) => {
       // purge buffer
       floatBuf = null;
       synth.randomStarts();
-      synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
       synth.randomInterpolate();
-      synth.setRate(1);
-      synth.setPitchShift(12);
-      console.log("loaded custom buffers");
+      soundLog("loaded user buffers");
     });
   }
 };
@@ -143,7 +148,7 @@ const loadSynths = async () => {
     const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
     const resampledBuf = await resampleBuffer(buf, sampleRate);
     if (f.audioFile) {
-      console.log("Loaded GrainSynth " + (i + 1));
+      soundLog("Loaded GrainSynth " + (i + 1));
       synths.push(new GrainSynth(resampledBuf, soundtrackAudioCtx, numVoices));
     }
   }
@@ -153,7 +158,7 @@ const loadSynths = async () => {
   muteButton.classList.add("fa", "fa-volume-off");
   muteButton.disabled = false;
   // muteButton.classList.remove("disabled");
-  console.log("Voices loaded");
+  soundLog("Voices loaded");
 };
 
 // method to start audio
@@ -163,7 +168,6 @@ const startAudio = async () => {
     await soundtrackAudioCtx.resume();
   }
   // setup master effects bus
-  const follower = new Follower();
 
   masterBus = new MasterBus(soundtrackAudioCtx);
   masterBus.connectSource(u.master);
@@ -175,7 +179,7 @@ const startAudio = async () => {
     if (!synth.isPlaying) {
       // setup synth parameters
       // synth.output.gain.value = 1 / synths.length;
-      synth.grains.forEach((grain) => (grain.volume.value = 2));
+      synth.grains.forEach((grain) => (grain.volume.value = 1));
       synth.output.gain.value = 0.8;
       synth.filter.type = "lowpass";
       synth.filter.gain.value = 10;
@@ -193,14 +197,12 @@ const startAudio = async () => {
       synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
       // connect the synth output to the master processing bus
       synth.output.disconnect(synth.dest);
-      synth.output.connect(follower);
       masterBus.connectSource(synth.output);
     }
   });
   subOscillator();
   masterBus.lowpassFilter(5000, 1);
-  follower.connect(subOsc.frequency);
-  masterBus.filter.gain.value = 20;
+  masterBus.filter.gain.value = 10;
   !isMobile && masterBus.chorus(0.01, 300, 0.9);
   !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
   //  if user clicks, randomize synth parameters and play a UI sound

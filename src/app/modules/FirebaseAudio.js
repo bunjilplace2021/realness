@@ -55,11 +55,11 @@ class FireBaseAudio {
       (snapshot) => {
         this.progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         if (firebase.storage.TaskState.RUNNING) {
-          console.log(this.progress);
+          // console.log(this.progress);
         }
       },
       (err) => {
-        console.log(err);
+        // console.log(err);
       },
       () => {
         this.uploadTask.snapshot.ref
