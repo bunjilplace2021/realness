@@ -178,10 +178,10 @@ const startAudio = async () => {
     if (!synth.isPlaying) {
       // setup synth parameters
       // synth.output.gain.value = 1 / synths.length;
-      synth.grains.forEach((grain) => (grain.volume.value = 1));
+      synth.grains.forEach((grain) => (grain.volume.value = 0.5));
       synth.output.gain.value = 0.8;
       synth.filter.type = "lowpass";
-      synth.filter.gain.value = 10;
+      synth.filter.gain.value = 0;
       synth.filter.frequency.value = 880 * (i + 1);
       synth.setDetune((i + 1) * 220 - numSources * 440);
       synth.setPitchShift(-12 / (i + 1));

@@ -202,9 +202,9 @@ function didactic() {
   }
 }
 
-function volumemute() {
-  volicons.classList.toggle("fa-volume-mute");
-}
+// function volumemute() {
+//   volicons.classList.toggle("fa-volume-mute");
+// }
 
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
