@@ -206,11 +206,11 @@ function didactic() {
   didactic_toggle = !didactic_toggle;
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  myInfo.style.background = "rgba(0, 0, 0, 0.2)";
+  myInfo.style.background = "rgba(0, 0, 0, 0.4)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    myInfo.style.background = "rgba(0, 0, 0, 0.2)";
+    myInfo.style.background = "rgba(0, 0, 0, 0.4)";
     //  myInfo.style.overflowY = "scroll";
 
   } else {
