@@ -188,11 +188,13 @@ function infoInstructions() {
 
   if (instruction_toggle) {
     FScreen.style.display = "block";
+    myLinks.style.background= "rgba(0, 0, 0, 0.6)";
 
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
     myLinks.style.display = "none";
+    myLinks.style.background= "none";
     myInfo.style.overflowY = "hidden";
     didactic_toggle = false;
   }
@@ -226,12 +228,11 @@ function volumemute() {
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
 
-//   if (pixelShaderToggle){
-//     myLinks.style.background = "rgba(0, 0, 0, 0.4)";
-// }else{
-//
-//   myLinks.style.background = "rgba(0, 0, 0, 0.0)";
-//}
+  if (pixelShaderToggle){
+    document.getElementById("top").style.backgroundColor='rgba(0, 0, 0, 0.4)';
+}else{
+    document.getElementById("top").style.backgroundColor='rgba(0, 0, 0, 0.0)';
+}
   }
 
 

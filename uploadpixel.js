@@ -3,6 +3,8 @@ let cam;
 let pixelpg;
 let colour;
 let lerp_amount = 0;
+let menu_loc = false;
+
 
 //load shader for camera module
 
@@ -25,21 +27,21 @@ function shaderDraw() {
   // shader() sets the active shader with our shader
   pixelpg.shader(pixelShader);
 
-if (pixelShaderToggle){
-  if (lerp_amount < 50){
-  lerp_amount = lerp_amount + 1;
-  }
-}else{
-  if (lerp_amount >= 0){
-  lerp_amount = lerp_amount - 1;
-}
+  if (pixelShaderToggle) {
+    if (lerp_amount < 50) {
+      lerp_amount = lerp_amount + 1;
+    }
+  } else {
+    if (lerp_amount >= 0) {
+      lerp_amount = lerp_amount - 1;
+    }
 
-}
+  }
 
 
   pixelShader.setUniform('tex0', cam);
   pixelShader.setUniform('u_resolution', [width, height]);
-  pixelShader.setUniform('u_lerp', map(lerp_amount, 0,50,0,1));
+  pixelShader.setUniform('u_lerp', map(lerp_amount, 0, 50, 0, 1));
   // lets just send the cam to our shader as a uniform
   if (!isMobile) { //check camera and device orientation on mobile
     pixelShader.setUniform('u_devicecamres', [cam.width, cam.height]);
@@ -65,35 +67,46 @@ function shaderMousePressed() {
 
   //push to firebase
 
-  if (mouseX > 0 && mouseX < width - 100 && mouseY > 100 && mouseY < height) {
 
 
-    detectWebcam(function(hasWebcam) {
-      webcam = hasWebcam;
-      //console.log(webcam);
-      console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
-    })
 
-    colour = pixelpg.get(mouseX, mouseY);
-    var data = {
-      uuid: uuid,
-      mouseX_loc: mouseX,
-      mouseY_loc: mouseY,
-      colour_loc: colour,
-      deviceWidth: width,
-      deviceHeight: height,
-      touchTime: touchtime
-    }
+  detectWebcam(function(hasWebcam) {
+    webcam = hasWebcam;
+    //console.log(webcam);
+    console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
+  })
 
-    var test = database.ref('test3');
+  colour = pixelpg.get(mouseX, mouseY);
+  var data = {
+    uuid: uuid,
+    mouseX_loc: mouseX,
+    mouseY_loc: mouseY,
+    colour_loc: colour,
+    deviceWidth: width,
+    deviceHeight: height,
+    touchTime: touchtime
+  }
+
+  var test = database.ref('test3');
+
+  //do not upload pixel if location under menu element check
+
+  let rect = document.getElementById("top").getBoundingClientRect();
 
 
-    if (webcam) {
-      test.push(data);
-      console.log(data);
-    }
+  if (mouseY >= rect.top && mouseY <= rect.bottom) {
+    menu_loc = true;
+  } else {
+    menu_loc = false;
+  }
+
+
+  if (webcam && !menu_loc) {
+    test.push(data);
+    console.log(data);
   }
 }
+
 
 function shaderWindowResized() {
   pixelpg.resizeCanvas(windowWidth, windowHeight);

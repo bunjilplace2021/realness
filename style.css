@@ -34,8 +34,8 @@ video {
   top: 0;
   bottom:auto;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
   padding: 14px 16px;
+  background-color: rgba(0, 0, 0, 0.0);
 }
 
 .topnav #myLinks {
