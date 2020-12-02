@@ -21,6 +21,9 @@ export function normalizeArray(arr, min, max) {
   });
 }
 
+export function timedAction(func, time, audioCtx) {
+  const startTime = audioCtx.currentTime();
+}
 export function isBetween(x, min, max) {
   return x >= min && x <= max;
 }

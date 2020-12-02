@@ -3,7 +3,7 @@ import { Reverb, Delay, Gain, Filter, Chorus, Limiter } from "tone";
 class MasterBus {
   constructor(ctx) {
     this.input = new Gain(0.8);
-    this.limiter = new Limiter(-6);
+    this.limiter = new Limiter(0);
     this.effectsChain = [];
     this.ctx = ctx;
 
@@ -79,6 +79,9 @@ class MasterBus {
     } else {
       this.masterReverb && this.removeEffect(this.masterReverb);
     }
+  }
+  disconnect() {
+    this.dest.disconnect();
   }
 }
 

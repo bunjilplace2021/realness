@@ -28,12 +28,13 @@ import regeneratorRuntime from "regenerator-runtime";
 getContext().rawContext.suspend();
 
 const isMobile = window.innerWidth < 600;
+let isMuted = true;
 let sampleRate = isMobile ? 11025 : 44100;
 
 // create own audio context
 let soundtrackAudioCtx = new Context({
   latencyHint: "playback",
-  lookAhead: 1,
+  // lookAhead: 1,
   updateInterval: 1,
   bufferSize: 1024,
 });
@@ -50,7 +51,7 @@ let f = new FireBaseAudio(soundtrackAudioCtx);
 const recordLength = 2000;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
 
-const uiNotes = ["C4", "E4", "G4"];
+const uiNotes = ["C4", "E4", "G4", "C5", "A5"];
 
 // number of different sources to use
 const numSources = isMobile ? 1 : 3;
@@ -84,10 +85,11 @@ const subOsc = new FMOscillator({
 
 const reloadBuffers = (customBuffer = null) => {
   // fetch new samples from database and load them into existing buffers
+
+  console.log(f.files);
   if (!customBuffer) {
     synths.forEach(async (synth) => {
       await f.getSample();
-
       const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
       const resampled = await resampleBuffer(buf, sampleRate);
       let floatBuf = new Float32Array(resampled.length);
@@ -133,7 +135,7 @@ const subOscillator = () => {
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
   subOsc.volume.value = -48;
-  subOsc.volume.targetRampTo(-34, 10);
+  subOsc.volume.targetRampTo(-32, 10);
   subOsc.filter.frequency.value = 80;
   noise.start("+1");
   subOsc.start("+1");
@@ -168,43 +170,47 @@ const startAudio = async () => {
   }
   // setup master effects bus
 
-  masterBus = new MasterBus(soundtrackAudioCtx);
-  masterBus.connectSource(u.master);
   // main synth setup loop
-  synths.forEach(async (synth, i) => {
-    // wait for all of the individual grains to load
-    await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
-    // if the synth isn't already playing...
-    if (!synth.isPlaying) {
-      // setup synth parameters
-      // synth.output.gain.value = 1 / synths.length;
-      synth.grains.forEach((grain) => (grain.volume.value = 0.5));
-      synth.output.gain.value = 0.8;
-      synth.filter.type = "lowpass";
-      synth.filter.gain.value = 0;
-      synth.filter.frequency.value = 880 * (i + 1);
-      synth.setDetune((i + 1) * 220 - numSources * 440);
-      synth.setPitchShift(-12 / (i + 1));
-      // if lower frequency value, higher resonance for low-end drones
-      if (synth.filter.frequency.value < 500) {
-        synth.filter.Q.value = 2;
-      } else {
-        synth.filter.Q.value = 0.5;
+  if (!synths[synths.length - 1].isPlaying) {
+    masterBus = new MasterBus(soundtrackAudioCtx);
+    masterBus.connectSource(u.master);
+    synths.forEach(async (synth, i) => {
+      // wait for all of the individual grains to load
+      await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
+      // if the synth isn't already playing...
+      if (!synth.isPlaying) {
+        // setup synth parameters
+        // synth.output.gain.value = 1 / synths.length;
+        synth.grains.forEach((grain) => (grain.volume.value = 0.5));
+        synth.output.gain.value = 0.8;
+        synth.filter.type = "lowpass";
+        synth.filter.gain.value = 0;
+        synth.filter.frequency.value = 880 * (i + 1);
+        synth.setDetune((i + 1) * 220 - numSources * 440);
+        synth.setPitchShift(-12 / (i + 1));
+        // if lower frequency value, higher resonance for low-end drones
+        if (synth.filter.frequency.value < 500) {
+          synth.filter.Q.value = 2;
+        } else {
+          synth.filter.Q.value = 0.5;
+        }
+        // start the synths
+        synth.randomInterpolate();
+        synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
+        // connect the synth output to the master processing bus
+        synth.output.disconnect(synth.dest);
+        masterBus.connectSource(synth.output);
+
+        //  if user clicks, randomize synth parameters and play a UI sound
       }
-      // start the synths
-      synth.randomInterpolate();
-      synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
-      // connect the synth output to the master processing bus
-      synth.output.disconnect(synth.dest);
-      masterBus.connectSource(synth.output);
-    }
-  });
-  subOscillator();
-  masterBus.lowpassFilter(5000, 1);
-  masterBus.filter.gain.value = 10;
-  !isMobile && masterBus.chorus(0.01, 300, 0.9);
-  !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
-  //  if user clicks, randomize synth parameters and play a UI sound
+    });
+
+    subOscillator();
+    masterBus.lowpassFilter(5000, 1);
+    !isMobile && masterBus.chorus(0.01, 300, 0.9);
+    !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
+  }
+
   document.querySelector("body").onclick = () => {
     u.play(uiNotes[~~Math.random * uiNotes.length]);
     synths.forEach((synth) => {
@@ -242,7 +248,17 @@ const pollValues = () => {
     );
   }
 };
-
+const stopAudio = () => {
+  if (soundtrackAudioCtx.state === "running") {
+    soundtrackAudioCtx.rawContext.suspend();
+    soundtrackAudioCtx.dispose();
+  }
+  isMuted = true;
+  synths.forEach((synth) => {
+    synth.stop();
+    synth.isPlaying = false;
+  });
+};
 const subOscLoop = () => {
   synths[0].transport.scheduleRepeat((time) => {
     subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -100, 100), 30);
@@ -252,23 +268,21 @@ const subOscLoop = () => {
 
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = () => {
+  //  if synths are loaded, start audio and change DOM element
   if (synthsLoaded) {
-    //  if synths are loaded, start audio and change DOM element
+    console.log(synths);
+    if (!synths[synths.length - 1].isPlaying) {
+      startAudio();
+    } else {
+      stopAudio();
+    }
+
     if (muteButton.classList.contains("fa-volume-off")) {
       muteButton.classList.remove("fa-volume-off");
       muteButton.classList.add("fa-volume-up");
     } else {
       muteButton.classList.add("fa-volume-off");
       muteButton.classList.remove("fa-volume-up");
-    }
-    if (!synths[synths.length - 1].isPlaying) {
-      startAudio();
-    } else {
-      // or stop the synths
-      synths.forEach((synth) => {
-        synth.stop();
-        synth.isPlaying = false;
-      });
     }
   }
 };

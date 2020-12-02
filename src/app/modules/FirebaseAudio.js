@@ -34,7 +34,7 @@ class FireBaseAudio {
     this.files = await this.storageRef.listAll();
   }
   async getSample() {
-    await this.listAll();
+    // await this.listAll();
     const ChosenFile = this.files.items[
       ~~(this.files.items.length * Math.random())
     ];
