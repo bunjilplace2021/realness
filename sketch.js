@@ -206,11 +206,11 @@ function didactic() {
   didactic_toggle = !didactic_toggle;
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  myInfo.style.background = "rgba(0, 0, 0, 0.6)";
+  myInfo.style.background = "rgba(0, 0, 0, 0.2)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    myInfo.style.background = "rgba(0, 0, 0, 0.6)";
+    myInfo.style.background = "rgba(0, 0, 0, 0.2)";
     //  myInfo.style.overflowY = "scroll";
 
   } else {
@@ -234,10 +234,6 @@ function cameratoggle() {
     document.getElementById("top").style.backgroundColor='rgba(0, 0, 0, 0.0)';
 }
   }
-
-
-
-
 
 function fullScreenMenu() {
   let fs = fullscreen();
