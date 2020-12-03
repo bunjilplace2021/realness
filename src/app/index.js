@@ -28,8 +28,7 @@ import regeneratorRuntime from "regenerator-runtime";
 getContext().rawContext.suspend();
 
 const isMobile = window.innerWidth < 600;
-let isMuted = true;
-let sampleRate = isMobile ? 11025 : 44100;
+let sampleRate = isMobile ? 22050 : 44100;
 
 // create own audio context
 let soundtrackAudioCtx = new Context({
@@ -178,12 +177,9 @@ const startAudio = async () => {
       // if the synth isn't already playing...
       if (!synth.isPlaying) {
         // setup synth parameters
-
         !isMobile && synth.grains.forEach((grain) => (grain.volume.value = -6));
-
         synth.output.gain.value = 1 / synths.length;
         synth.filter.type = "lowpass";
-
         synth.filter.frequency.value = 880 * (i + 1);
         synth.setDetune((i + 1) * 220 - numSources * 440);
         synth.setPitchShift(-12 / (i + 1));
@@ -199,7 +195,6 @@ const startAudio = async () => {
         // connect the synth output to the master processing bus
         synth.output.disconnect(synth.dest);
         masterBus.connectSource(synth.output);
-
         //  if user clicks, randomize synth parameters and play a UI sound
       }
     });
@@ -230,7 +225,6 @@ const startAudio = async () => {
 
   subOscLoop();
   // getNodes(soundtrackAudioCtx);
-  window.synths = synths;
 };
 
 const pollValues = () => {
@@ -252,7 +246,6 @@ const stopAudio = () => {
     soundtrackAudioCtx.rawContext.suspend();
     soundtrackAudioCtx.dispose();
   }
-  isMuted = true;
   synths.forEach((synth) => {
     synth.stop();
     synth.isPlaying = false;
@@ -265,22 +258,25 @@ const subOscLoop = () => {
   }, 30);
 };
 
+const changeMuteButton = () => {
+  if (muteButton.classList.contains("fa-volume-off")) {
+    muteButton.classList.remove("fa-volume-off");
+    muteButton.classList.add("fa-volume-up");
+  } else {
+    muteButton.classList.add("fa-volume-off");
+    muteButton.classList.remove("fa-volume-up");
+  }
+};
+
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = () => {
   //  if synths are loaded, start audio and change DOM element
   if (synthsLoaded) {
+    changeMuteButton();
     if (!synths[synths.length - 1].isPlaying) {
       startAudio();
     } else {
       stopAudio();
-    }
-
-    if (muteButton.classList.contains("fa-volume-off")) {
-      muteButton.classList.remove("fa-volume-off");
-      muteButton.classList.add("fa-volume-up");
-    } else {
-      muteButton.classList.add("fa-volume-off");
-      muteButton.classList.remove("fa-volume-up");
     }
   }
 };
