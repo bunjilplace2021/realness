@@ -181,13 +181,13 @@ function windowResized() {
 
   if (!isMobile) {
     resizeCanvas(windowWidth, windowHeight);
-    pg.resizeCanvas(windowWidth, windowHeight);
+    particlepg.resizeCanvas(windowWidth, windowHeight);
     shaderWindowResized(windowWidth, windowHeight);
   } else {
     let innerh = iosInnerHeight();
-    resizeCanvas(windowWidth, windowHeight);
-    pg.resizeCanvas(windowWidth, windowHeight);
-    shaderWindowResized(windowWidth, windowHeight);
+    resizeCanvas(windowWidth, innerh);
+    particlepg.resizeCanvas(windowWidth, innerh);
+    shaderWindowResized(windowWidth, innerh);
   }
 }
 
@@ -219,12 +219,12 @@ function didactic() {
   didactic_toggle = !didactic_toggle;
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  myInfo.style.background = "rgba(0, 0, 0, 0.4)";
+  myInfo.style.background = "rgba(0, 0, 0, 0.2)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    myInfo.style.background = "rgba(0, 0, 0, 0.4)";
-    document.getElementById("myInfo").style.webkitbackdropFilter = "blur(30px)";
+    myInfo.style.background = "rgba(0, 0, 0, 0.2)";
+    document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
     document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
     //  myInfo.style.overflowY = "scroll";
 
@@ -232,7 +232,7 @@ function didactic() {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
-    document.getElementById("myInfo").style.webkitbackdropFilter = "blur(none)";
+    document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
     document.getElementById("myInfo").style.backdropFilter = "blur(none)";
 
   }
@@ -246,13 +246,13 @@ function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
 
   if (pixelShaderToggle) {
-    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
-    document.getElementById("top").style.webkitbackdropFilter = "blur(30px)";
+    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+    document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
     document.getElementById("top").style.backdropFilter = "blur(30px)";
 
   } else {
     document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
-    document.getElementById("top").style.webkitbackdropFilter = "blur(0px)";
+    document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
     document.getElementById("top").style.backdropFilter = "blur(0px)";
 
   }
