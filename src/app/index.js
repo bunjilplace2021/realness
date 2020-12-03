@@ -57,7 +57,7 @@ const uiNotes = ["C4", "E4", "G4", "C5", "A5"];
 const numSources = isMobile ? 1 : 3;
 
 // number of voices per synth
-const numVoices = isMobile ? 1 : 2;
+const numVoices = isMobile ? 2 : 3;
 const muteButton = document.querySelector("#mute");
 const recordButton = document.querySelector("#recordButton");
 
@@ -86,7 +86,6 @@ const subOsc = new FMOscillator({
 const reloadBuffers = (customBuffer = null) => {
   // fetch new samples from database and load them into existing buffers
 
-  console.log(f.files);
   if (!customBuffer) {
     synths.forEach(async (synth) => {
       await f.getSample();
@@ -95,8 +94,9 @@ const reloadBuffers = (customBuffer = null) => {
       let floatBuf = new Float32Array(resampled.length);
       resampled.copyFromChannel(floatBuf, 0, 0);
       synth.buffer.copyToChannel(floatBuf, 0, 0);
+
       // purge buffer
-      floatBuf = null;
+      // floatBuf = null;
       synth.randomStarts();
       synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
       synth.randomInterpolate();
@@ -154,11 +154,9 @@ const loadSynths = async () => {
     }
   }
   synthsLoaded = true;
-
   muteButton.classList = [];
   muteButton.classList.add("fa", "fa-volume-off");
   muteButton.disabled = false;
-  // muteButton.classList.remove("disabled");
   soundLog("Voices loaded");
 };
 
@@ -180,11 +178,12 @@ const startAudio = async () => {
       // if the synth isn't already playing...
       if (!synth.isPlaying) {
         // setup synth parameters
-        // synth.output.gain.value = 1 / synths.length;
-        synth.grains.forEach((grain) => (grain.volume.value = 0.5));
-        synth.output.gain.value = 0.8;
+
+        !isMobile && synth.grains.forEach((grain) => (grain.volume.value = -6));
+
+        synth.output.gain.value = 1 / synths.length;
         synth.filter.type = "lowpass";
-        synth.filter.gain.value = 0;
+
         synth.filter.frequency.value = 880 * (i + 1);
         synth.setDetune((i + 1) * 220 - numSources * 440);
         synth.setPitchShift(-12 / (i + 1));
@@ -231,16 +230,16 @@ const startAudio = async () => {
 
   subOscLoop();
   // getNodes(soundtrackAudioCtx);
+  window.synths = synths;
 };
 
 const pollValues = () => {
   if (ps && ps.particles) {
     let { radius, maxradius } = ps.particles[ps.particles.length - 1];
     synths.forEach((synth, i) => {
-      synth.setGrainSize(mapValue(radius, 0, maxradius, 0.01, 0.05));
       synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
       let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 1100);
-      synth.filter.frequency.rampTo(filterFreq, 10);
+      !isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
     });
     subOsc.filter.frequency.rampTo(
       mapValue(~~radius, 0, ~~maxradius, 50, 120),
@@ -270,7 +269,6 @@ const subOscLoop = () => {
 muteButton.onclick = () => {
   //  if synths are loaded, start audio and change DOM element
   if (synthsLoaded) {
-    console.log(synths);
     if (!synths[synths.length - 1].isPlaying) {
       startAudio();
     } else {

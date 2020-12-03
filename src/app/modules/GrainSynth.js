@@ -71,6 +71,7 @@ class GrainSynth {
       }
     });
   }
+
   setupMaster() {
     this.output = new Gain(1);
     this.output.name = "Output";

@@ -1,5 +1,5 @@
 import { filter } from "async";
-import { EQ3 } from "tone";
+import { Filter } from "tone";
 
 // load an audiourl to a buffer
 export async function fetchSample(url, ctx) {
@@ -43,14 +43,21 @@ export function resampleBuffer(input, target_rate) {
     // NORMALIZE AND FILTER BUFFERS
     let source = off.createBufferSource();
     const bufferMax = Math.max(...input.getChannelData(0));
-    const diff = 0.5 - bufferMax;
+    let filter = off.createBiquadFilter();
+    filter.frequency.value = ~~(Math.random() * 10 + 1) * 110;
+    console.log(filter.frequency.value);
+    filter.type = "bandpass";
+
+    //  calculate difference from 1
+    // subtract max volume value from 1, set gain to that value
+    const diff = Math.abs(1 - bufferMax);
     const gainNode = off.createGain();
     gainNode.gain.value = diff;
     source.buffer = input;
-    source.connect(gainNode);
+    source.connect(filter);
+    filter.connect(gainNode);
     gainNode.connect(off.destination);
     source.start(0);
-
     try {
       resolve(await off.startRendering());
     } catch (error) {
