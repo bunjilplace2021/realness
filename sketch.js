@@ -19,6 +19,8 @@ let webcam = false;
 
 let array_limit = 30;
 
+let particlepg;
+
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
   var cnv_y = (windowHeight - height) / 2;
@@ -45,7 +47,7 @@ function preload() {
 
 }
 
-function detectWebcam(callback) {  //check if webcam device exists and/or permission granted by device label
+function detectWebcam(callback) { //check if webcam device exists and/or permission granted by device label
   let md = navigator.mediaDevices;
   if (!md || !md.enumerateDevices) return callback(false);
   md.enumerateDevices().then(devices => {
@@ -57,6 +59,7 @@ function setup() {
 
   if (isMobile == false) {
     cnv = createCanvas(windowWidth, windowHeight);
+    particlepg = createGraphics(windowWidth, windowHeight);
     cnv.id('mycanvas');
     cnv.style('display', 'block');
     FScreen.style.display = "block";
@@ -66,11 +69,13 @@ function setup() {
     if (windowWidth < windowHeight) {
       inner = iosInnerHeight();
       cnv = createCanvas(windowWidth, inner);
+      particlepg = createGraphics(windowWidth, inner);
       cnv.id('mycanvas');
       cnv.style('display', 'block');
       console.log("portrait")
     } else {
       cnv = createCanvas(windowWidth, windowHeight);
+      particlepg = createGraphics(windowWidth, windowHeight);
       cnv.id('mycanvas');
       cnv.style('display', 'block');
       console.log("landscape")
@@ -83,12 +88,11 @@ function setup() {
 
   ps = new ParticleSystem(createVector(width / 2, height / 2), img);
 
-
 }
 
 function draw() {
 
-  particle_draw();
+  particle_draw(particlepg);
 
 }
 
@@ -108,17 +112,21 @@ function guid() {
   return _p8() + _p8(true) + _p8(true) + _p8();
 }
 
-function particle_draw() {
+function particle_draw(p) {
 
   touchtime = frameCount % 600; //10 second loop approx
 
-  blendMode(BLEND);
-  background(0);
-  blendMode(ADD);
+  if (!pixelShaderToggle) {
+
+  p.blendMode(BLEND);
+  p.background(0);
+  p.blendMode(ADD);
+} else {
+  p.clear();
+}
 
 
-
-  if (!isMobile) {
+if (!isMobile) {
   push();
   noCursor();
 
@@ -130,11 +138,15 @@ function particle_draw() {
 }
 
 
-  ps.run();
-  ps.intersection();
-  ps.resize_window();
+ps.run(p);
+ps.intersection();
+ps.resize_window();
 
-  shaderDraw();
+shaderDraw();
+
+image(particlepg, 0, 0);
+
+
 
 
 }
@@ -169,16 +181,14 @@ function windowResized() {
 
   if (!isMobile) {
     resizeCanvas(windowWidth, windowHeight);
+    pg.resizeCanvas(windowWidth, windowHeight);
     shaderWindowResized(windowWidth, windowHeight);
   } else {
     let innerh = iosInnerHeight();
     resizeCanvas(windowWidth, innerh);
+    pg.resizeCanvas(windowWidth, innerh);
     shaderWindowResized(windowWidth, innerh);
   }
-
-  
-
-
 }
 
 function infoInstructions() {
@@ -191,13 +201,13 @@ function infoInstructions() {
 
   if (instruction_toggle) {
     FScreen.style.display = "block";
-    myLinks.style.background= "rgba(0, 0, 0, 0.6)";
+    myLinks.style.background = "rgba(0, 0, 0, 0.6)";
 
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
     myLinks.style.display = "none";
-    myLinks.style.background= "none";
+    myLinks.style.background = "none";
     myInfo.style.overflowY = "hidden";
     didactic_toggle = false;
   }
@@ -214,12 +224,16 @@ function didactic() {
   if (didactic_toggle) {
     myInfo.style.display = "block";
     myInfo.style.background = "rgba(0, 0, 0, 0.4)";
+    document.getElementById("myInfo").style.webkitbackdropFilter = "blur(30px)";
+    document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
     //  myInfo.style.overflowY = "scroll";
 
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
+    document.getElementById("myInfo").style.webkitbackdropFilter = "blur(none)";
+    document.getElementById("myInfo").style.backdropFilter = "blur(none)";
 
   }
 }
@@ -231,12 +245,18 @@ function volumemute() {
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
 
-  if (pixelShaderToggle){
-    document.getElementById("top").style.backgroundColor='rgba(0, 0, 0, 0.4)';
-}else{
-    document.getElementById("top").style.backgroundColor='rgba(0, 0, 0, 0.0)';
-}
+  if (pixelShaderToggle) {
+    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+    document.getElementById("top").style.webkitbackdropFilter = "blur(30px)";
+    document.getElementById("top").style.backdropFilter = "blur(30px)";
+
+  } else {
+    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
+    document.getElementById("top").style.webkitbackdropFilter = "blur(0px)";
+    document.getElementById("top").style.backdropFilter = "blur(0px)";
+
   }
+}
 
 function fullScreenMenu() {
   let fs = fullscreen();

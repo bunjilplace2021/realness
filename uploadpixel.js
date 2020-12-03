@@ -76,7 +76,7 @@ function shaderMousePressed() {
     console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
   })
 
-  colour = pixelpg.get(mouseX, mouseY);
+  colour = pixelpg.get(mouseX, height - mouseY); // texture upside down?
   var data = {
     uuid: uuid,
     mouseX_loc: mouseX,

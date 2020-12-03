@@ -40,20 +40,24 @@ class Particle {
     if (pixelShaderToggle) {
       if (this.timer < this.timermax) {
         this.timer = this.timer + 1;
+
       }
-    }else{
+    } else {
 
       if (this.timer >= 0) {
         this.timer = this.timer - 1;
+
       }
     }
 
     if (this.UUID == uuid) {
       this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
       this.fill_col = lerpColor(this.fill_col, this.col, map(this.timer, 0, this.timermax, 0, 1));
+      this.fill_col.setAlpha(this.fill_alpha);
     } else {
-      this.col = color(0, this.fill_alpha);
+      this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
       this.fill_col = lerpColor(this.fill_col, this.col, map(this.timer, 0, this.timermax, 0, 1));
+      this.fill_col.setAlpha(map(this.timer, 0, this.timermax, this.fill_alpha, 0));
     }
 
 
@@ -62,12 +66,14 @@ class Particle {
       this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
       this.fill_col = lerpColor(this.col, this.fill_col, map(this.duration, 0, 200, 0, 1));
     }
+
+    //this.fill_col.setAlpha(this.fill_alpha);
+
   }
 
-
-  run() {
+  run(p) {
     this.update();
-    this.display();
+    this.display(p);
   }
 
 
@@ -95,8 +101,6 @@ class Particle {
 
   update() {
 
-    // this.position.x = (round(this.position.x / 100))*100;
-    // this.position.y = (round(this.position.y / 100))*100;
 
     this.velocity.add(this.acceleration);
     this.position.add(this.velocity);
@@ -115,44 +119,52 @@ class Particle {
       this.duration = this.duration + 1;
     }
 
-    if (this.duration > 500 && this.active == true) {
-      this.lifespan -= 0.2 * (this.rand + 1);
-      this.fill_alpha -= 0.2 * (this.rand + 1);
-    }
-    if (this.lifespan <= 0.5 && this.active == true) {
-      this.radius = 0.;
-      this.fill_alpha = 200.0;
-      this.lifespan = 255.0;
-      this.duration = 0.0;
-      this.active = false;
-      this.rand = this.rand + 1;
-      this.firstrun = !this.firstrun;
 
-      if (this.rand > 2) {
-        this.rand = 0;
+  //  if (!pixelShaderToggle) {
+
+      if (this.duration > 500 && this.active == true) {
+        this.lifespan -= 0.2 * (this.rand + 1);
+        this.fill_alpha -= 0.2 * (this.rand + 1);
+      }
+      if (this.lifespan <= 0.5 && this.active == true) {
+        this.radius = 0.;
+        this.fill_alpha = 200.0;
+        this.lifespan = 255.0;
+        this.duration = 0.0;
+        this.active = false;
+        this.rand = this.rand + 1;
+        this.firstrun = !this.firstrun;
+
+        if (this.rand > 2) {
+          this.rand = 0;
+        }
       }
     }
 
-  }
 
-  // Method to display
-  display() {
 
-    this.fill_col.setAlpha(this.fill_alpha);
+    // Method to display
+    display(p) {
 
-    push();
-    noStroke();
-    fill(this.fill_col);
-    ellipseMode(CENTER);
-    ellipse(this.position.x, this.position.y, this.radius);
-    pop();
-  }
+      p.push();
 
-  isDead() {
-    if (!this.alive && !this.active) {
-      return true;
-    } else {
-      return false;
+      if(pixelShaderToggle && this.UUID == uuid){
+        p.stroke(255,this.fill_alpha);
+      }else{
+      p.noStroke();
+    }
+      //p.stroke(0,this.fill_alpha);
+      p.fill(this.fill_col);
+      p.ellipseMode(CENTER);
+      p.ellipse(this.position.x, this.position.y, this.radius);
+      p.pop();
+    }
+
+    isDead() {
+      if (!this.alive && !this.active) {
+        return true;
+      } else {
+        return false;
+      }
     }
   }
-}

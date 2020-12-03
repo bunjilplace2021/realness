@@ -82,7 +82,19 @@ video {
   center: 0;
   width: 80%;
   height: 50%;
-  padding: 0.5em;
+}
+
+/* if backdrop support: very transparent and blurred */
+@supports ((-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))) {
+.content {
+    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(30px);
+  }
+  .topnav {
+      -webkit-backdrop-filter: blur(30px);
+      backdrop-filter: blur(30px);
+    }
+
 }
 
 .content .fa {

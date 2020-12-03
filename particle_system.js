@@ -46,9 +46,9 @@ class ParticleSystem {
     }
   }
 
-  run() {
+  run(p) {
     for (let particle of this.particles) {
-      particle.run();
+      particle.run(p);
 
       //remove particles if array limit exceeded.
       for (let i = this.particles.length - 1; i > array_limit; i--) {
