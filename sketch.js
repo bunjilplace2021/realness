@@ -185,9 +185,9 @@ function windowResized() {
     shaderWindowResized(windowWidth, windowHeight);
   } else {
     let innerh = iosInnerHeight();
-    resizeCanvas(windowWidth, innerh);
-    pg.resizeCanvas(windowWidth, innerh);
-    shaderWindowResized(windowWidth, innerh);
+    resizeCanvas(windowWidth, windowHeight);
+    pg.resizeCanvas(windowWidth, windowHeight);
+    shaderWindowResized(windowWidth, windowHeight);
   }
 }
 
