@@ -205,12 +205,12 @@ function infoInstructions() {
   menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
 
-  if (pixelShaderToggle) {
+  // if (pixelShaderToggle) {
     document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
     document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
     document.getElementById("top").style.backdropFilter = "blur(30px)";
 
-  }
+  // }
 
   if (instruction_toggle) {
 //    icons_toolbar.style.display = "block";
@@ -261,17 +261,17 @@ function volumemute() {
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
 
-  if (pixelShaderToggle) {
-    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
-    document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
-    document.getElementById("top").style.backdropFilter = "blur(30px)";
-
-  } else {
-    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
-    document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
-    document.getElementById("top").style.backdropFilter = "blur(0px)";
-
-  }
+  // if (pixelShaderToggle) {
+  //   document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+  //   document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
+  //   document.getElementById("top").style.backdropFilter = "blur(30px)";
+  //
+  // } else {
+  //   document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
+  //   document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
+  //   document.getElementById("top").style.backdropFilter = "blur(0px)";
+  //
+  // }
 }
 
 function fullScreenMenu() {
