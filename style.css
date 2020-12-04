@@ -32,9 +32,8 @@ video {
   overflow: hidden;
   position: fixed;
   top: 0;
-  bottom:auto;
+  bottom: auto;
   width: 100%;
-  padding: 14px 16px;
   background-color: rgba(0, 0, 0, 0.0);
 }
 
@@ -42,20 +41,19 @@ video {
   display: none;
 }
 
-.topnav #FScreen {
+.topnav #icons_toolbar {
   display: none;
-  float: right;
+  float: left;
 }
 
 .topnav a {
   float: left;
+  width: calc(100% / 6);
   color: white;
   text-align: center;
-  margin-left: .25em;
-  margin-right: .25em;
   text-decoration: none;
-  padding: 14px 16px;
-
+  padding: 2vh 0;
+  transition: all 0.3s ease;
 }
 
 .topnav a.icon {
@@ -86,15 +84,15 @@ video {
 
 /* if backdrop support: very transparent and blurred */
 @supports ((-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))) {
-.content {
+  .content {
     -webkit-backdrop-filter: blur(30px);
     backdrop-filter: blur(30px);
   }
-  .topnav {
-      -webkit-backdrop-filter: blur(30px);
-      backdrop-filter: blur(30px);
-    }
 
+  .topnav {
+    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(30px);
+  }
 }
 
 .content .fa {
@@ -152,26 +150,27 @@ video {
 }
 
 @media only screen and (max-width: 900px) {
-
   .topnav {
     top: auto;
-    bottom:0;
+    bottom: 0;
   }
 
   .topnav a {
-    padding: 5px 5px;
     font-size: calc(1em + 0.5vw);
-
   }
+
+  .topnav a.menu_text{
+    padding: 3vh 0;
+    font-size: calc(.6em + 0.5vw);
+  }
+
 
   .content {
     font-size: calc(.8em + 0.5vw);
-
   }
 
   .animated {
     font-size: calc(1em + 0.5vw);
-
   }
 
   .content .fa-instagram {
@@ -179,53 +178,38 @@ video {
   }
 }
 
-
-
 /* @media only screen and (min-width: 500) and (max-width: 800px)  {
-
   .topnav {
     top: auto;
     bottom:0;
   }
-
   .topnav a {
     font-size: calc(.8em + 0.5vw);
-
   }
-
   .content {
     font-size: calc(.8em + 0.5vw);
-
   }
-
   .animated {
     font-size: calc(.8em + 0.5vw);
-
   }
-
   .content .fa-instagram {
     font-size: calc(.8em + 0.5vw);
   }
 } */
-
 /* @media only screen and (min-width: 1920px) {
   .topnav a {
     font-size: 3.5vw;
   }
-
   .content {
     font-size: 2.5vw;
   }
-
   .animated {
     font-size: 3.5vw;
   }
-
   .content .fa-instagram {
     font-size: 3.5vw;
   }
 } */
-
 .fadeOut {
   -webkit-animation-name: fadeOut;
   -moz-animation-name: fadeOut;

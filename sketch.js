@@ -1,4 +1,5 @@
 var isMobile = false;
+var isAndroid = false;
 
 var pixelShaderToggle = false;
 var instruction_toggle = false;
@@ -62,7 +63,7 @@ function setup() {
     particlepg = createGraphics(windowWidth, windowHeight);
     cnv.id('mycanvas');
     cnv.style('display', 'block');
-    FScreen.style.display = "block";
+    //icons_toolbar.style.display = "block";
 
   } else {
 
@@ -80,6 +81,12 @@ function setup() {
       cnv.style('display', 'block');
       console.log("landscape")
     }
+
+//     if (!isAndroid){
+//     fullicons.style.display = "none";
+// console.log('test')
+//     }
+
   }
 
   pixelDensity(1);
@@ -198,10 +205,16 @@ function infoInstructions() {
   menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
 
+  if (pixelShaderToggle) {
+    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+    document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
+    document.getElementById("top").style.backdropFilter = "blur(30px)";
+
+  }
 
   if (instruction_toggle) {
-    FScreen.style.display = "block";
-    myLinks.style.background = "rgba(0, 0, 0, 0.6)";
+//    icons_toolbar.style.display = "block";
+
 
   } else {
     myInfo.style.display = "none";
@@ -210,6 +223,9 @@ function infoInstructions() {
     myLinks.style.background = "none";
     myInfo.style.overflowY = "hidden";
     didactic_toggle = false;
+    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
+    document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
+    document.getElementById("top").style.backdropFilter = "blur(0px)";
   }
 
 }
