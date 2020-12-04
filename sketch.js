@@ -206,7 +206,7 @@ function infoInstructions() {
   myLinks.style.display = "block";
 
   // if (pixelShaderToggle) {
-    document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+    document.getElementById("top").style.backgroundColor = 'rgba(127, 127, 127, 0.2)';
     document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
     document.getElementById("top").style.backdropFilter = "blur(30px)";
 
@@ -235,11 +235,11 @@ function didactic() {
   didactic_toggle = !didactic_toggle;
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  myInfo.style.background = "rgba(0, 0, 0, 0.2)";
+  myInfo.style.background = "rgba(127, 127, 127, 0.2)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    myInfo.style.background = "rgba(0, 0, 0, 0.2)";
+    myInfo.style.background = "rgba(127, 127, 127, 0.2)";
     document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
     document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
     //  myInfo.style.overflowY = "scroll";
