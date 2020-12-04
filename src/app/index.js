@@ -84,7 +84,7 @@ const subOsc = new FMOscillator({
 
 const reloadBuffers = (customBuffer = null) => {
   // fetch new samples from database and load them into existing buffers
-
+  console.log(customBuffer);
   if (!customBuffer) {
     synths.forEach(async (synth) => {
       await f.getSample();
@@ -97,6 +97,7 @@ const reloadBuffers = (customBuffer = null) => {
       // purge buffer
       // floatBuf = null;
       synth.randomStarts();
+
       synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
       synth.randomInterpolate();
       soundLog("reloaded buffers");
@@ -105,6 +106,7 @@ const reloadBuffers = (customBuffer = null) => {
     synths.forEach((synth) => {
       let floatBuf = new Float32Array(customBuffer.length);
       customBuffer.copyFromChannel(floatBuf, 0, 0);
+      console.log(floatBuf);
       synth.buffer.copyToChannel(floatBuf, 0, 0);
       // purge buffer
       floatBuf = null;
@@ -233,7 +235,7 @@ const pollValues = () => {
     synths.forEach((synth, i) => {
       synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
       let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 1100);
-      !isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
+      !isMobile && synth.filter.frequency.rampTo(filterFreq, 1);
     });
     subOsc.filter.frequency.rampTo(
       mapValue(~~radius, 0, ~~maxradius, 50, 120),

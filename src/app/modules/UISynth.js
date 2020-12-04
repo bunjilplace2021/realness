@@ -7,10 +7,10 @@ class UISynth {
         attack: 0,
         decay: 0.1,
         sustain: 1.0,
-        release: 0.3,
+        release: 0.5,
       },
       harmonicity: 2,
-      volume: -6,
+      volume: -3,
     });
 
     this.master = new Gain(0.1);
