@@ -2,7 +2,7 @@ class Particle {
   constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
     this.origposition = createVector(x, y);
     this.map_position = createVector(map(x, 0, devWidth, 0, width), map(y, 0, devHeight, 0, height));
-    this.position = createVector((round(this.map_position.x / 100)) * 100, (round(this.map_position.y / 100)) * 100);
+    this.position = createVector((round(this.map_position.x / 99)) * 99, (round(this.map_position.y / 99)) * 99);
     this.resize_position = createVector();
     this.velocity = createVector();
     this.acceleration = createVector();
@@ -11,7 +11,7 @@ class Particle {
     this.rand = floor(random(0, 3));
     this.img = img_;
     this.radius = 0.0;
-    this.resize = 0.2 * int(random(1, 3));
+    this.resize = 0.2 * int(random(1, 3)) + (width*0.0001);
     this.maxradius = height;
     this.origWidth = devWidth;
     this.origHeight = devHeight;
@@ -84,10 +84,10 @@ class Particle {
 
   resize_window() {
 
-    this.resize_position.x = map(this.origposition.x, 0, this.origWidth, 0, width);
-    this.resize_position.y = map(this.origposition.y, 0, this.origHeight, 0, height);
-    this.resize_position.x = (round(this.resize_position.x / 100)) * 100;
-    this.resize_position.y = (round(this.resize_position.y / 100)) * 100;
+    this.resize_position.x = constrain(map(this.origposition.x, 0, this.origWidth, 0, width), 0, width);
+    this.resize_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height),0, height);
+    this.resize_position.x = (round(this.resize_position.x / 99)) * 99;
+    this.resize_position.y = (round(this.resize_position.y / 99)) * 99;
 
 
     this.velocity.x = 0;
