@@ -32,7 +32,7 @@ video {
   overflow: hidden;
   position: fixed;
   top: 0;
-  bottom: auto;
+  bottom: top;
   width: 100%;
   background-color: rgba(0, 0, 0, 0.0);
 }
@@ -48,12 +48,19 @@ video {
 
 .topnav a {
   float: left;
-  width: calc(100% / 6);
+  width: calc(100% / 5);
   color: white;
   text-align: center;
   text-decoration: none;
   padding: 2vh 0;
   transition: all 0.3s ease;
+}
+
+.topnav a.menu_text {
+  top: 0;
+  bottom: auto;
+  width:25%;
+  text-align: center;
 }
 
 .topnav a.icon {
@@ -150,19 +157,21 @@ video {
 }
 
 @media only screen and (max-width: 900px) {
-  .topnav {
-    top: auto;
-    bottom: 0;
-  }
+
+.topnav {
+  top: auto;
+  bottom: 0;
+}
+
 
   .topnav a {
     font-size: calc(1em + 0.5vw);
   }
 
-  .topnav a.menu_text{
-    padding: 3vh 0;
-    font-size: calc(.6em + 0.5vw);
-  }
+  /* .topnav a.menu_text{
+  padding-left: 14px 0;
+
+  } */
 
 
   .content {
