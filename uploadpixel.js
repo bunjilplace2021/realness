@@ -10,6 +10,7 @@ let coltoggle = false;
 let color_lerp = 0;
 let backgroundcol;
 
+let amt, startColor, newColor;
 
 //load shader for camera module
 
@@ -29,7 +30,28 @@ function shaderSetup() {
   colour = color(0,0,0);
   oldcolour = color(0,0,0);
   backgroundcol= color(0,0,0);
+
+  startColor = color(255,255,255);
+  newColor = color(255,255,255);
+  amt = 0;
+
 }
+
+function colorDraw(c) {
+  let col = lerpColor(startColor, newColor, smoothstep(0.1,0.9,amt));
+  amt += 0.005;
+  if(amt >= 1){
+    amt = 0.0;
+    startColor = newColor;
+    newColor = color(c);
+  }
+  return col;
+}
+
+function smoothstep(edge0, edge1, x) {
+    x = constrain((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+    return x * x * (3 - 2 * x);
+  }
 
 function shaderDraw() {
 
@@ -47,8 +69,6 @@ function shaderDraw() {
     }
 
   }
-
-
 
 
 
@@ -79,9 +99,13 @@ if (!coltoggle){
   }
 }
 
+//if (pixelShaderToggle){
+backgroundcol = colorDraw(colour);
+//  }
+
   backgroundShader.setUniform('u_resolution', [width, height]);
   backgroundShader.setUniform('u_color_old', [oldcolour[0], oldcolour[1], oldcolour[2]]);
-  backgroundShader.setUniform('u_color', [backgroundcol[0], backgroundcol[1], backgroundcol[2]]);
+  backgroundShader.setUniform('u_color', [backgroundcol.levels[0], backgroundcol.levels[1], backgroundcol.levels[2]]);
   backgroundShader.setUniform('u_lerp', map(color_lerp, 0, 200, 0, 1));
   backgroundShader.setUniform('u_lerp2', map(lerp_amount, 0, 200, 0, 1));
   // let tileno = 1;
@@ -111,9 +135,7 @@ function shaderMousePressed() {
 
 //color_lerp = 0;
 
-if (pixelShaderToggle){
-    backgroundcol = pixelpg.get(width/2,height/2);
-  }
+
 
 
   detectWebcam(function(hasWebcam) {
@@ -121,7 +143,7 @@ if (pixelShaderToggle){
     //console.log(webcam);
     console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
   })
-  oldcolour = colour;
+
   colour = pixelpg.get(mouseX, height - mouseY);
    // texture upside down?
   var data = {
