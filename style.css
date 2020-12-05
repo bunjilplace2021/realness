@@ -21,6 +21,11 @@ canvas {
   display: block;
 }
 
+canvas #can {
+  filter: blur(30px);
+}
+
+
 video {
   position: absolute;
   width: 0;
@@ -121,6 +126,7 @@ video {
   color: white;
 }
 
+
 .animated {
   position: absolute;
   text-align: center;
@@ -160,6 +166,7 @@ video {
   }
 
   .topnav a.menu_text{
+
     padding: 3vh 0;
     font-size: calc(.6em + 0.5vw);
   }

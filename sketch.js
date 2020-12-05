@@ -64,14 +64,15 @@ function setup() {
     cnv.id('mycanvas');
     cnv.style('display', 'block');
     //icons_toolbar.style.display = "block";
-
   } else {
+
+
 
     if (windowWidth < windowHeight) {
       inner = iosInnerHeight();
       cnv = createCanvas(windowWidth, inner);
       particlepg = createGraphics(windowWidth, inner);
-      cnv.id('mycanvas');
+      particlepg.id('can');
       cnv.style('display', 'block');
       console.log("portrait")
     } else {
@@ -79,6 +80,7 @@ function setup() {
       particlepg = createGraphics(windowWidth, windowHeight);
       cnv.id('mycanvas');
       cnv.style('display', 'block');
+
       console.log("landscape")
     }
 
@@ -163,6 +165,7 @@ function mousePressed() {
 
   //sample and upload pixel to firebase
   shaderMousePressed();
+
 }
 
 
@@ -261,6 +264,9 @@ function volumemute() {
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
 
+  if (pixelShaderToggle){
+      backgroundcol = pixelpg.get(width/2,height/2);
+    }
   // if (pixelShaderToggle) {
   //   document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
   //   document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";

@@ -1,9 +1,14 @@
 let pixelShader;
+let backgroundShader;
 let cam;
 let pixelpg;
-let colour;
+let backgroundpg;
+let colour, oldcolour;
 let lerp_amount = 0;
 let menu_loc = false;
+let coltoggle = false;
+let color_lerp = 0;
+let backgroundcol;
 
 
 //load shader for camera module
@@ -11,6 +16,7 @@ let menu_loc = false;
 function shaderPreload() {
   // load the shader
   pixelShader = loadShader('shader/effect.vert', 'shader/effect.frag');
+  backgroundShader = loadShader('shader/effect.vert', 'shader/background.frag');
 }
 
 function shaderSetup() {
@@ -19,13 +25,17 @@ function shaderSetup() {
   cam.elt.setAttribute('playsinline', '');
 
   pixelpg = createGraphics(cnv.width, cnv.height, WEBGL);
-
+  backgroundpg = createGraphics(cnv.width, cnv.height, WEBGL);
+  colour = color(0,0,0);
+  oldcolour = color(0,0,0);
+  backgroundcol= color(0,0,0);
 }
 
 function shaderDraw() {
 
   // shader() sets the active shader with our shader
   pixelpg.shader(pixelShader);
+  backgroundpg.shader(backgroundShader);
 
   if (pixelShaderToggle) {
     if (lerp_amount < 50) {
@@ -37,6 +47,9 @@ function shaderDraw() {
     }
 
   }
+
+
+
 
 
   pixelShader.setUniform('tex0', cam);
@@ -54,11 +67,39 @@ function shaderDraw() {
   }
 
 
+if (coltoggle){
+  if (color_lerp <= 200) {
+    color_lerp = color_lerp + 1;
+  }
+}
+
+if (!coltoggle){
+  if (color_lerp >= 0) {
+    color_lerp = color_lerp - 1;
+  }
+}
+
+  backgroundShader.setUniform('u_resolution', [width, height]);
+  backgroundShader.setUniform('u_color_old', [oldcolour[0], oldcolour[1], oldcolour[2]]);
+  backgroundShader.setUniform('u_color', [backgroundcol[0], backgroundcol[1], backgroundcol[2]]);
+  backgroundShader.setUniform('u_lerp', map(color_lerp, 0, 200, 0, 1));
+  backgroundShader.setUniform('u_lerp2', map(lerp_amount, 0, 200, 0, 1));
+  // let tileno = 1;
+  // let radius = 20;
+  //
+  // backgroundShader.setUniform('tex0', pixelpg);
+  // backgroundShader.setUniform('resolution', [width, height]);
+  // backgroundShader.setUniform('tileno', tileno);
+  // backgroundShader.setUniform('radius', radius);
+  // backgroundShader.setUniform('u_time', frameCount * 0.05);
+  // backgroundShader.setUniform('isMobile', isMobile);
+
   // rect gives us some geometry on the screen
   pixelpg.rect(0, 0, width, height);
+  backgroundpg.rect(0, 0, width, height);
 
   if (pixelShaderToggle) {
-    image(pixelpg, 0, 0);
+    image(backgroundpg, 0, 0);
   }
 
 }
@@ -68,6 +109,11 @@ function shaderMousePressed() {
   //push to firebase
 
 
+//color_lerp = 0;
+
+if (pixelShaderToggle){
+    backgroundcol = pixelpg.get(width/2,height/2);
+  }
 
 
   detectWebcam(function(hasWebcam) {
@@ -75,8 +121,9 @@ function shaderMousePressed() {
     //console.log(webcam);
     console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
   })
-
-  colour = pixelpg.get(mouseX, height - mouseY); // texture upside down?
+  oldcolour = colour;
+  colour = pixelpg.get(mouseX, height - mouseY);
+   // texture upside down?
   var data = {
     uuid: uuid,
     mouseX_loc: mouseX,
@@ -110,4 +157,5 @@ function shaderMousePressed() {
 
 function shaderWindowResized(w,h) {
   pixelpg.resizeCanvas(w, h);
+  backgroundpg.resizeCanvas(w, h);
 }
