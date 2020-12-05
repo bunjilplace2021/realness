@@ -11,7 +11,7 @@ class Particle {
     this.rand = floor(random(0, 3));
     this.img = img_;
     this.radius = 0.0;
-    this.resize = 0.2 * int(random(1, 3)) + (width*0.0001);
+    this.resize = 0.2 * int(random(1, 3));
     this.maxradius = height;
     this.origWidth = devWidth;
     this.origHeight = devHeight;
@@ -107,6 +107,7 @@ class Particle {
     this.acceleration.mult(0);
     this.lifespan -= 0.0;
     this.velocity.limit(this.maxspeed);
+
 
     this.colour(this.rand);
 
