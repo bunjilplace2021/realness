@@ -178,11 +178,11 @@ const startAudio = async () => {
       if (!synth.isStopped) {
         // setup synth parameters
         !isMobile && synth.grains.forEach((grain) => (grain.volume.value = -6));
-        synth.output.gain.value = 1 / synths.length;
+        synth.grainOutput.gain.value = 1 / numSources;
         synth.filter.type = "lowpass";
         synth.filter.frequency.value = 880 * (i + 1);
         synth.setDetune((i + 1) * 220 - numSources * 440);
-        // synth.setPitchShift(-12 / (i + 1));
+        synth.setPitchShift(-12 / (i + 1));
         // if lower frequency value, higher resonance for low-end drones
         if (synth.filter.frequency.value < 500) {
           synth.filter.Q.value = 2;

@@ -39,8 +39,8 @@ class GrainSynth {
     this.grainOutput.name = "Grain Output";
     this.filter = new Filter(10000, "lowpass", -24, 4);
     this.compressor = new Compressor({
-      ratio: 8,
-      threshold: -24,
+      ratio: 12,
+      threshold: -30,
       release: 1,
       attack: 0.003,
     });
@@ -82,10 +82,10 @@ class GrainSynth {
   setupMaster() {
     this.output = new Gain(1);
     this.output.name = "Output";
-    this.output.gain.setValueAtTime(0.8 / this.numVoices, now());
+    this.output.gain.setValueAtTime(0.7 / this.numVoices, now());
     this.pitchShifter.windowSize = 1;
-    this.filter.connect(this.pitchShifter);
-    // this.compressor.connect(this.pitchShifter);
+    this.filter.connect(this.compressor);
+    this.compressor.connect(this.pitchShifter);
     this.pitchShifter.connect(this.output);
     this.output.connect(this.dest);
 
