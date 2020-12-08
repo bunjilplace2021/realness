@@ -6,8 +6,8 @@ class Particle {
       map(y, 0, devHeight, 0, height)
     );
     this.position = createVector(
-      round(this.map_position.x / 100) * 100,
-      round(this.map_position.y / 100) * 100
+      round(this.map_position.x / 99) * 99,
+      round(this.map_position.y / 99) * 99
     );
     this.resize_position = createVector();
     this.velocity = createVector();
@@ -58,12 +58,16 @@ class Particle {
         this.col,
         map(this.timer, 0, this.timermax, 0, 1)
       );
+      this.fill_col.setAlpha(this.fill_alpha);
     } else {
-      this.col = color(0, this.fill_alpha);
+      this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
       this.fill_col = lerpColor(
         this.fill_col,
         this.col,
         map(this.timer, 0, this.timermax, 0, 1)
+      );
+      this.fill_col.setAlpha(
+        map(this.timer, 0, this.timermax, this.fill_alpha, 0)
       );
     }
 
@@ -81,11 +85,13 @@ class Particle {
         map(this.duration, 0, 200, 0, 1)
       );
     }
+
+    //this.fill_col.setAlpha(this.fill_alpha);
   }
 
-  run() {
+  run(p) {
     this.update();
-    this.display();
+    this.display(p);
   }
 
   intersects(other) {
@@ -99,22 +105,18 @@ class Particle {
   }
 
   resize_window() {
-    this.resize_position.x = map(
-      this.origposition.x,
-      0,
-      this.origWidth,
+    this.resize_position.x = constrain(
+      map(this.origposition.x, 0, this.origWidth, 0, width),
       0,
       width
     );
-    this.resize_position.y = map(
-      this.origposition.y,
-      0,
-      this.origHeight,
+    this.resize_position.y = constrain(
+      map(this.origposition.y, 0, this.origHeight, 0, height),
       0,
       height
     );
-    this.resize_position.x = round(this.resize_position.x / 100) * 100;
-    this.resize_position.y = round(this.resize_position.y / 100) * 100;
+    this.resize_position.x = round(this.resize_position.x / 99) * 99;
+    this.resize_position.y = round(this.resize_position.y / 99) * 99;
 
     this.velocity.x = 0;
     this.velocity.y = 0;
@@ -123,9 +125,6 @@ class Particle {
   }
 
   update() {
-    // this.position.x = (round(this.position.x / 100))*100;
-    // this.position.y = (round(this.position.y / 100))*100;
-
     this.velocity.add(this.acceleration);
     this.position.add(this.velocity);
     this.acceleration.mult(0);
@@ -142,6 +141,8 @@ class Particle {
       this.radius += this.resize;
       this.duration = this.duration + 1;
     }
+
+    //  if (!pixelShaderToggle) {
 
     if (this.duration > 500 && this.active == true) {
       this.lifespan -= 0.2 * (this.rand + 1);
@@ -163,15 +164,19 @@ class Particle {
   }
 
   // Method to display
-  display() {
-    this.fill_col.setAlpha(this.fill_alpha);
+  display(p) {
+    p.push();
 
-    push();
-    noStroke();
-    fill(this.fill_col);
-    ellipseMode(CENTER);
-    ellipse(this.position.x, this.position.y, this.radius);
-    pop();
+    if (pixelShaderToggle && this.UUID == uuid) {
+      p.stroke(255, this.fill_alpha);
+    } else {
+      p.noStroke();
+    }
+    //p.stroke(0,this.fill_alpha);
+    p.fill(this.fill_col);
+    p.ellipseMode(CENTER);
+    p.ellipse(this.position.x, this.position.y, this.radius);
+    p.pop();
   }
 
   isDead() {

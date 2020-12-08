@@ -1,4 +1,5 @@
 var isMobile = false;
+var isAndroid = false;
 
 var pixelShaderToggle = false;
 var instruction_toggle = false;
@@ -17,6 +18,8 @@ let uuid;
 let webcam = false;
 
 let array_limit = 30;
+
+let particlepg;
 
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
@@ -68,22 +71,31 @@ function detectWebcam(callback) {
 function setup() {
   if (isMobile == false) {
     cnv = createCanvas(windowWidth, windowHeight);
+    particlepg = createGraphics(windowWidth, windowHeight);
     cnv.id("mycanvas");
     cnv.style("display", "block");
-    FScreen.style.display = "block";
+    //icons_toolbar.style.display = "block";
   } else {
     if (windowWidth < windowHeight) {
       inner = iosInnerHeight();
       cnv = createCanvas(windowWidth, inner);
+      particlepg = createGraphics(windowWidth, inner);
       cnv.id("mycanvas");
       cnv.style("display", "block");
       console.log("portrait");
     } else {
       cnv = createCanvas(windowWidth, windowHeight);
+      particlepg = createGraphics(windowWidth, windowHeight);
       cnv.id("mycanvas");
       cnv.style("display", "block");
+
       console.log("landscape");
     }
+
+    //     if (!isAndroid){
+    //     fullicons.style.display = "none";
+    // console.log('test')
+    //     }
   }
 
   pixelDensity(1);
@@ -94,8 +106,7 @@ function setup() {
 }
 
 function draw() {
-  particle_draw();
-  drawFPS();
+  particle_draw(particlepg);
 }
 
 function shaderToggle() {
@@ -112,16 +123,21 @@ function guid() {
   return _p8() + _p8(true) + _p8(true) + _p8();
 }
 
-function particle_draw() {
+function particle_draw(p) {
   touchtime = frameCount % 600; //10 second loop approx
 
-  blendMode(BLEND);
-  background(0);
-  blendMode(ADD);
+  if (!pixelShaderToggle) {
+    p.blendMode(BLEND);
+    p.background(0);
+    p.blendMode(ADD);
+  } else {
+    p.clear();
+  }
 
   if (!isMobile) {
     push();
     noCursor();
+
     fill(255, 100);
     noStroke();
     ellipseMode(CENTER);
@@ -129,11 +145,13 @@ function particle_draw() {
     pop();
   }
 
-  ps.run();
+  ps.run(p);
   ps.intersection();
   ps.resize_window();
 
   shaderDraw();
+
+  image(particlepg, 0, 0);
 }
 
 function mousePressed() {
@@ -149,21 +167,29 @@ function keyPressed() {
 
     if (hideicon) {
       menuicon.style.display = "none";
+      menu_txt.style.display = "none";
     } else {
       menuicon.style.display = "block";
+      menu_txt.style.display = "block";
     }
+  }
+
+  if (key == "R" || key == "r") {
+    removeData();
   }
 }
 
 function windowResized() {
   if (!isMobile) {
     resizeCanvas(windowWidth, windowHeight);
+    particlepg.resizeCanvas(windowWidth, windowHeight);
+    shaderWindowResized(windowWidth, windowHeight);
   } else {
     let innerh = iosInnerHeight();
     resizeCanvas(windowWidth, innerh);
+    particlepg.resizeCanvas(windowWidth, innerh);
+    shaderWindowResized(windowWidth, innerh);
   }
-
-  shaderWindowResized();
 }
 
 function infoInstructions() {
@@ -172,9 +198,18 @@ function infoInstructions() {
   menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
 
+  // if (pixelShaderToggle) {
+  document.getElementById("top").style.backgroundColor =
+    "rgba(127, 127, 127, 0.2)";
+  document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
+  document.getElementById("top").style.backdropFilter = "blur(30px)";
+
+  // }
+
   if (instruction_toggle) {
-    FScreen.style.display = "block";
-    myLinks.style.background = "rgba(0, 0, 0, 0.6)";
+    document.getElementById("menu_txt").style.display = "none";
+
+    //    icons_toolbar.style.display = "block";
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
@@ -182,6 +217,10 @@ function infoInstructions() {
     myLinks.style.background = "none";
     myInfo.style.overflowY = "hidden";
     didactic_toggle = false;
+    document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.0)";
+    document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
+    document.getElementById("top").style.backdropFilter = "blur(0px)";
+    document.getElementById("menu_txt").style.display = "block";
   }
 }
 
@@ -189,16 +228,20 @@ function didactic() {
   didactic_toggle = !didactic_toggle;
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  myInfo.style.background = "rgba(0, 0, 0, 0.4)";
+  myInfo.style.background = "rgba(127, 127, 127, 0.2)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    myInfo.style.background = "rgba(0, 0, 0, 0.4)";
+    myInfo.style.background = "rgba(127, 127, 127, 0.2)";
+    document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
+    document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
     //  myInfo.style.overflowY = "scroll";
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
+    document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
+    document.getElementById("myInfo").style.backdropFilter = "blur(none)";
   }
 }
 
@@ -209,11 +252,17 @@ function didactic() {
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
 
-  if (pixelShaderToggle) {
-    document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.4)";
-  } else {
-    document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.0)";
-  }
+  // if (pixelShaderToggle) {
+  //   document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+  //   document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
+  //   document.getElementById("top").style.backdropFilter = "blur(30px)";
+  //
+  // } else {
+  //   document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
+  //   document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
+  //   document.getElementById("top").style.backdropFilter = "blur(0px)";
+  //
+  // }
 }
 
 function fullScreenMenu() {

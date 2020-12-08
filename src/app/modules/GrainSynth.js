@@ -25,7 +25,7 @@ class GrainSynth {
 
     this.grains = [];
     this.presets = [];
-    this.isPlaying = false;
+    this.isStopped = false;
     this.numVoices = voices;
     this.buffer = buffer;
     this.nodes = [];
@@ -71,7 +71,14 @@ class GrainSynth {
       }
     });
   }
-
+  debug() {
+    this.grains.forEach((grain) => {
+      grain.debug = true;
+      grain.playbackRate = 1;
+      grain.grainSize = 0.5;
+    });
+    this.setClockFrequency(1);
+  }
   setupMaster() {
     this.output = new Gain(1);
     this.output.name = "Output";
@@ -100,15 +107,14 @@ class GrainSynth {
     this.grains.forEach(async (grain, i) => {
       grain.start(`+${i}`, i + startTime);
     });
-    this.isPlaying = true;
+    this.isStopped = false;
   }
   stop() {
-    this.transport.stop();
     this.grains.forEach((grain) => {
       grain.stop();
     });
-    this.output.gain.setValueAtTime(0, this.toneContext.currentTime);
-    this.isPlaying = false;
+
+    this.isStopped = true;
   }
   kill() {
     this.grains.forEach((grain) => grain.dispose());

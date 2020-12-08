@@ -1,7 +1,6 @@
 class Recorder {
   constructor(length = 800, ctx) {
     this.length = length;
-
     //instantiate audiocontext
     this.audioCtx = ctx;
   }
@@ -11,7 +10,6 @@ class Recorder {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.stream = stream;
-
       return true;
     } catch (error) {
       console.log(error);
@@ -27,13 +25,11 @@ class Recorder {
       this.mediaRecorder.addEventListener("dataavailable", (event) => {
         this.audioChunks.push(event.data);
       });
-
       setTimeout(() => {
         this.mediaRecorder.stop();
         this.recording = false;
         // console.log("stopped recorder");
       }, this.length);
-
       this.mediaRecorder.addEventListener("stop", () => {
         this.audioBlob = new Blob(this.audioChunks, { type: "audio/mpeg-3" });
         this.audioUrl = URL.createObjectURL(this.audioBlob);
@@ -62,7 +58,14 @@ class Recorder {
       const decodedBuffer = await this.audioCtx.decodeAudioData(
         this.arrayBuffer
       );
-      this.decodedBuffer = decodedBuffer;
+      return new Promise((resolve, reject) => {
+        try {
+          resolve(decodedBuffer);
+          this.decodedBuffer = decodedBuffer;
+        } catch (error) {
+          reject(error);
+        }
+      });
     }
   }
   createSource(decodedBuffer) {

@@ -21,9 +21,6 @@ export function normalizeArray(arr, min, max) {
   });
 }
 
-export function timedAction(func, time, audioCtx) {
-  const startTime = audioCtx.currentTime();
-}
 export function isBetween(x, min, max) {
   return x >= min && x <= max;
 }
@@ -45,17 +42,15 @@ export function resampleBuffer(input, target_rate) {
     const bufferMax = Math.max(...input.getChannelData(0));
     let filter = off.createBiquadFilter();
     filter.frequency.value = ~~(Math.random() * 10 + 1) * 110;
-    console.log(filter.frequency.value);
     filter.type = "bandpass";
-
     //  calculate difference from 1
     // subtract max volume value from 1, set gain to that value
     const diff = Math.abs(1 - bufferMax);
     const gainNode = off.createGain();
     gainNode.gain.value = diff;
     source.buffer = input;
-    source.connect(filter);
-    filter.connect(gainNode);
+    source.connect(gainNode);
+    // filter.connect(gainNode);
     gainNode.connect(off.destination);
     source.start(0);
     try {

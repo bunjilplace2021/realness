@@ -13,6 +13,7 @@ import {
   Filter,
   Noise,
   setContext,
+  start,
 } from "tone";
 
 // UTILITIES
@@ -27,8 +28,9 @@ import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
 getContext().rawContext.suspend();
-
 const isMobile = window.innerWidth < 600;
+let isMuted = true;
+let muteClicked = 0;
 let sampleRate = isMobile ? 22050 : 44100;
 
 // create own audio context
@@ -40,6 +42,7 @@ let soundtrackAudioCtx = new Context({
 });
 
 soundtrackAudioCtx.name = "Playback Context";
+
 // set that context as the global tone.js context
 setContext(soundtrackAudioCtx);
 let masterBus;
@@ -67,10 +70,10 @@ recordButton.onclick = async () => {
   soundLog("got permissions");
   const blob = await r.recordChunks();
   soundLog(blob);
-  await r.loadToBuffer();
+  const decodedBuffer = await r.loadToBuffer();
   setTimeout(() => {
-    r.decodedBuffer && recordButton.classList.remove("red");
-    reloadBuffers(r.decodedBuffer);
+    decodedBuffer && recordButton.classList.remove("red");
+    reloadBuffers(decodedBuffer);
     f.uploadSample(r.audioBlob);
   }, recordLength);
 };
@@ -85,7 +88,7 @@ const subOsc = new FMOscillator({
 
 const reloadBuffers = (customBuffer = null) => {
   // fetch new samples from database and load them into existing buffers
-  console.log(customBuffer);
+
   if (!customBuffer) {
     synths.forEach(async (synth) => {
       await f.getSample();
@@ -104,13 +107,11 @@ const reloadBuffers = (customBuffer = null) => {
       soundLog("reloaded buffers");
     });
   } else {
+    let floatBuf = new Float32Array(customBuffer.length);
+    customBuffer.copyFromChannel(floatBuf, 0, 0);
     synths.forEach((synth) => {
-      let floatBuf = new Float32Array(customBuffer.length);
-      customBuffer.copyFromChannel(floatBuf, 0, 0);
-      console.log(floatBuf);
       synth.buffer.copyToChannel(floatBuf, 0, 0);
       // purge buffer
-      floatBuf = null;
       synth.randomStarts();
       synth.randomInterpolate();
       soundLog("loaded user buffers");
@@ -137,7 +138,7 @@ const subOscillator = () => {
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
   subOsc.volume.value = -48;
-  subOsc.volume.targetRampTo(-32, 10);
+  subOsc.volume.targetRampTo(-30, 10);
   subOsc.filter.frequency.value = 80;
   noise.start("+1");
   subOsc.start("+1");
@@ -164,28 +165,24 @@ const loadSynths = async () => {
 
 // method to start audio
 const startAudio = async () => {
-  // don't start audio unless the context is running -- requires user gesture
-  if (soundtrackAudioCtx.state !== "running") {
+  // if the audioCtx is suspended - it must be the first time it is run
+  if (soundtrackAudioCtx.state === "suspended" && !isMuted) {
+    await start();
     await soundtrackAudioCtx.resume();
-  }
-  // setup master effects bus
-
-  // main synth setup loop
-  if (!synths[synths.length - 1].isPlaying) {
     masterBus = new MasterBus(soundtrackAudioCtx);
     masterBus.connectSource(u.master);
     synths.forEach(async (synth, i) => {
       // wait for all of the individual grains to load
       await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
       // if the synth isn't already playing...
-      if (!synth.isPlaying) {
+      if (!synth.isStopped) {
         // setup synth parameters
         !isMobile && synth.grains.forEach((grain) => (grain.volume.value = -6));
         synth.output.gain.value = 1 / synths.length;
         synth.filter.type = "lowpass";
         synth.filter.frequency.value = 880 * (i + 1);
         synth.setDetune((i + 1) * 220 - numSources * 440);
-        synth.setPitchShift(-12 / (i + 1));
+        // synth.setPitchShift(-12 / (i + 1));
         // if lower frequency value, higher resonance for low-end drones
         if (synth.filter.frequency.value < 500) {
           synth.filter.Q.value = 2;
@@ -201,58 +198,60 @@ const startAudio = async () => {
         //  if user clicks, randomize synth parameters and play a UI sound
       }
     });
-
     subOscillator();
     masterBus.lowpassFilter(5000, 1);
     !isMobile && masterBus.chorus(0.01, 300, 0.9);
     !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
-  }
-
-  document.querySelector("body").onclick = () => {
-    u.play(uiNotes[~~Math.random * uiNotes.length]);
-    synths.forEach((synth) => {
-      synth.randomInterpolate();
-    });
-  };
-  // // loop to poll paprticle system values
-  synths[0].transport.scheduleRepeat((time) => {
-    pollValues();
-  }, 10);
-  // loop to reload samples every 30 seconds approx
-
-  if (!r.decodedBuffer) {
+    document.querySelector("body").onclick = () => {
+      u.play(uiNotes[~~Math.random * uiNotes.length]);
+      synths.forEach((synth) => {
+        synth.randomInterpolate();
+      });
+    };
+    // // loop to poll paprticle system values
     synths[0].transport.scheduleRepeat((time) => {
-      reloadBuffers();
-    }, 30);
+      pollValues();
+    }, 10);
+    // loop to reload samples every 30 seconds approx
+    if (!r.decodedBuffer) {
+      synths[0].transport.scheduleRepeat((time) => {
+        reloadBuffers();
+      }, 30);
+    }
+    subOscLoop();
   }
 
-  subOscLoop();
-  // getNodes(soundtrackAudioCtx);
+  // don't start audio unless the context is running -- requires user gesture
+  if (soundtrackAudioCtx.state === "closed") {
+    console.log("audio context is closed by user gesture, restarting");
+    await soundtrackAudioCtx.rawContext.resume();
+  }
+
+  // main synth setup loop
 };
 
 const pollValues = () => {
-  if (ps && ps.particles) {
-    let { radius, maxradius } = ps.particles[ps.particles.length - 1];
-    synths.forEach((synth, i) => {
-      synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
-      let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 1100);
-      !isMobile && synth.filter.frequency.rampTo(filterFreq, 1);
-    });
-    subOsc.filter.frequency.rampTo(
-      mapValue(~~radius, 0, ~~maxradius, 50, 120),
-      10
-    );
+  try {
+    if (ps && ps.particles) {
+      let { radius, maxradius } = ps.particles[ps.particles.length - 1];
+      synths.forEach((synth, i) => {
+        synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
+        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 1100);
+        !isMobile && synth.filter.frequency.rampTo(filterFreq, 1);
+      });
+      subOsc.filter.frequency.rampTo(
+        mapValue(~~radius, 0, ~~maxradius, 50, 120),
+        10
+      );
+    }
+  } catch (error) {
+    console.warn("particle system not defined, threw error" + error);
   }
 };
 const stopAudio = () => {
   if (soundtrackAudioCtx.state === "running") {
     soundtrackAudioCtx.rawContext.suspend();
-    soundtrackAudioCtx.dispose();
   }
-  synths.forEach((synth) => {
-    synth.stop();
-    synth.isPlaying = false;
-  });
 };
 const subOscLoop = () => {
   synths[0].transport.scheduleRepeat((time) => {
@@ -270,14 +269,23 @@ const changeMuteButton = () => {
     muteButton.classList.remove("fa-volume-up");
   }
 };
-
+const restartAudio = () => {
+  soundtrackAudioCtx.rawContext.resume();
+};
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = () => {
+  // keep track of number of clicks
+  muteClicked++;
+  isMuted = !isMuted;
+  changeMuteButton();
   //  if synths are loaded, start audio and change DOM element
   if (synthsLoaded) {
-    changeMuteButton();
-    if (!synths[synths.length - 1].isPlaying) {
-      startAudio();
+    if (!isMuted) {
+      if (muteClicked === 1) {
+        startAudio();
+      } else {
+        restartAudio();
+      }
     } else {
       stopAudio();
     }
