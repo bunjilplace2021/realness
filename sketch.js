@@ -176,11 +176,16 @@ function keyPressed() {
 
     if (hideicon) {
       menuicon.style.display = "none";
+      menu_txt.style.display = "none";
     } else {
       menuicon.style.display = "block";
+      menu_txt.style.display = "block";
     }
-
   }
+
+  if (key == 'R' || key == 'r') {
+  removeData();
+}
 }
 
 

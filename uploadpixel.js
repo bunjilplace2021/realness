@@ -128,15 +128,20 @@ backgroundcol = colorDraw(colour);
 
 }
 
+
+function removeData() {
+  var testremove = database.ref('test3');
+testremove.remove()
+.then(function() {
+  console.log("Remove succeeded.")
+})
+.catch(function(error){
+  console.log("Remove failed: "+ error.message)
+});
+
+}
+
 function shaderMousePressed() {
-
-  //push to firebase
-
-
-//color_lerp = 0;
-
-
-
 
   detectWebcam(function(hasWebcam) {
     webcam = hasWebcam;
