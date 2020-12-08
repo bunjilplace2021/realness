@@ -17,8 +17,8 @@ class Particle {
     this.rand = floor(random(0, 3));
     this.img = img_;
     this.radius = 0.0;
-    this.resize = 0.2 * int(random(1, 3));
-    this.maxradius = height;
+    this.resize = 0.2 * int(random(1, 3)) + width * 0.0001;
+    this.maxradius = width >= height ? width : height;
     this.origWidth = devWidth;
     this.origHeight = devHeight;
     this.touchtime = touchTime;
@@ -117,6 +117,8 @@ class Particle {
     );
     this.resize_position.x = round(this.resize_position.x / 99) * 99;
     this.resize_position.y = round(this.resize_position.y / 99) * 99;
+    this.resize = 0.2 * int(random(1, 3)) + width * 0.0001;
+    this.maxradius = width >= height ? width : height;
 
     this.velocity.x = 0;
     this.velocity.y = 0;
