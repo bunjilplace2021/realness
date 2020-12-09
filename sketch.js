@@ -287,7 +287,7 @@ function cameratoggle() {
 function fullScreenMenu() {
   let fs = fullscreen();
   fullscreen(!fs);
-  fullicons.classList.toggle("fa-expand");
+  fullicons.classList.toggle("fa-compress");
   document.body.scrollTop = 0; // <-- pull the page back up to the top
   document.body.style.overflow = 'hidden';
 }
