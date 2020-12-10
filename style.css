@@ -82,7 +82,7 @@ video {
 
 #mute {
   transition: opacity 0.3s ease-out;
-  min-width: 36px;
+
   color: white;
 }
 
