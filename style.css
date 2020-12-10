@@ -18,7 +18,6 @@ body {
   font-family: "Avenir Next", "Avenir", "Nunito Sans", sans-serif;
 }
 
-
 canvas {
   display: block;
 }
@@ -147,13 +146,12 @@ video {
 }
 
 .content .logos {
-width:30%;
-height:30%;
- vertical-align: middle;
- padding-left:1em;
- padding-right:1em;
- align-items: center;
-
+  width: 30%;
+  height: 30%;
+  vertical-align: middle;
+  padding-left: 1em;
+  padding-right: 1em;
+  align-items: center;
 }
 
 .animated {
