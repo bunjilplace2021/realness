@@ -17,7 +17,7 @@ let uuid;
 
 let webcam = false;
 
-let array_limit = 30;
+let array_limit = 20;
 
 let particlepg;
 
