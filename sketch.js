@@ -255,6 +255,8 @@ function cameratoggle() {
 }
 
 function fullScreenMenu() {
+  // changed to define fullicons as expand toggle
+  const fullicons = document.querySelector("#fullicons");
   let fs = fullscreen();
   fullscreen(!fs);
   fullicons.classList.toggle("fa-compress");
