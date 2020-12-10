@@ -50,7 +50,7 @@ video {
 
 .topnav a {
   float: left;
-  width: calc(100% / 5);
+  width: calc(100% / 7);
   color: white;
   text-align: center;
   text-decoration: none;
