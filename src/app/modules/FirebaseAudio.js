@@ -36,7 +36,7 @@ class FireBaseAudio {
   async getSample() {
     // await this.listAll();
     const ChosenFile = this.files.items[
-      ~~(this.files.items.length * Math.random())
+      ~~(Math.random() * this.files.items.length)
     ];
     this.audioFile = await ChosenFile.getDownloadURL();
   }
