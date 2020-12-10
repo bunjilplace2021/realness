@@ -22,16 +22,18 @@ import {
   mapValue,
   resampleBuffer,
   soundLog,
+  safariFallback,
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
+
 getContext().rawContext.suspend();
 const isMobile = window.innerWidth < 600;
 let isMuted = true;
 let muteClicked = 0;
-let sampleRate = isMobile ? 22050 : 44100;
+let sampleRate = 44100;
 
 // create own audio context
 let soundtrackAudioCtx = new Context({
@@ -148,12 +150,31 @@ const loadSynths = async () => {
   await f.listAll();
   for (let i = 0; i < numSources; i++) {
     await f.getSample();
+
+    const isSafari = window.safari !== undefined;
+
+    isSafari &&
+      console.log("User is on safari! Changing decode to user gesture");
     // fetch random samples from database
-    const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-    const resampledBuf = await resampleBuffer(buf, sampleRate);
+    // console.log(f.audioFile);
+    // TODO: if it is safari, wait for user gesture before downlaoding file
+    let buf;
+    if (!isSafari) {
+      buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+    } else {
+      buf = await safariFallback(f.audioFile, soundtrackAudioCtx);
+    }
+
+    // let resampledBuf;
+    // try {
+    //   resampledBuf = await resampleBuffer(buf, sampleRate);
+    // } catch (error) {
+    //   resampledBuf = buf;
+    // }
+
     if (f.audioFile) {
       soundLog("Loaded GrainSynth " + (i + 1));
-      synths.push(new GrainSynth(resampledBuf, soundtrackAudioCtx, numVoices));
+      synths.push(new GrainSynth(buf, soundtrackAudioCtx, numVoices));
     }
   }
   synthsLoaded = true;
@@ -273,7 +294,13 @@ const restartAudio = () => {
   soundtrackAudioCtx.rawContext.resume();
 };
 // allow unmuting once synths loaded from firebase
-muteButton.onclick = () => {
+muteButton.onclick = async () => {
+  //  if safari - load synths on unmute
+  if (window.safari) {
+    await start();
+    await soundtrackAudioCtx.resume();
+    loadSynths();
+  }
   // keep track of number of clicks
   muteClicked++;
   isMuted = !isMuted;
@@ -294,7 +321,7 @@ muteButton.onclick = () => {
 
 //  MAIN ///
 // load synths!
-loadSynths();
+!window.safari && loadSynths();
 UISound();
 
 // ! allow hot reloading of the files in project (webpack)

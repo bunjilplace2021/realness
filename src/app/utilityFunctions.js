@@ -5,9 +5,34 @@ import { Filter } from "tone";
 export async function fetchSample(url, ctx) {
   return fetch(url)
     .then((response) => response.arrayBuffer())
-    .then((arrayBuffer) => ctx.decodeAudioData(arrayBuffer));
+    .then((arrayBuffer) => ctx.decodeAudioData(arrayBuffer))
+    .catch((error) => console.log(error));
 }
 
+export async function safariFallback(url, ctx) {
+  ctx.decodeAudioData = window.webkitAudioContext.decodeAudioData;
+  const response = await fetch(url);
+  const arrayBuf = await response.arrayBuffer();
+  document.body.addEventListener("touchstart", function () {
+    const elt = document.createElement("audio");
+    elt.src = arrayBuf;
+    elt.play();
+    elt.pause();
+    elt.currentTime = 0;
+  });
+
+  console.log(ctx);
+  ctx.decodeAudioData(
+    arrayBuf,
+    (audioBuffer) => {
+      console.log(audioBuffer);
+      return audioBuffer;
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
+}
 //  map one range of values to another
 export function mapValue(input, inMin, inMax, outMin, outMax) {
   return ((input - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
@@ -30,7 +55,15 @@ export function resampleBuffer(input, target_rate) {
     if (typeof target_rate != "number" && target_rate <= 0) {
       reject("Samplerate is not a number");
     }
-    let resampling_ratio = input.sampleRate / target_rate;
+    // if can set samplerate (eg.not on safari)
+    let resampling_ratio;
+
+    if (typeof input.sampleRate === Number) {
+      resampling_ratio = input.sampleRate / target_rate;
+    } else {
+      resampling_ratio = 44100 / target_rate;
+    }
+
     let final_length = input.length * resampling_ratio;
     let off = new OfflineAudioContext(
       input.numberOfChannels,

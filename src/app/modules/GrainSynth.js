@@ -50,7 +50,7 @@ class GrainSynth {
     });
     for (let i = 0; i < this.numVoices; i++) {
       this.grains[i] = new GrainPlayer(this.buffer);
-      this.grains[i].buffer.toMono();
+      // this.grains[i].buffer.toMono();
       this.grains[i].channelCount = 1;
     }
 
