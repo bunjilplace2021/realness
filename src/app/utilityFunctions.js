@@ -10,12 +10,12 @@ export async function fetchSample(url, ctx) {
 }
 
 export async function safariFallback(url, ctx) {
-  ctx.decodeAudioData = window.webkitAudioContext.decodeAudioData;
   const response = await fetch(url);
   const arrayBuf = await response.arrayBuffer();
   document.body.addEventListener("touchstart", function () {
     const elt = document.createElement("audio");
     elt.src = arrayBuf;
+    console.log(elt);
     elt.play();
     elt.pause();
     elt.currentTime = 0;
