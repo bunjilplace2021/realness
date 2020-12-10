@@ -251,24 +251,13 @@ function didactic() {
 
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
-
-  // if (pixelShaderToggle) {
-  //   document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
-  //   document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
-  //   document.getElementById("top").style.backdropFilter = "blur(30px)";
-  //
-  // } else {
-  //   document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
-  //   document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
-  //   document.getElementById("top").style.backdropFilter = "blur(0px)";
-  //
-  // }
+  icons.classList.toggle("select");
 }
 
 function fullScreenMenu() {
   let fs = fullscreen();
   fullscreen(!fs);
-  fullicons.classList.toggle("fa-expand");
+  fullicons.classList.toggle("fa-compress");
   document.body.scrollTop = 0; // <-- pull the page back up to the top
   document.body.style.overflow = "hidden";
 }
