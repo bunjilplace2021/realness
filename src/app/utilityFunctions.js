@@ -12,26 +12,51 @@ export async function fetchSample(url, ctx) {
 export async function safariFallback(url, ctx) {
   const response = await fetch(url);
   const arrayBuf = await response.arrayBuffer();
-  document.body.addEventListener("touchstart", function () {
-    const elt = document.createElement("audio");
-    elt.src = arrayBuf;
-    console.log(elt);
-    elt.play();
-    elt.pause();
-    elt.currentTime = 0;
-  });
+  let context = new webkitAudioContext();
+  const offlineCtx = new webkitOfflineAudioContext(2, 44100 * 40, 44100);
 
-  console.log(ctx);
-  ctx.decodeAudioData(
-    arrayBuf,
-    (audioBuffer) => {
-      console.log(audioBuffer);
-      return audioBuffer;
-    },
-    (error) => {
-      console.log(error);
-    }
-  );
+  let source = offlineCtx.createBufferSource();
+
+  // use XHR to load an audio track, and
+  // decodeAudioData to decode it and OfflineAudioContext to render it
+
+  function getData() {
+    let request = new XMLHttpRequest();
+
+    request.open("GET", url, true);
+
+    request.responseType = "arraybuffer";
+
+    request.onload = function () {
+      var audioData = request.response;
+
+      context.decodeAudioData(audioData, function (buffer) {
+        myBuffer = buffer;
+        source.buffer = myBuffer;
+        source.connect(offlineCtx.destination);
+        source.start();
+        //source.loop = true;
+        offlineCtx
+          .startRendering()
+          .then(function (renderedBuffer) {
+            console.log("Rendering completed successfully");
+
+            console.log(renderedBuffer);
+          })
+          .catch(function (err) {
+            console.log("Rendering failed: " + err);
+            // Note: The promise should reject when startRendering is called a second time on an OfflineAudioContext
+          });
+      });
+    };
+
+    request.send();
+  }
+
+  // Run getData to start the process off
+
+  getData();
+  context.suspend();
 }
 //  map one range of values to another
 export function mapValue(input, inMin, inMax, outMin, outMax) {
