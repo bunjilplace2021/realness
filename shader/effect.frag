@@ -39,14 +39,15 @@ vec2 st = gl_FragCoord.xy;  //centre screen
     uv = 1.0 - uv;
 
   // get the webcam as a vec4 using texture2D
-  vec3 tex = texture2D(tex0, uv).rgb;
+  vec3 tex = texture2D(tex0,uv).rgb;
+  //vec3 col = mix(tex,1.0-tex,uv.x);
 
-//  vec3 col = lerp(vec3(0.0),tex,vec3(u_lerp));
+vec3 col = lerp(vec3(0.0),tex,vec3(u_lerp));
 
   // lets invert the colors just for kicks
 //  tex.rgb = 1.0 - tex.rgb;
 
 
 
-  gl_FragColor = vec4(tex,u_lerp);
+  gl_FragColor = vec4(col,u_lerp);
 }

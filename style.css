@@ -22,6 +22,11 @@ canvas {
   display: block;
 }
 
+canvas #can {
+  filter: blur(30px);
+}
+
+
 video {
   position: absolute;
   width: 0;

@@ -5,16 +5,15 @@ precision mediump float;
 // lets grab texcoords just for fun
 varying vec2 vTexCoord;
 
+uniform vec2 u_mouse;
 uniform vec2 u_resolution;
+uniform vec2 u_pip;
+uniform vec2 u_pip_mouse;
+
 uniform vec3 u_color;
 
-//uniform vec2 u_devicecamres;
-//uniform float u_lerp2;
+uniform sampler2D tex1;
 
-
-vec3 lerp(vec3 from, vec3 to, vec3 rel){
-  return ((vec3(1.0) - rel) * from) + (rel * to);
-}
 
 mat2 rotate2d(float _angle){
     return mat2(cos(_angle),-sin(_angle),
@@ -22,9 +21,12 @@ mat2 rotate2d(float _angle){
 }
 
 
+
 void main() {
 
+
 vec2 uv =  gl_FragCoord.xy/u_resolution;
+
 
   uv -= vec2(0.5);
     // rotate the space
@@ -32,11 +34,14 @@ vec2 uv =  gl_FragCoord.xy/u_resolution;
     // move it back to the original place
   uv += vec2(0.5);
 
-vec3 pix = u_color/255.0;
 
- vec3 colout= mix(pix,1.0 - pix, uv.x);
+  vec3 pix = u_color/255.0;
 
- //vec3 colfinal = mix(vec3(0.0),colout,u_lerp2);
 
-  gl_FragColor = vec4(colout,1.0);
+
+ vec3 bg = mix(pix,1.0 - pix, uv.x);
+
+
+
+  gl_FragColor = vec4(bg,1.0);
 }

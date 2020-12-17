@@ -72,7 +72,7 @@ function setup() {
       inner = iosInnerHeight();
       cnv = createCanvas(windowWidth, inner);
       particlepg = createGraphics(windowWidth, inner);
-      cnv.id('mycanvas');
+      particlepg.id('can');
       cnv.style('display', 'block');
       console.log("portrait")
     } else {
@@ -154,6 +154,12 @@ ps.resize_window();
 shaderDraw();
 
 image(particlepg, 0, 0);
+
+if (pixelShaderToggle) {
+//  image(backgroundpg, 0, 0);
+  image(pippg, 0, 0);
+}
+
 
 }
 
