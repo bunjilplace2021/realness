@@ -22,6 +22,8 @@ let array_limit = 20;
 
 let particlepg;
 
+let isSafari = false;
+
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
   var cnv_y = (windowHeight - height) / 2;
@@ -42,6 +44,10 @@ function preload() {
   if (/android/i.test(navigator.userAgent)) {
     isAndroid = true;
   }
+
+
+  isSafari = checkIfWebKit();
+
   uuid = guid();
   shaderPreload();
 
@@ -54,6 +60,26 @@ function detectWebcam(callback) { //check if webcam device exists and/or permiss
   md.enumerateDevices().then(devices => {
     callback(devices.some(device => '' != device.label));
   })
+}
+
+function checkIfWebKit() {
+  var ua = navigator.userAgent.toLowerCase();
+
+  var isWebKit = false;
+
+  if ((ua.indexOf("chrome") === ua.indexOf("android")) && ua.indexOf("safari") !== -1) {
+    // accessed via a WebKit-based browser
+    isWebKit = true;
+  } else {
+    // check if accessed via a WebKit-based webview
+    if ((ua.indexOf("ipad") !== -1) || (ua.indexOf("iphone") !== -1) || (ua.indexOf("ipod") !== -1)) {
+      isWebKit = true;
+    } else {
+      isWebKit = false;
+    }
+  }
+
+  return isWebKit;
 }
 
 function setup() {

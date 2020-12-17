@@ -9,6 +9,7 @@ uniform sampler2D tex0;
 uniform vec2 u_resolution;
 uniform vec2 u_devicecamres;
 uniform float u_lerp;
+uniform float u_safari;
 
 
 vec3 lerp(vec3 from, vec3 to, vec3 rel){
@@ -19,11 +20,7 @@ vec3 lerp(vec3 from, vec3 to, vec3 rel){
 void main() {
 
 vec2 uv = vTexCoord;
-
 vec2 st = gl_FragCoord.xy;  //centre screen
-
-
-
 
   float aspect_ratio_ratio = u_resolution.x / u_resolution.y / (u_devicecamres.x / u_devicecamres.y);
 
@@ -36,7 +33,10 @@ vec2 st = gl_FragCoord.xy;  //centre screen
 
 
       // the texture is loaded upside down and backwards by default so lets flip it
-    uv = 1.0 - uv;
+  //  uv = 1.0 - uv;
+  uv.y = (1.0 -uv.y) * step(u_safari,0.9) + uv.y * step(0.9,u_safari);
+
+
 
   // get the webcam as a vec4 using texture2D
   vec3 tex = texture2D(tex0,uv).rgb;
