@@ -46,6 +46,11 @@ let soundtrackAudioCtx = new Context({
 soundtrackAudioCtx.name = "Playback Context";
 
 // set that context as the global tone.js context
+
+if (window.safari) {
+  setContext(new webkitAudioContext());
+}
+
 setContext(soundtrackAudioCtx);
 let masterBus;
 let synths = [];
@@ -296,14 +301,19 @@ const restartAudio = () => {
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = async () => {
   //  if safari - load synths on unmute
-  if (window.safari) {
-    await start();
-    await soundtrackAudioCtx.resume();
-    loadSynths();
-  }
+
   // keep track of number of clicks
   muteClicked++;
   isMuted = !isMuted;
+
+  if (window.safari && muteClicked === 1) {
+    loadSynths();
+    soundtrackAudioCtx.resume();
+    await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
+    if (synthsLoaded) {
+      startAudio();
+    }
+  }
   changeMuteButton();
   //  if synths are loaded, start audio and change DOM element
   if (synthsLoaded) {
@@ -322,6 +332,7 @@ muteButton.onclick = async () => {
 //  MAIN ///
 // load synths!
 !window.safari && loadSynths();
+
 UISound();
 
 // ! allow hot reloading of the files in project (webpack)
