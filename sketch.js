@@ -274,7 +274,7 @@ function volumemute() {
 
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
-  icons.classList.toggle("select");
+  //icons.classList.toggle("select");
 
 }
 

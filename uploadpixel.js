@@ -78,7 +78,6 @@ function shaderDraw() {
   }
 
 
-
   pixelShader.setUniform('tex0', cam);
   pixelShader.setUniform('u_resolution', [width, height]);
   pixelShader.setUniform('u_lerp', map(lerp_amount, 0, 50, 0, 1));
@@ -169,7 +168,7 @@ testremove.remove()
 });
 
 //color_lerp = 0;
-
+}
 
 
 function shaderMousePressed() {
