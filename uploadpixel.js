@@ -100,23 +100,32 @@ if (!coltoggle){
 }
 
 //if (pixelShaderToggle){
-backgroundcol = colorDraw(colour);
+  backgroundcol = colorDraw(colour);
 //  }
+let mx = map(mouseX,0,width,0.,1.);
+let my = map(mouseY,0,height,0.,1.);
+
+let pipx = width-30;
+let pipy = height-(height/6);
+
+let pip_x = map(pipx,0,width,1.,0.);
+let pip_y = map(pipy,0,height,0.,1.);
+
+let pip_mx = norm(map(mouseX, 0, width, pipx - (width/5), pipx), 0, width);
+let pip_my = norm(map(mouseY, 0, height,pipy - (height/5), pipy), 0, height);
+
+
+
+
 
   backgroundShader.setUniform('u_resolution', [width, height]);
-  backgroundShader.setUniform('u_color_old', [oldcolour[0], oldcolour[1], oldcolour[2]]);
+  backgroundShader.setUniform('u_mouse', [mx, my]);
+  backgroundShader.setUniform('u_pip', [pip_x, pip_y]);
+  backgroundShader.setUniform('u_pip_mouse', [pip_mx, pip_my]);
+  backgroundShader.setUniform('tex1', pixelpg);
   backgroundShader.setUniform('u_color', [backgroundcol.levels[0], backgroundcol.levels[1], backgroundcol.levels[2]]);
   backgroundShader.setUniform('u_lerp', map(color_lerp, 0, 200, 0, 1));
   backgroundShader.setUniform('u_lerp2', map(lerp_amount, 0, 200, 0, 1));
-  // let tileno = 1;
-  // let radius = 20;
-  //
-  // backgroundShader.setUniform('tex0', pixelpg);
-  // backgroundShader.setUniform('resolution', [width, height]);
-  // backgroundShader.setUniform('tileno', tileno);
-  // backgroundShader.setUniform('radius', radius);
-  // backgroundShader.setUniform('u_time', frameCount * 0.05);
-  // backgroundShader.setUniform('isMobile', isMobile);
 
   // rect gives us some geometry on the screen
   pixelpg.rect(0, 0, width, height);
