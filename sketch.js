@@ -96,8 +96,8 @@ function setup() {
 
     if (windowWidth < windowHeight) {
       inner = iosInnerHeight();
-      cnv = createCanvas(windowWidth, inner);
-      particlepg = createGraphics(windowWidth, inner);
+      cnv = createCanvas(windowWidth, windowHeight);
+      particlepg = createGraphics(windowWidth, windowHeight);
       cnv.style('display', 'block');
       console.log("portrait")
     } else {
