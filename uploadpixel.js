@@ -80,7 +80,7 @@ function shaderDraw() {
 
   pixelShader.setUniform('tex0', cam);
   pixelShader.setUniform('u_resolution', [width, height]);
-  pixelShader.setUniform('u_lerp', map(lerp_amount, 0, 50, 0, 1));
+  pixelShader.setUniform('u_lerp', 1); //map(lerp_amount, 0, 50, 0, 1)
   pixelShader.setUniform('u_safari', isSafari ? 1 : 0);
   // lets just send the cam to our shader as a uniform
   if (!isMobile) { //check camera and device orientation on mobile
@@ -181,6 +181,7 @@ function shaderMousePressed() {
   })
 
   colour = pixelpg.get(mouseX, height - mouseY);
+
    // texture upside down?
   var data = {
     uuid: uuid,
