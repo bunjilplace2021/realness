@@ -84,9 +84,9 @@ st += pip_pos;
   vec3 pix = u_color/255.0;
 
   float mousecirc = ComputeCircle(mousepos,vec2(0.5),radius,1.0);
-  float mousecirc2 = ComputeCircle(mousepip,vec2(-10.,-10.),20.,0.5);
+  float mousecirc2 = ComputeCircle(mousepip,vec2(-10.,-10.),15.,0.5);
 
-  vec4 mousecol = vec4(texture2D(tex1,vec2(1.0 - u_mouse.x,u_mouse.y)).rgb, 0.5);
+  vec4 mousecol = vec4(texture2D(tex1,vec2(1.0 - u_mouse.x,u_mouse.y)).rgb, 1.0);
 
   vec4 mousecol2 = vec4(1.0);
 
