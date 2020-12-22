@@ -137,8 +137,10 @@ class Particle {
   //  if (!pixelShaderToggle) {
 
       if (this.duration > 500 && this.active == true) {
-        this.lifespan -= 0.2 * (this.rand + 1);
-        this.fill_alpha -= 0.2 * (this.rand + 1);
+
+        this.alph_factor =  constrain(map(width,300,1000,0.2,0.1),0.1,0.2);
+        this.lifespan -= this.alph_factor * (this.rand + 1);
+        this.fill_alpha -= this.alph_factor * (this.rand + 1);
       }
       if (this.lifespan <= 0.5 && this.active == true) {
         this.radius = 0.;
