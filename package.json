@@ -7,7 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "webpack-cli serve --config webpack.config.js --mode development",
+    "dev": "webpack-cli serve --config webpack.config.js --mode development --https",
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

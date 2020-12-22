@@ -37,8 +37,8 @@ let sampleRate = 44100;
 
 // create own audio context
 let soundtrackAudioCtx = new Context({
+  sampleRate: 44100,
   latencyHint: "playback",
-  // lookAhead: 1,
   updateInterval: 1,
   bufferSize: 1024,
 });
@@ -73,16 +73,22 @@ const recordButton = document.querySelector("#recordButton");
 
 recordButton.onclick = async () => {
   recordButton.classList.toggle("red");
-  await r.getPermissions();
-  soundLog("got permissions");
-  const blob = await r.recordChunks();
-  soundLog(blob);
-  const decodedBuffer = await r.loadToBuffer();
-  setTimeout(() => {
-    decodedBuffer && recordButton.classList.remove("red");
-    reloadBuffers(decodedBuffer);
-    f.uploadSample(r.audioBlob);
-  }, recordLength);
+
+  try {
+    await r.getPermissions();
+    soundLog("got permissions");
+    const blob = await r.recordChunks();
+    soundLog(blob);
+    const decodedBuffer = await r.loadToBuffer();
+    setTimeout(() => {
+      decodedBuffer && recordButton.classList.remove("red");
+      reloadBuffers(decodedBuffer);
+      f.uploadSample(r.audioBlob);
+    }, recordLength);
+  } catch (error) {
+    console.log(error);
+    recordButton.classList.remove("red");
+  }
 };
 
 // list all samples in database
@@ -145,8 +151,9 @@ const subOscillator = () => {
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
   subOsc.volume.value = -48;
-  subOsc.volume.targetRampTo(-30, 10);
+  subOsc.volume.targetRampTo(-24, 10);
   subOsc.filter.frequency.value = 80;
+  subOsc.filter.gain.value = 10;
   noise.start("+1");
   subOsc.start("+1");
 };
