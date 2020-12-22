@@ -1,8 +1,9 @@
 class Particle {
   constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
     this.origposition = createVector(x, y);
-  //  this.map_position = createVector(map(x, 0, devWidth, 0, width), map(y, 0, devHeight, 0, height));
-    this.position = createVector(map(x, 0, devWidth, 0, width), map(y, 0, devHeight, 0, height));//createVector((round(this.map_position.x / 99)) * 99, (round(this.map_position.y / 99)) * 99);
+    this.map_position = createVector(map(x, 0, devWidth, 0, width), map(y, 0, devHeight, 0, height));
+    this.alignpixel = 100;
+    this.position = createVector((round(this.map_position.x / this.alignpixel)) * this.alignpixel, (round(this.map_position.y / this.alignpixel)) * this.alignpixel);
     this.resize_position = createVector();
     this.velocity = createVector();
     this.acceleration = createVector();
@@ -84,15 +85,18 @@ class Particle {
 
   resize_window() {
 
+    this.map_position.x = constrain(map(this.origposition.x, 0, this.origWidth, 0, width), 0, width);
+    this.map_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height),0, height);
+
     this.resize_position.x = constrain(map(this.origposition.x, 0, this.origWidth, 0, width), 0, width);
     this.resize_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height),0, height);
 
-
-// if (!this.firstrun && !this.active){
-//     this.position.x = (round(this.resize_position.x / 99)) * 99;
-//     this.position.y = (round(this.resize_position.y / 99)) * 99;
-// }
-
+    this.resize_position.x = (round(this.resize_position.x / this.alignpixel)) * this.alignpixel;
+    this.resize_position.y = (round(this.resize_position.y / this.alignpixel)) * this.alignpixel;
+    //     this.resize_position.x = (round(this.resize_position.x / 99)) * 99;
+    //     this.resize_position.y = (round(this.resize_position.y / 99)) * 99;
+    //
+    // }
 
     this.resize = (0.2 * int(random(1, 3)) ) + (width* 0.0001);
     this.maxradius = (width>=height ? width : height );
@@ -143,7 +147,7 @@ class Particle {
         this.duration = 0.0;
         this.active = false;
         this.rand = this.rand + 1;
-        this.firstrun = !this.firstrun;
+        this.firstrun = false;
 
         if (this.rand > 2) {
           this.rand = 0;
@@ -166,7 +170,11 @@ class Particle {
       //p.stroke(0,this.fill_alpha);
       p.fill(this.fill_col);
       p.ellipseMode(CENTER);
+      if(this.firstrun && this.UUID == uuid){
+      p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+    }else{
       p.ellipse(this.position.x, this.position.y, this.radius);
+    }
       p.pop();
     }
 
