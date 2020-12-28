@@ -172,13 +172,6 @@ height:30%;
   }
 }
 
-@media only screen and (max-width: 900px) {
-
-.topnav {
-  top: auto;
-  bottom: 0;
-}
-
 
   .topnav a {
     font-size: calc(1em + 0.5vw);

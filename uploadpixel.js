@@ -113,7 +113,7 @@ let mx = map(mouseX,0,width,0.,1.);
 let my = map(mouseY,0,height,0.,1.);
 
 let pipx = width-30;
-let pipy = width < 900 ? height-(height/6) : height-30;
+let pipy = height-30;//width < 900 ? height-(height/6) : height-30;
 
 
 let pip_x = map(pipx,0,width,1.,0.);
