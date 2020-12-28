@@ -265,7 +265,9 @@ function infoInstructions() {
     document.getElementById("top").style.backgroundColor = 'rgba(0, 0, 0, 0.0)';
     document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
     document.getElementById("top").style.backdropFilter = "blur(0px)";
+    document.getElementById("top").style.height = "auto";
     document.getElementById("menu_txt").style.display = 'block';
+
   }
 
 }
@@ -275,21 +277,23 @@ function didactic() {
   didactic_toggle = !didactic_toggle;
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  myInfo.style.background = "rgba(127, 127, 127, 0.2)";
+  //myInfo.style.background = "rgba(127, 127, 127, 0.2)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    myInfo.style.background = "rgba(127, 127, 127, 0.2)";
-    document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
-    document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
+    document.getElementById("top").style.height = "100%";
+  //  myInfo.style.background = "rgba(127, 127, 127, 0.2)";
+  //  document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
+  //  document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
     //  myInfo.style.overflowY = "scroll";
 
   } else {
     myInfo.style.display = "none";
-    myInfo.style.background = "none";
+    document.getElementById("top").style.height = "auto";
+  //  myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
-    document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
-    document.getElementById("myInfo").style.backdropFilter = "blur(none)";
+  //  document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
+  //  document.getElementById("myInfo").style.backdropFilter = "blur(none)";
 
   }
 }
