@@ -24,7 +24,7 @@ class Particle {
     this.active = false;
     this.UUID = part_UUID;
     this.firstrun = true;
-
+    this.strokeweight = 0;
   }
 
   colour(rand) {
@@ -63,9 +63,10 @@ class Particle {
 
 
     //first click - white and lerps to color
-    if (this.firstrun && this.UUID == uuid && this.active && this.duration <= 200) {
+    if (this.firstrun  && this.active && this.duration <= 800) {
       this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
-      this.fill_col = lerpColor(this.col, this.fill_col, map(this.duration, 0, 200, 0, 1));
+      this.fill_col = lerpColor(this.col, this.fill_col, map(this.duration, 0, 800, 0, 1));
+      this.strokeweight = lerp(5,0,map(this.duration, 0, 800, 0, 1));
     }
 
     //this.fill_col.setAlpha(this.fill_alpha);
@@ -169,6 +170,15 @@ class Particle {
       }else{
       p.noStroke();
     }
+
+    if(!pixelShaderToggle && this.UUID != uuid && this.firstrun){
+p.strokeWeight(this.strokeweight);
+      p.stroke(this.fill_col,this.fill_alpha);
+    }else{
+    p.noStroke();
+  }
+
+
       //p.stroke(0,this.fill_alpha);
       p.fill(this.fill_col);
       p.ellipseMode(CENTER);
