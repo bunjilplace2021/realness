@@ -3,7 +3,8 @@ import FireBaseAudio from "./modules/FirebaseAudio";
 import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
-import fallback from "./samples/fallback.mp3";
+
+let fallBack;
 // !TODO: GRAPH GAIN STAGING!!!
 // GLOBAL VARIABLES
 import {
@@ -54,11 +55,17 @@ if (window.safari) {
 let safariAudioTrack = null;
 
 const loadFallback = () => {
-  safariAudioTrack = new Audio();
-  safariAudioTrack.load();
-  safariAudioTrack.src = fallback;
-  safariAudioTrack.loop = true;
-  console.log(safariAudioTrack);
+  if (typeof fallBack == "undefined") {
+    import(/* webpackChunkName:"fallback" */ "./samples/fallback.mp3").then(
+      (x) => {
+        fallBack = x.default;
+        safariAudioTrack = new Audio();
+        safariAudioTrack.load();
+        safariAudioTrack.src = fallBack;
+        safariAudioTrack.loop = true;
+      }
+    );
+  }
 };
 
 setContext(soundtrackAudioCtx);
