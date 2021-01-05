@@ -25,7 +25,13 @@ function shaderPreload() {
 
 function shaderSetup() {
   // initialize the webcam at the window size
-  cam = createCapture(VIDEO);
+  cam = createCapture(VIDEO,
+    detectWebcam(function(hasWebcam) {
+      webcam = hasWebcam;
+      //console.log(webcam);
+      console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
+    }));
+    
   cam.elt.setAttribute('playsinline', '');
 
   pixelpg = createGraphics(cnv.width, cnv.height, WEBGL);
@@ -43,6 +49,7 @@ function shaderSetup() {
 }
 
 function colorDraw(c) {
+
   let col = lerpColor(startColor, newColor, smoothstep(0.1,0.9,amt));
   amt += 0.005;
   if(amt >= 1){
@@ -50,6 +57,7 @@ function colorDraw(c) {
     startColor = newColor;
     newColor = color(c);
   }
+
   return col;
 }
 
@@ -174,11 +182,7 @@ testremove.remove()
 
 function shaderMousePressed() {
 
-  detectWebcam(function(hasWebcam) {
-    webcam = hasWebcam;
-    //console.log(webcam);
-    console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
-  })
+
 
   colour = pixelpg.get(mouseX, height - mouseY);
 
