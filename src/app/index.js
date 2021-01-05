@@ -3,7 +3,7 @@ import FireBaseAudio from "./modules/FirebaseAudio";
 import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
-import fallbackSample from "./samples/audio-01024f6d-aff2-46ec-9197-f668839a4940.mp3";
+import fallback from "./samples/fallback.mp3";
 // !TODO: GRAPH GAIN STAGING!!!
 // GLOBAL VARIABLES
 import {
@@ -29,7 +29,7 @@ import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
 
-// getContext().rawContext.suspend();
+getContext().rawContext.suspend();
 const isMobile = window.innerWidth < 600;
 let isMuted = true;
 let muteClicked = 0;
@@ -50,6 +50,16 @@ soundtrackAudioCtx.name = "Playback Context";
 if (window.safari) {
   setContext(new webkitAudioContext());
 }
+
+let safariAudioTrack = null;
+
+const loadFallback = () => {
+  safariAudioTrack = new Audio();
+  safariAudioTrack.load();
+  safariAudioTrack.src = fallback;
+  safariAudioTrack.loop = true;
+  console.log(safariAudioTrack);
+};
 
 setContext(soundtrackAudioCtx);
 let masterBus;
@@ -174,8 +184,7 @@ const loadSynths = async () => {
     if (!isSafari) {
       buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
     } else {
-      console.log(fallbackSample);
-      buf = await safariFallback(fallbackSample, soundtrackAudioCtx);
+      buf = await safariFallback(f.audioFile, soundtrackAudioCtx);
     }
 
     // let resampledBuf;
@@ -293,7 +302,10 @@ const subOscLoop = () => {
     subOsc.harmonicity.rampTo(mapValue(Math.random(), 0, 1, 0.5, 2), 30);
   }, 30);
 };
-
+if (window.safari) {
+  muteButton.classList = "";
+  muteButton.classList.add("fa", "fa-volume-off");
+}
 const changeMuteButton = () => {
   if (muteButton.classList.contains("fa-volume-off")) {
     muteButton.classList.remove("fa-volume-off");
@@ -314,14 +326,21 @@ muteButton.onclick = async () => {
   muteClicked++;
   isMuted = !isMuted;
 
-  if (window.safari && muteClicked === 1) {
-    loadSynths();
-    soundtrackAudioCtx.resume();
-    // await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
-    if (synthsLoaded) {
-      startAudio();
+  if (window.safari) {
+    safariAudioTrack.volume = !isMuted;
+    u.master.gain.value = !isMuted;
+    if (muteClicked === 1) {
+      u.master.toDestination();
+      document.querySelector("body").addEventListener("click", () => {
+        u.play(uiNotes[~~Math.random * uiNotes.length]);
+      });
+      UISound();
+      soundtrackAudioCtx.resume();
+      await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
+      safariAudioTrack.play();
     }
   }
+
   changeMuteButton();
   //  if synths are loaded, start audio and change DOM element
   if (synthsLoaded) {
@@ -339,6 +358,9 @@ muteButton.onclick = async () => {
 
 //  MAIN ///
 // load synths!
+if (window.safari) {
+  loadFallback();
+}
 !window.safari && loadSynths();
 
 UISound();

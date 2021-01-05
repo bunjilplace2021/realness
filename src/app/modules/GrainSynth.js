@@ -49,7 +49,14 @@ class GrainSynth {
       channelCount: 1,
     });
     for (let i = 0; i < this.numVoices; i++) {
-      this.grains[i] = new GrainPlayer(this.buffer);
+      if (window.safari) {
+        this.grains[i] = new GrainPlayer({
+          url: this.buffer,
+        });
+      } else {
+        this.grains[i] = new GrainPlayer(this.buffer);
+      }
+
       // this.grains[i].buffer.toMono();
       this.grains[i].channelCount = 1;
     }
