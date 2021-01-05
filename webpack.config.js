@@ -40,6 +40,11 @@ module.exports = {
         loader: "babel-loader",
       },
       {
+        test: /\.(mp3)$/,
+
+        loader: "file-loader",
+      },
+      {
         test: /.css$/,
 
         use: [

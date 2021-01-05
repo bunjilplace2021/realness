@@ -3,7 +3,7 @@ import FireBaseAudio from "./modules/FirebaseAudio";
 import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
-
+import fallbackSample from "./samples/audio-01024f6d-aff2-46ec-9197-f668839a4940.mp3";
 // !TODO: GRAPH GAIN STAGING!!!
 // GLOBAL VARIABLES
 import {
@@ -29,7 +29,7 @@ import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
 
-getContext().rawContext.suspend();
+// getContext().rawContext.suspend();
 const isMobile = window.innerWidth < 600;
 let isMuted = true;
 let muteClicked = 0;
@@ -174,7 +174,8 @@ const loadSynths = async () => {
     if (!isSafari) {
       buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
     } else {
-      buf = await safariFallback(f.audioFile, soundtrackAudioCtx);
+      console.log(fallbackSample);
+      buf = await safariFallback(fallbackSample, soundtrackAudioCtx);
     }
 
     // let resampledBuf;
@@ -316,7 +317,7 @@ muteButton.onclick = async () => {
   if (window.safari && muteClicked === 1) {
     loadSynths();
     soundtrackAudioCtx.resume();
-    await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
+    // await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
     if (synthsLoaded) {
       startAudio();
     }

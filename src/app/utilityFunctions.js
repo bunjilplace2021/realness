@@ -1,7 +1,5 @@
-import { filter } from "async";
-import { Filter } from "tone";
+import "promise-decode-audio-data/build/promise-decode-audio-data.min.js";
 
-// load an audiourl to a buffer
 export async function fetchSample(url, ctx) {
   return fetch(url)
     .then((response) => response.arrayBuffer())
@@ -10,54 +8,24 @@ export async function fetchSample(url, ctx) {
 }
 
 export async function safariFallback(url, ctx) {
-  const response = await fetch(url);
-  const arrayBuf = await response.arrayBuffer();
-  let context = new webkitAudioContext();
-  const offlineCtx = new webkitOfflineAudioContext(2, 44100 * 40, 44100);
+  return new Promise(async (resolve, reject) => {
+    resolve(url);
 
-  let source = offlineCtx.createBufferSource();
+    //   ctx.decodeAudioData = new webkitAudioContext().decodeAudioData;
 
-  // use XHR to load an audio track, and
-  // decodeAudioData to decode it and OfflineAudioContext to render it
-
-  function getData() {
-    let request = new XMLHttpRequest();
-
-    request.open("GET", url, true);
-
-    request.responseType = "arraybuffer";
-
-    request.onload = function () {
-      var audioData = request.response;
-
-      context.decodeAudioData(audioData, function (buffer) {
-        myBuffer = buffer;
-        source.buffer = myBuffer;
-        source.connect(offlineCtx.destination);
-        source.start();
-        //source.loop = true;
-        offlineCtx
-          .startRendering()
-          .then(function (renderedBuffer) {
-            console.log("Rendering completed successfully");
-
-            console.log(renderedBuffer);
-          })
-          .catch(function (err) {
-            console.log("Rendering failed: " + err);
-            // Note: The promise should reject when startRendering is called a second time on an OfflineAudioContext
-          });
-      });
-    };
-
-    request.send();
-  }
-
-  // Run getData to start the process off
-
-  getData();
-  context.suspend();
+    //   ctx.rawContext._nativeContext.decodeAudioData(
+    //     arrayBuf,
+    //     function (buffer) {
+    //       resolve(buffer);
+    //     },
+    //     function (e) {
+    //       reject(e);
+    //     }
+    //   );
+    // });
+  });
 }
+
 //  map one range of values to another
 export function mapValue(input, inMin, inMax, outMin, outMax) {
   return ((input - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
