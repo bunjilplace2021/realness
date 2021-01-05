@@ -12,8 +12,8 @@ class Particle {
     this.rand = floor(random(0, 3));
     this.img = img_;
     this.radius = 0.0;
-    this.resize = (0.2 * int(random(1, 3)) ) + (width* 0.0001);
-    this.maxradius = (width>=height ? width : height );
+    this.resize = (0.2 * int(random(1, 3))) + (width * 0.0001);
+    this.maxradius = (width >= height ? width : height);
     this.origWidth = devWidth;
     this.origHeight = devHeight;
     this.touchtime = touchTime;
@@ -25,6 +25,7 @@ class Particle {
     this.UUID = part_UUID;
     this.firstrun = true;
     this.strokeweight = 0;
+    this.intersect = 0.0;
   }
 
   colour(rand) {
@@ -63,13 +64,11 @@ class Particle {
 
 
     //first click - white and lerps to color
-    if (this.firstrun  && this.active && this.duration <= 800) {
+    if (this.firstrun && this.active && this.duration <= 800 && !pixelShaderToggle) {
       this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
       this.fill_col = lerpColor(this.col, this.fill_col, map(this.duration, 0, 800, 0, 1));
-      this.strokeweight = lerp(5,0,map(this.duration, 0, 800, 0, 1));
+      this.strokeweight = lerp(5, 0, map(this.duration, 0, 800, 0, 1));
     }
-
-    //this.fill_col.setAlpha(this.fill_alpha);
 
   }
 
@@ -87,34 +86,25 @@ class Particle {
   resize_window() {
 
     this.map_position.x = constrain(map(this.origposition.x, 0, this.origWidth, 0, width), 0, width);
-    this.map_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height),0, height);
+    this.map_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height), 0, height);
 
     this.resize_position.x = constrain(map(this.origposition.x, 0, this.origWidth, 0, width), 0, width);
-    this.resize_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height),0, height);
+    this.resize_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height), 0, height);
 
     this.resize_position.x = (round(this.resize_position.x / this.alignpixel)) * this.alignpixel;
     this.resize_position.y = (round(this.resize_position.y / this.alignpixel)) * this.alignpixel;
-    //     this.resize_position.x = (round(this.resize_position.x / 99)) * 99;
-    //     this.resize_position.y = (round(this.resize_position.y / 99)) * 99;
-    //
-    // }
 
-    this.resize = (0.2 * int(random(1, 3)) ) + (width* 0.0001);
-    this.maxradius = (width>=height ? width : height );
-
+    this.resize = (0.2 * int(random(1, 3))) + (width * 0.0001);
+    this.maxradius = (width >= height ? width : height);
 
     this.velocity.x = 0;
     this.velocity.y = 0;
     this.acceleration.x = -0.1 * (this.position.x - this.resize_position.x);
     this.acceleration.y = -0.1 * (this.position.y - this.resize_position.y);
 
-
   }
 
-
-
   update() {
-
 
     this.velocity.add(this.acceleration);
     this.position.add(this.velocity);
@@ -134,67 +124,68 @@ class Particle {
       this.duration = this.duration + 1;
     }
 
+if (this.active && pixelShaderToggle && this.UUID == uuid){
+  this.lifespan -= this.intersect;
+  this.fill_alpha -= this.intersect;
+}
+    //  if (!pixelShaderToggle) {
 
-  //  if (!pixelShaderToggle) {
+    if (this.duration > 500 && this.active == true) {
 
-      if (this.duration > 500 && this.active == true) {
+      this.alph_factor = constrain(map(width, 300, 1000, 0.2, 0.1), 0.1, 0.2);
+      this.lifespan -= this.alph_factor * (this.rand + 1);
+      this.fill_alpha -= this.alph_factor * (this.rand + 1);
+    }
+    if (this.lifespan <= 0.5 && this.active == true) {
+      this.radius = 0.;
+      this.fill_alpha = 200.0;
+      this.lifespan = 255.0;
+      this.duration = 0.0;
+      this.active = false;
+      this.rand = this.rand + 1;
+      this.firstrun = false;
+      this.intersect = 0.0;
 
-        this.alph_factor =  constrain(map(width,300,1000,0.2,0.1),0.1,0.2);
-        this.lifespan -= this.alph_factor * (this.rand + 1);
-        this.fill_alpha -= this.alph_factor * (this.rand + 1);
-      }
-      if (this.lifespan <= 0.5 && this.active == true) {
-        this.radius = 0.;
-        this.fill_alpha = 200.0;
-        this.lifespan = 255.0;
-        this.duration = 0.0;
-        this.active = false;
-        this.rand = this.rand + 1;
-        this.firstrun = false;
-
-        if (this.rand > 2) {
-          this.rand = 0;
-        }
+      if (this.rand > 2) {
+        this.rand = 0;
       }
     }
+  }
 
 
+  // Method to display
+  display(p) {
 
-    // Method to display
-    display(p) {
+    p.push();
 
-      p.push();
+    // if (pixelShaderToggle && this.UUID == uuid) {
+    //   p.stroke(255, this.fill_alpha);
+    // } else {
+    //   p.noStroke();
+    // }
 
-      if(pixelShaderToggle && this.UUID == uuid){
-        p.stroke(255,this.fill_alpha);
-      }else{
+    if (!pixelShaderToggle && this.UUID != uuid && this.firstrun) {
+      p.strokeWeight(this.strokeweight);
+      p.stroke(this.fill_col, this.fill_alpha);
+    } else {
       p.noStroke();
     }
 
-    if(!pixelShaderToggle && this.UUID != uuid && this.firstrun){
-p.strokeWeight(this.strokeweight);
-      p.stroke(this.fill_col,this.fill_alpha);
-    }else{
-    p.noStroke();
-  }
-
-
-      //p.stroke(0,this.fill_alpha);
-      p.fill(this.fill_col);
-      p.ellipseMode(CENTER);
-      if(this.firstrun && this.UUID == uuid){
+    p.fill(this.fill_col);
+    p.ellipseMode(CENTER);
+    if (this.firstrun && this.UUID == uuid) {
       p.ellipse(this.map_position.x, this.map_position.y, this.radius);
-    }else{
+    } else {
       p.ellipse(this.position.x, this.position.y, this.radius);
     }
-      p.pop();
-    }
+    p.pop();
+  }
 
-    isDead() {
-      if (!this.alive && !this.active) {
-        return true;
-      } else {
-        return false;
-      }
+  isDead() {
+    if (!this.alive && !this.active) {
+      return true;
+    } else {
+      return false;
     }
   }
+}

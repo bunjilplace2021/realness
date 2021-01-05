@@ -30,11 +30,10 @@ class ParticleSystem {
       for (let point of points) {
         let other = point.userData;
 
+
         //Collision Detection Test
-        if (particle !== other && particle.intersects(other)) {
-          // noFill();
-          // stroke(255);
-          // line(particle.position.x, particle.position.y, other.position.x, other.position.y);
+        if (particle !== other && particle.intersects(other) && pixelShaderToggle && particle.active && particle.UUID ==uuid) {
+        particle.intersect = particle.intersect+0.001;
         }
       }
     }
