@@ -23,7 +23,6 @@
   "homepage": "https://github.com/wezzahd/realness#readme",
   "dependencies": {
     "firebase": "^8.0.2",
-    "promise-decode-audio-data": "^0.4.1",
     "tone": "^14.7.58"
   },
   "devDependencies": {
