@@ -1,5 +1,3 @@
-import "promise-decode-audio-data/build/promise-decode-audio-data.min.js";
-
 export async function fetchSample(url, ctx) {
   return fetch(url)
     .then((response) => response.arrayBuffer())

@@ -22,6 +22,10 @@ canvas {
   display: block;
 }
 
+canvas #can {
+  filter: blur(30px);
+}
+
 video {
   position: absolute;
   width: 0;
@@ -101,7 +105,7 @@ video {
   position: absolute;
   overflow-y: auto;
   width: 80%;
-  height: 50vh;
+  height: 70vh;
 }
 
 /* if backdrop support: very transparent and blurred */
@@ -182,32 +186,25 @@ video {
   }
 }
 
-@media only screen and (max-width: 900px) {
-  .topnav {
-    top: auto;
-    bottom: 0;
-  }
+.topnav a {
+  font-size: calc(1em + 0.5vw);
+}
 
-  .topnav a {
-    font-size: calc(1em + 0.5vw);
-  }
-
-  /* .topnav a.menu_text{
+/* .topnav a.menu_text{
   padding-left: 14px 0;
 
   } */
 
-  .content {
-    font-size: calc(0.8em + 0.5vw);
-  }
+.content {
+  font-size: calc(0.8em + 0.5vw);
+}
 
-  .animated {
-    font-size: calc(1em + 0.5vw);
-  }
+.animated {
+  font-size: calc(1em + 0.5vw);
+}
 
-  .content .fa-instagram {
-    font-size: calc(1.5em + 0.5vw);
-  }
+.content .fa-instagram {
+  font-size: calc(1.5em + 0.5vw);
 }
 
 /* @media only screen and (min-width: 500) and (max-width: 800px)  {

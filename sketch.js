@@ -21,6 +21,8 @@ let array_limit = 20;
 
 let particlepg;
 
+let isSafari = false;
+
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
   var cnv_y = (windowHeight - height) / 2;
@@ -55,6 +57,9 @@ function preload() {
   if (/android/i.test(navigator.userAgent)) {
     isAndroid = true;
   }
+
+  isSafari = checkIfWebKit();
+
   uuid = guid();
   shaderPreload();
 }
@@ -66,6 +71,33 @@ function detectWebcam(callback) {
   md.enumerateDevices().then((devices) => {
     callback(devices.some((device) => "" != device.label));
   });
+}
+
+function checkIfWebKit() {
+  var ua = navigator.userAgent.toLowerCase();
+
+  var isWebKit = false;
+
+  if (
+    ua.indexOf("chrome") === ua.indexOf("android") &&
+    ua.indexOf("safari") !== -1
+  ) {
+    // accessed via a WebKit-based browser
+    isWebKit = true;
+  } else {
+    // check if accessed via a WebKit-based webview
+    if (
+      ua.indexOf("ipad") !== -1 ||
+      ua.indexOf("iphone") !== -1 ||
+      ua.indexOf("ipod") !== -1
+    ) {
+      isWebKit = true;
+    } else {
+      isWebKit = false;
+    }
+  }
+
+  return isWebKit;
 }
 
 function setup() {
@@ -80,7 +112,6 @@ function setup() {
       inner = iosInnerHeight();
       cnv = createCanvas(windowWidth, inner);
       particlepg = createGraphics(windowWidth, inner);
-      cnv.id("mycanvas");
       cnv.style("display", "block");
       console.log("portrait");
     } else {
@@ -151,7 +182,10 @@ function particle_draw(p) {
 
   shaderDraw();
 
-  image(particlepg, 0, 0);
+  if (pixelShaderToggle) {
+    //  image(backgroundpg, 0, 0);
+    image(pippg, 0, 0);
+  }
 }
 
 function mousePressed() {
@@ -220,6 +254,7 @@ function infoInstructions() {
     document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.0)";
     document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
     document.getElementById("top").style.backdropFilter = "blur(0px)";
+    document.getElementById("top").style.height = "auto";
     document.getElementById("menu_txt").style.display = "block";
   }
 }
@@ -228,30 +263,32 @@ function didactic() {
   didactic_toggle = !didactic_toggle;
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  myInfo.style.background = "rgba(127, 127, 127, 0.2)";
+  //myInfo.style.background = "rgba(127, 127, 127, 0.2)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    myInfo.style.background = "rgba(127, 127, 127, 0.2)";
-    document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
-    document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
+    document.getElementById("top").style.height = "100%";
+    //  myInfo.style.background = "rgba(127, 127, 127, 0.2)";
+    //  document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
+    //  document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
     //  myInfo.style.overflowY = "scroll";
   } else {
     myInfo.style.display = "none";
-    myInfo.style.background = "none";
+    document.getElementById("top").style.height = "auto";
+    //  myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
+
     document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
     document.getElementById("myInfo").style.backdropFilter = "blur(none)";
   }
 }
 
-// function volumemute() {
 //   volicons.classList.toggle("fa-volume-mute");
 // }
 
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
-  icons.classList.toggle("select");
+  //icons.classList.toggle("select");
 }
 
 function fullScreenMenu() {
