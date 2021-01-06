@@ -246,6 +246,7 @@ function infoInstructions() {
     document.getElementById("top").style.backgroundColor = 'rgba(127, 127, 127, 0.2)';
     document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
     document.getElementById("top").style.backdropFilter = "blur(30px)";
+    document.getElementById("top").style.paddingLeft = "none";
 
   // }
 
@@ -266,7 +267,9 @@ function infoInstructions() {
     document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
     document.getElementById("top").style.backdropFilter = "blur(0px)";
     document.getElementById("top").style.height = "auto";
+    document.getElementById("top").style.paddingLeft = "1em";
     document.getElementById("menu_txt").style.display = 'block';
+
 
   }
 
