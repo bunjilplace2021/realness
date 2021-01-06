@@ -29,16 +29,6 @@ function centerCanvas() {
   cnv.position(cnv_x, cnv_y);
 }
 
-function drawFPS() {
-  push();
-  noStroke();
-  let fps = Math.floor(frameRate());
-  fill(255);
-  textSize(20);
-  text("FPS: " + fps, 72, 32);
-  pop();
-}
-
 p5.disableFriendlyErrors = true; // disables FES
 
 function preload() {
@@ -182,6 +172,8 @@ function particle_draw(p) {
 
   shaderDraw();
 
+  image(particlepg, 0, 0);
+
   if (pixelShaderToggle) {
     //  image(backgroundpg, 0, 0);
     image(pippg, 0, 0);
@@ -277,14 +269,14 @@ function didactic() {
     document.getElementById("top").style.height = "auto";
     //  myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
-
-    document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
-    document.getElementById("myInfo").style.backdropFilter = "blur(none)";
+    //  document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
+    //  document.getElementById("myInfo").style.backdropFilter = "blur(none)";
   }
 }
 
-//   volicons.classList.toggle("fa-volume-mute");
-// }
+function volumemute() {
+  volicons.classList.toggle("fa-volume-mute");
+}
 
 function cameratoggle() {
   pixelShaderToggle = !pixelShaderToggle;
@@ -292,8 +284,6 @@ function cameratoggle() {
 }
 
 function fullScreenMenu() {
-  // changed to define fullicons as expand toggle
-  const fullicons = document.querySelector("#fullicons");
   let fs = fullscreen();
   fullscreen(!fs);
   fullicons.classList.toggle("fa-compress");
