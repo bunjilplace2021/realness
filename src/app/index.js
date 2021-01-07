@@ -44,12 +44,22 @@ let soundtrackAudioCtx = new Context({
   bufferSize: 1024,
 });
 
+// Debugging safari == set window.safari to true
+
+// window.safari = true;
+// window.webkitAudioContext = AudioContext;
+
 soundtrackAudioCtx.name = "Playback Context";
 
 // set that context as the global tone.js context
 
 if (window.safari) {
   setContext(new webkitAudioContext());
+  // add polyfill for Media Recorder
+  import("audio-recorder-polyfill").then((audioRecorder) => {
+    window.MediaRecorder = audioRecorder.default;
+  });
+  console.log("loaded polyfill for safari");
 }
 
 let safariAudioTrack = null;
@@ -63,6 +73,7 @@ const loadFallback = () => {
         safariAudioTrack.load();
         safariAudioTrack.src = fallBack;
         safariAudioTrack.loop = true;
+        console.dir(safariAudioTrack);
       }
     );
   }
@@ -94,14 +105,21 @@ recordButton.onclick = async () => {
   try {
     await r.getPermissions();
     soundLog("got permissions");
-    const blob = await r.recordChunks();
-    soundLog(blob);
-    const decodedBuffer = await r.loadToBuffer();
-    setTimeout(() => {
-      decodedBuffer && recordButton.classList.remove("red");
-      reloadBuffers(decodedBuffer);
-      f.uploadSample(r.audioBlob);
-    }, recordLength);
+
+    if (window.MediaRecorder) {
+      const blob = await r.recordChunks();
+      soundLog(blob);
+      const decodedBuffer = await r.loadToBuffer();
+      setTimeout(() => {
+        decodedBuffer && recordButton.classList.remove("red");
+        reloadBuffers(decodedBuffer);
+        f.uploadSample(r.audioBlob);
+      }, recordLength);
+    } else {
+      console.log(
+        "MediaRecorder not available in this browser. Trying polyfill."
+      );
+    }
   } catch (error) {
     console.log(error);
     recordButton.classList.remove("red");
