@@ -67,17 +67,34 @@ if (window.safari) {
   console.log("loaded MediaRecorder polyfill for safari");
 }
 
-let safariAudioTrack = null;
+let safariAudioTrack = new Audio();
+
+if (window.safari) {
+  window.addEventListener(
+    "touchstart",
+    () => {
+      safariAudioTrack.autoplay = true;
+      safariAudioTrack.muted = false;
+      safariAudioTrack.play();
+      safariAudioTrack.pause();
+      safariAudioTrack.currentTime = 0;
+    },
+    false
+  );
+}
 
 const loadFallback = () => {
   if (typeof fallBack == "undefined") {
     import(/* webpackChunkName:"fallback" */ "./samples/fallback.mp3").then(
       (file) => {
         fallBack = file.default;
-        safariAudioTrack = new Audio();
         safariAudioTrack.load();
         safariAudioTrack.src = fallBack;
         safariAudioTrack.loop = true;
+        safariAudioTrack.addEventListener("canplay", () => {
+          safariAudioTrack.play();
+          safariAudioTrack.muted = false;
+        });
       }
     );
   }
@@ -333,10 +350,10 @@ const subOscLoop = () => {
     subOsc.harmonicity.rampTo(mapValue(Math.random(), 0, 1, 0.5, 2), 30);
   }, 30);
 };
-if (window.safari) {
-  muteButton.classList = "";
-  muteButton.classList.add("fa", "fa-volume-off");
-}
+// if (window.safari) {
+//   muteButton.classList = "";
+//   muteButton.classList.add("fa", "fa-volume-off");
+// }
 const changeMuteButton = () => {
   if (muteButton.classList.contains("fa-volume-off")) {
     muteButton.classList.remove("fa-volume-off");
@@ -367,8 +384,14 @@ muteButton.onclick = async () => {
       });
       UISound();
       soundtrackAudioCtx.resume();
-      await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
-      safariAudioTrack.play();
+      // await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
+
+      safariAudioTrack.addEventListener("canplay", () => {
+        safariAudioTrack.muted = false;
+
+        muteButton.classList.add("fa", "fa-volume-off");
+        safariAudioTrack.play();
+      });
     }
   }
 
