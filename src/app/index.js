@@ -70,17 +70,14 @@ if (window.safari) {
 let safariAudioTrack = new Audio();
 
 if (window.safari) {
-  window.addEventListener(
-    "touchstart",
-    () => {
-      safariAudioTrack.autoplay = true;
-      safariAudioTrack.muted = false;
-      safariAudioTrack.play();
-      safariAudioTrack.pause();
-      safariAudioTrack.currentTime = 0;
-    },
-    false
-  );
+  window.addEventListener("touchstart", () => {
+    console.log(safariAudioTrack);
+    safariAudioTrack.autoplay = true;
+    safariAudioTrack.muted = false;
+    safariAudioTrack.play();
+    safariAudioTrack.pause();
+    safariAudioTrack.currentTime = 0;
+  });
 }
 
 const loadFallback = () => {
@@ -92,8 +89,10 @@ const loadFallback = () => {
         safariAudioTrack.src = fallBack;
         safariAudioTrack.loop = true;
         safariAudioTrack.addEventListener("canplay", () => {
-          safariAudioTrack.play();
+          muteButton.classList = "";
+          muteButton.classList.add("fa-volume-off");
           safariAudioTrack.muted = false;
+          muteButton.classList.add("fa", "fa-volume-off");
         });
       }
     );
@@ -386,12 +385,7 @@ muteButton.onclick = async () => {
       soundtrackAudioCtx.resume();
       // await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
 
-      safariAudioTrack.addEventListener("canplay", () => {
-        safariAudioTrack.muted = false;
-
-        muteButton.classList.add("fa", "fa-volume-off");
-        safariAudioTrack.play();
-      });
+      safariAudioTrack.play();
     }
   }
 
