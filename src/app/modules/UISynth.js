@@ -1,4 +1,4 @@
-import { FMSynth, Gain, now } from "tone";
+import { FMSynth, Gain } from "tone";
 class UISynth {
   constructor(ctx) {
     this.ctx = ctx;
@@ -21,9 +21,7 @@ class UISynth {
     this.uiSynth.modulationIndex.value = Math.random() * 24;
     try {
       this.uiSynth.triggerAttackRelease(note, 0.1, "+0.01");
-    } catch (error) {
-      console.warn(error);
-    }
+    } catch (error) {}
   }
 }
 

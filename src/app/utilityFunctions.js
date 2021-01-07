@@ -95,7 +95,9 @@ export function getNodes(obj) {
     }
   });
 }
-
+export function randomChoice(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 export function soundLog(str) {
   console.log(
     `%cSound: ${str}`,

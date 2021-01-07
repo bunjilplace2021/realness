@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/wezzahd/realness#readme",
   "dependencies": {
+    "audio-recorder-polyfill": "^0.4.1",
     "firebase": "^8.0.2",
     "tone": "^14.7.58"
   },

@@ -24,6 +24,7 @@ import {
   resampleBuffer,
   soundLog,
   safariFallback,
+  randomChoice,
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -31,25 +32,39 @@ import regeneratorRuntime from "regenerator-runtime";
 // suspend auto generated audio context from tone import
 
 getContext().rawContext.suspend();
+
 const isMobile = window.innerWidth < 600;
 let isMuted = true;
 let muteClicked = 0;
 let sampleRate = 44100;
-
+// Turn on logging
+let logging = false;
 // create own audio context
 let soundtrackAudioCtx = new Context({
   sampleRate: 44100,
   latencyHint: "playback",
   updateInterval: 1,
   bufferSize: 1024,
+  state: "suspended",
 });
+
+// Debugging safari == set window.safari to true
+
+// window.safari = true;
+// window.webkitAudioContext = AudioContext;
 
 soundtrackAudioCtx.name = "Playback Context";
 
 // set that context as the global tone.js context
 
 if (window.safari) {
+  // set to safari specific audio context
   setContext(new webkitAudioContext());
+  // add polyfill for Media Recorder
+  import("audio-recorder-polyfill").then((audioRecorder) => {
+    window.MediaRecorder = audioRecorder.default;
+  });
+  console.log("loaded MediaRecorder polyfill for safari");
 }
 
 let safariAudioTrack = null;
@@ -57,8 +72,8 @@ let safariAudioTrack = null;
 const loadFallback = () => {
   if (typeof fallBack == "undefined") {
     import(/* webpackChunkName:"fallback" */ "./samples/fallback.mp3").then(
-      (x) => {
-        fallBack = x.default;
+      (file) => {
+        fallBack = file.default;
         safariAudioTrack = new Audio();
         safariAudioTrack.load();
         safariAudioTrack.src = fallBack;
@@ -93,15 +108,21 @@ recordButton.onclick = async () => {
 
   try {
     await r.getPermissions();
-    soundLog("got permissions");
-    const blob = await r.recordChunks();
-    soundLog(blob);
-    const decodedBuffer = await r.loadToBuffer();
-    setTimeout(() => {
-      decodedBuffer && recordButton.classList.remove("red");
-      reloadBuffers(decodedBuffer);
-      f.uploadSample(r.audioBlob);
-    }, recordLength);
+    logging && soundLog("got permissions");
+
+    if (window.MediaRecorder) {
+      await r.recordChunks();
+      const decodedBuffer = await r.loadToBuffer();
+      setTimeout(() => {
+        decodedBuffer && recordButton.classList.remove("red");
+        reloadBuffers(decodedBuffer);
+        f.uploadSample(r.audioBlob);
+      }, recordLength);
+    } else {
+      console.log(
+        "MediaRecorder not available in this browser. Trying polyfill."
+      );
+    }
   } catch (error) {
     console.log(error);
     recordButton.classList.remove("red");
@@ -134,7 +155,7 @@ const reloadBuffers = (customBuffer = null) => {
 
       synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
       synth.randomInterpolate();
-      soundLog("reloaded buffers");
+      logging && soundLog("reloaded buffers");
     });
   } else {
     let floatBuf = new Float32Array(customBuffer.length);
@@ -144,7 +165,7 @@ const reloadBuffers = (customBuffer = null) => {
       // purge buffer
       synth.randomStarts();
       synth.randomInterpolate();
-      soundLog("loaded user buffers");
+      logging && soundLog("loaded user buffers");
     });
   }
 };
@@ -153,7 +174,7 @@ const reloadBuffers = (customBuffer = null) => {
 const UISound = () => {
   document.querySelectorAll("a").forEach((elt) => {
     elt.addEventListener("click", () => {
-      u.play(uiNotes[~~Math.random * uiNotes.length]);
+      u.play(randomChoice(uiNotes));
     });
   });
 };
@@ -202,7 +223,7 @@ const loadSynths = async () => {
     // }
 
     if (f.audioFile) {
-      soundLog("Loaded GrainSynth " + (i + 1));
+      logging && soundLog("Loaded GrainSynth " + (i + 1));
       synths.push(new GrainSynth(buf, soundtrackAudioCtx, numVoices));
     }
   }
@@ -210,7 +231,7 @@ const loadSynths = async () => {
   muteButton.classList = [];
   muteButton.classList.add("fa", "fa-volume-off");
   muteButton.disabled = false;
-  soundLog("Voices loaded");
+  logging && soundLog("Voices loaded");
 };
 
 // method to start audio
@@ -252,12 +273,15 @@ const startAudio = async () => {
     masterBus.lowpassFilter(5000, 1);
     !isMobile && masterBus.chorus(0.01, 300, 0.9);
     !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
-    document.querySelector("body").onclick = () => {
-      u.play(uiNotes[~~Math.random * uiNotes.length]);
+
+    document.querySelector("body").addEventListener("click", () => {
+      const note = randomChoice(uiNotes);
+      u.play(note);
       synths.forEach((synth) => {
         synth.randomInterpolate();
       });
-    };
+    });
+
     // // loop to poll paprticle system values
     synths[0].transport.scheduleRepeat((time) => {
       pollValues();
@@ -365,12 +389,18 @@ muteButton.onclick = async () => {
 
 //  MAIN ///
 // load synths!
-if (window.safari) {
-  loadFallback();
-}
-!window.safari && loadSynths();
 
-UISound();
+const main = async () => {
+  if (window.safari) {
+    loadFallback();
+  } else {
+    loadSynths();
+  }
+
+  UISound();
+};
+
+main();
 
 // ! allow hot reloading of the files in project (webpack)
 if (module.hot) {
