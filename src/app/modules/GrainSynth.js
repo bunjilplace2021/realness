@@ -1,4 +1,5 @@
 import {
+  debug,
   now,
   Gain,
   GrainPlayer,
@@ -10,18 +11,17 @@ import {
   Filter,
   Compressor,
   getContext,
-  Clock,
-  AutoWah,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
 import { forEach } from "async";
-
 // TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
 // TODO: ADD PRESETS LOADED FROM JSON
 class GrainSynth {
   constructor(buffer, ctx, voices = 2) {
+    // workaround to suspend audiocontext without warnings
     getContext().rawContext.suspend();
+    getContext().isOffline = true;
 
     this.grains = [];
     this.presets = [];
@@ -30,6 +30,7 @@ class GrainSynth {
     this.buffer = buffer;
     this.nodes = [];
     this.toneContext = ctx;
+
     this.transport = this.toneContext.transport;
     this.dest = this.toneContext.destination;
     this.dest.name = "Grainsynth Destination";
