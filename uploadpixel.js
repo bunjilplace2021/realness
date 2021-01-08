@@ -151,7 +151,7 @@ function shaderDraw() {
   pippg.rect(0, 0, width, height);
 
   if (pixelShaderToggle) {
-    image(backgroundpg, 0, 0);
+    image(pixelpg, 0, 0);
     image(pippg, 0, 0);
   }
 }
@@ -177,7 +177,7 @@ function shaderMousePressed() {
     console.log("Webcam: " + (hasWebcam ? "yes" : "no"));
   });
 
-  colour = pixelpg.get(mouseX, height - mouseY);
+  colour = pixelpg.get(mouseX, isSafari ? mouseY : height - mouseY);
 
   // texture upside down?
   var data = {
