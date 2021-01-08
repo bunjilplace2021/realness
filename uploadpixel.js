@@ -156,7 +156,7 @@ let pip_my = norm(map(mouseY, 0, height,pipy - (height/5), pipy), 0, height);
   pippg.rect(0, 0, width, height);
 
   if (pixelShaderToggle) {
-    image(backgroundpg, 0, 0);
+    image(pixelpg, 0, 0);
     image(pippg, 0, 0);
   }
 
