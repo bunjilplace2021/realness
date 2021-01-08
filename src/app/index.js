@@ -4,7 +4,6 @@ import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
-let fallBack;
 // !TODO: GRAPH GAIN STAGING!!!
 // GLOBAL VARIABLES
 import {
@@ -34,6 +33,8 @@ import regeneratorRuntime from "regenerator-runtime";
 getContext().rawContext.suspend();
 
 const isMobile = window.innerWidth < 600;
+let fallBack;
+let safariAudioTrack;
 let isMuted = true;
 let muteClicked = 0;
 let sampleRate = 44100;
@@ -48,38 +49,28 @@ let soundtrackAudioCtx = new Context({
   state: "suspended",
 });
 
-// Debugging safari == set window.safari to true
-
-// window.safari = true;
-// window.webkitAudioContext = AudioContext;
-
 soundtrackAudioCtx.name = "Playback Context";
 
-// set that context as the global tone.js context
-
+/*
+SAFARI FALLBACK
+ */
 if (window.safari) {
+  safariAudioTrack = new Audio();
   // set to safari specific audio context
   setContext(new webkitAudioContext());
   // add polyfill for Media Recorder
   import("audio-recorder-polyfill").then((audioRecorder) => {
     window.MediaRecorder = audioRecorder.default;
   });
-  console.log("loaded MediaRecorder polyfill for safari");
-}
-
-let safariAudioTrack = new Audio();
-
-if (window.safari) {
   window.addEventListener("touchstart", () => {
-    console.log(safariAudioTrack);
     safariAudioTrack.autoplay = true;
     safariAudioTrack.muted = false;
     // safariAudioTrack.play();
     // safariAudioTrack.pause();
     // safariAudioTrack.currentTime = 0;
   });
+  console.log("loaded MediaRecorder polyfill for safari");
 }
-
 const loadFallback = () => {
   if (typeof fallBack == "undefined") {
     import(/* webpackChunkName:"fallback" */ "./samples/fallback.mp3").then(
@@ -99,6 +90,7 @@ const loadFallback = () => {
   }
 };
 
+/* GLOBAL VARIABLES */
 setContext(soundtrackAudioCtx);
 let masterBus;
 let synths = [];
@@ -109,7 +101,7 @@ let f = new FireBaseAudio(soundtrackAudioCtx);
 const recordLength = 2000;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
 
-const uiNotes = ["C4", "E4", "G4", "C5", "A5"];
+const uiNotes = ["C3", "E3", "G3", "C4", "A4"];
 
 // number of different sources to use
 const numSources = isMobile ? 1 : 3;
@@ -119,9 +111,44 @@ const numVoices = isMobile ? 2 : 3;
 const muteButton = document.querySelector("#mute");
 const recordButton = document.querySelector("#recordButton");
 
+/* EVENT LISTENERS */
+
+// allow unmuting once synths loaded from firebase
+muteButton.onclick = async () => {
+  //  if safari - load synths on unmute
+  // keep track of number of clicks
+  muteClicked++;
+  isMuted = !isMuted;
+  if (window.safari) {
+    safariAudioTrack.volume = !isMuted;
+    u.master.gain.value = !isMuted;
+    if (muteClicked === 1) {
+      u.master.toDestination();
+      document.querySelector("body").addEventListener("click", () => {
+        u.play(uiNotes[~~Math.random * uiNotes.length]);
+      });
+      UISound();
+      soundtrackAudioCtx.resume();
+      safariAudioTrack.play();
+    }
+  }
+  changeMuteButton();
+  //  if synths are loaded, start audio and change DOM element
+  if (synthsLoaded) {
+    if (!isMuted) {
+      if (muteClicked === 1) {
+        startAudio();
+      } else {
+        restartAudio();
+      }
+    } else {
+      stopAudio();
+    }
+  }
+};
+
 recordButton.onclick = async () => {
   recordButton.classList.toggle("red");
-
   try {
     await r.getPermissions();
     logging && soundLog("got permissions");
@@ -135,9 +162,7 @@ recordButton.onclick = async () => {
         f.uploadSample(r.audioBlob);
       }, recordLength);
     } else {
-      console.log(
-        "MediaRecorder not available in this browser. Trying polyfill."
-      );
+      soundLog("MediaRecorder not available in this browser. Trying polyfill.");
     }
   } catch (error) {
     console.log(error);
@@ -155,7 +180,6 @@ const subOsc = new FMOscillator({
 
 const reloadBuffers = (customBuffer = null) => {
   // fetch new samples from database and load them into existing buffers
-
   if (!customBuffer) {
     synths.forEach(async (synth) => {
       await f.getSample();
@@ -164,11 +188,9 @@ const reloadBuffers = (customBuffer = null) => {
       let floatBuf = new Float32Array(resampled.length);
       resampled.copyFromChannel(floatBuf, 0, 0);
       synth.buffer.copyToChannel(floatBuf, 0, 0);
-
       // purge buffer
       // floatBuf = null;
       synth.randomStarts();
-
       synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
       synth.randomInterpolate();
       logging && soundLog("reloaded buffers");
@@ -216,28 +238,7 @@ const loadSynths = async () => {
   await f.listAll();
   for (let i = 0; i < numSources; i++) {
     await f.getSample();
-
-    const isSafari = window.safari !== undefined;
-
-    isSafari &&
-      console.log("User is on safari! Changing decode to user gesture");
-    // fetch random samples from database
-    // console.log(f.audioFile);
-    // TODO: if it is safari, wait for user gesture before downlaoding file
-    let buf;
-    if (!isSafari) {
-      buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-    } else {
-      buf = await safariFallback(f.audioFile, soundtrackAudioCtx);
-    }
-
-    // let resampledBuf;
-    // try {
-    //   resampledBuf = await resampleBuffer(buf, sampleRate);
-    // } catch (error) {
-    //   resampledBuf = buf;
-    // }
-
+    const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
     if (f.audioFile) {
       logging && soundLog("Loaded GrainSynth " + (i + 1));
       synths.push(new GrainSynth(buf, soundtrackAudioCtx, numVoices));
@@ -289,7 +290,6 @@ const startAudio = async () => {
     masterBus.lowpassFilter(5000, 1);
     !isMobile && masterBus.chorus(0.01, 300, 0.9);
     !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
-
     document.querySelector("body").addEventListener("click", () => {
       const note = randomChoice(uiNotes);
       u.play(note);
@@ -297,20 +297,9 @@ const startAudio = async () => {
         synth.randomInterpolate();
       });
     });
-
-    // // loop to poll paprticle system values
-    synths[0].transport.scheduleRepeat((time) => {
-      pollValues();
-    }, 10);
-    // loop to reload samples every 30 seconds approx
-    if (!r.decodedBuffer) {
-      synths[0].transport.scheduleRepeat((time) => {
-        reloadBuffers();
-      }, 30);
-    }
+    runLoops();
     subOscLoop();
   }
-
   // don't start audio unless the context is running -- requires user gesture
   if (soundtrackAudioCtx.state === "closed") {
     console.log("audio context is closed by user gesture, restarting");
@@ -320,14 +309,34 @@ const startAudio = async () => {
   // main synth setup loop
 };
 
+const runLoops = () => {
+  // // loop to poll paprticle system values
+  synths[0].transport.scheduleRepeat((time) => {
+    pollValues();
+  }, 10);
+  // loop to reload samples every 30 seconds approx
+  if (!r.decodedBuffer) {
+    synths[0].transport.scheduleRepeat((time) => {
+      reloadBuffers();
+    }, 30);
+  }
+};
+
+const subOscLoop = () => {
+  synths[0].transport.scheduleRepeat((time) => {
+    subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -100, 100), 30);
+    subOsc.harmonicity.rampTo(mapValue(Math.random(), 0, 1, 0.5, 2), 30);
+  }, 30);
+};
+
 const pollValues = () => {
   try {
     if (ps && ps.particles) {
       let { radius, maxradius } = ps.particles[ps.particles.length - 1];
       synths.forEach((synth, i) => {
         synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
-        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 1100);
-        !isMobile && synth.filter.frequency.rampTo(filterFreq, 1);
+        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 880);
+        !isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
       });
       subOsc.filter.frequency.rampTo(
         mapValue(~~radius, 0, ~~maxradius, 50, 120),
@@ -343,16 +352,7 @@ const stopAudio = () => {
     soundtrackAudioCtx.rawContext.suspend();
   }
 };
-const subOscLoop = () => {
-  synths[0].transport.scheduleRepeat((time) => {
-    subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -100, 100), 30);
-    subOsc.harmonicity.rampTo(mapValue(Math.random(), 0, 1, 0.5, 2), 30);
-  }, 30);
-};
-// if (window.safari) {
-//   muteButton.classList = "";
-//   muteButton.classList.add("fa", "fa-volume-off");
-// }
+
 const changeMuteButton = () => {
   if (muteButton.classList.contains("fa-volume-off")) {
     muteButton.classList.remove("fa-volume-off");
@@ -362,46 +362,9 @@ const changeMuteButton = () => {
     muteButton.classList.remove("fa-volume-up");
   }
 };
+
 const restartAudio = () => {
   soundtrackAudioCtx.rawContext.resume();
-};
-// allow unmuting once synths loaded from firebase
-muteButton.onclick = async () => {
-  //  if safari - load synths on unmute
-
-  // keep track of number of clicks
-  muteClicked++;
-  isMuted = !isMuted;
-
-  if (window.safari) {
-    safariAudioTrack.volume = !isMuted;
-    u.master.gain.value = !isMuted;
-    if (muteClicked === 1) {
-      u.master.toDestination();
-      document.querySelector("body").addEventListener("click", () => {
-        u.play(uiNotes[~~Math.random * uiNotes.length]);
-      });
-      UISound();
-      soundtrackAudioCtx.resume();
-      // await soundtrackAudioCtx.rawContext._nativeAudioContext.resume();
-
-      safariAudioTrack.play();
-    }
-  }
-
-  changeMuteButton();
-  //  if synths are loaded, start audio and change DOM element
-  if (synthsLoaded) {
-    if (!isMuted) {
-      if (muteClicked === 1) {
-        startAudio();
-      } else {
-        restartAudio();
-      }
-    } else {
-      stopAudio();
-    }
-  }
 };
 
 //  MAIN ///
@@ -412,11 +375,11 @@ const main = async () => {
     loadFallback();
   } else {
     loadSynths();
+    UISound();
   }
-
-  UISound();
 };
 
+// run main loop
 main();
 
 // ! allow hot reloading of the files in project (webpack)
