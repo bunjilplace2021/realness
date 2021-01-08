@@ -74,9 +74,9 @@ if (window.safari) {
     console.log(safariAudioTrack);
     safariAudioTrack.autoplay = true;
     safariAudioTrack.muted = false;
-    safariAudioTrack.play();
-    safariAudioTrack.pause();
-    safariAudioTrack.currentTime = 0;
+    // safariAudioTrack.play();
+    // safariAudioTrack.pause();
+    // safariAudioTrack.currentTime = 0;
   });
 }
 
