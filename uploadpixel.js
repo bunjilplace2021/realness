@@ -204,8 +204,7 @@ function shaderMousePressed() {
 
   let rect = document.getElementById("top").getBoundingClientRect();
 
-
-  if (mouseY >= rect.top && mouseY <= rect.bottom) {
+  if (mouseY <= rect.height) {
     menu_loc = true;
   } else {
     menu_loc = false;
