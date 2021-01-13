@@ -19,6 +19,7 @@ class Recorder {
   async recordChunks() {
     return new Promise((resolve, reject) => {
       this.recording = true;
+
       this.mediaRecorder = new MediaRecorder(this.stream);
       this.mediaRecorder.start();
       this.audioChunks = [];
