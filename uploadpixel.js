@@ -151,7 +151,7 @@ function shaderDraw() {
   pippg.rect(0, 0, width, height);
 
   if (pixelShaderToggle) {
-    image(pixelpg, 0, 0);
+    image(backgroundpg, 0, 0);
     image(pippg, 0, 0);
   }
 }
@@ -177,7 +177,7 @@ function shaderMousePressed() {
     console.log("Webcam: " + (hasWebcam ? "yes" : "no"));
   });
 
-  colour = pixelpg.get(mouseX, isSafari ? mouseY : height - mouseY);
+  colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
 
   // texture upside down?
   var data = {
@@ -196,7 +196,7 @@ function shaderMousePressed() {
 
   let rect = document.getElementById("top").getBoundingClientRect();
 
-  if (mouseY >= rect.top && mouseY <= rect.bottom) {
+  if (mouseY <= rect.height) {
     menu_loc = true;
   } else {
     menu_loc = false;
