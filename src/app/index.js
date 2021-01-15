@@ -216,6 +216,8 @@ const reloadBuffers = (customBuffer = null) => {
       synth.randomInterpolate();
       logging && soundLog("loaded user buffers");
       subOsc.start();
+      // null the buffel so that doesn't try to reload the user buffer on next loop
+      customBuffer = null;
     });
   }
 };
