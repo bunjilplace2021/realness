@@ -43,7 +43,7 @@ let isMuted = true;
 let muteClicked = 0;
 let sampleRate = 44100;
 // Turn on logging
-let logging = false;
+let logging = true;
 // create own audio context
 let soundtrackAudioCtx = new Context({
   sampleRate: 44100,
@@ -195,8 +195,11 @@ const reloadBuffers = (customBuffer = null) => {
       const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
       const resampled = await resampleBuffer(buf, sampleRate);
       let floatBuf = new Float32Array(resampled.length);
+      //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
+
       resampled.copyFromChannel(floatBuf, 0, 0);
-      synth.buffer.copyToChannel(floatBuf, 0, 0);
+      const newBuf = floatBuf.filter((val) => val !== 0);
+      synth.buffer.copyToChannel(newBuf, 0, 0);
       // purge buffer
       // floatBuf = null;
       synth.randomStarts();
