@@ -120,7 +120,7 @@ muteButton.onclick = async () => {
   muteClicked++;
   isMuted = !isMuted;
   if (window.safari) {
-    safariAudioTrack.volume = !isMuted;
+    safariAudioTrack.volume = !isMuted * 0.8;
     u.master.gain.value = !isMuted;
     if (muteClicked === 1) {
       u.master.toDestination();
@@ -243,7 +243,11 @@ const loadSynths = async () => {
     const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
     if (f.audioFile) {
       logging && soundLog("Loaded GrainSynth " + (i + 1));
-      synths.push(new GrainSynth(buf, soundtrackAudioCtx, numVoices));
+      if (!window.safari) {
+        synths.push(new GrainSynth(buf, soundtrackAudioCtx, numVoices));
+      } else {
+        synths.push(new GrainSynth(f.audioFile, soundtrackAudioCtx, numVoices));
+      }
     }
   }
   synthsLoaded = true;
