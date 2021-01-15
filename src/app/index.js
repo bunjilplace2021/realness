@@ -148,6 +148,7 @@ muteButton.onclick = async () => {
 };
 
 recordButton.onclick = async () => {
+  safariAudioTrack && safariAudioTrack.pause();
   recordButton.classList.toggle("red");
   try {
     await r.getPermissions();
@@ -160,6 +161,7 @@ recordButton.onclick = async () => {
         decodedBuffer && recordButton.classList.remove("red");
         reloadBuffers(decodedBuffer);
         f.uploadSample(r.audioBlob);
+        safariAudioTrack && safariAudioTrack.play();
       }, recordLength);
     } else {
       soundLog("MediaRecorder not available in this browser. Trying polyfill.");
