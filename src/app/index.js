@@ -151,6 +151,7 @@ recordButton.onclick = async () => {
   safariAudioTrack && safariAudioTrack.pause();
   recordButton.classList.toggle("red");
   try {
+    soundtrackAudioCtx.destination.volume = 0;
     await r.getPermissions();
     logging && soundLog("got permissions");
 
@@ -160,8 +161,10 @@ recordButton.onclick = async () => {
       setTimeout(() => {
         decodedBuffer && recordButton.classList.remove("red");
         reloadBuffers(decodedBuffer);
+
         f.uploadSample(r.audioBlob);
         safariAudioTrack && safariAudioTrack.play();
+        soundtrackAudioCtx.destination.volume = 1;
       }, recordLength);
     } else {
       soundLog("MediaRecorder not available in this browser. Trying polyfill.");
@@ -199,10 +202,12 @@ const reloadBuffers = (customBuffer = null) => {
     });
   } else {
     let floatBuf = new Float32Array(customBuffer.length);
-    customBuffer.copyFromChannel(floatBuf, 0, 0);
+    floatBuf = customBuffer.getChannelData(0);
+    const newBuf = floatBuf.filter((val) => val !== 0);
+    console.log(newBuf);
     synths.forEach((synth) => {
-      synth.buffer.copyToChannel(floatBuf, 0, 0);
-      // purge buffer
+      synth.buffer.copyToChannel(newBuf, 0, 0);
+      synth.setVolume(3);
       synth.randomStarts();
       synth.randomInterpolate();
       logging && soundLog("loaded user buffers");
@@ -213,10 +218,9 @@ const reloadBuffers = (customBuffer = null) => {
 
 // method to play UI sounds
 const UISound = () => {
-  document.querySelectorAll("a").forEach((elt) => {
-    elt.addEventListener("click", () => {
-      u.play(randomChoice(uiNotes));
-    });
+  window.addEventListener("pixel_added", () => {
+    console.log("added particle");
+    u.play(randomChoice(uiNotes));
   });
 };
 
@@ -298,8 +302,8 @@ const startAudio = async () => {
     !isMobile && masterBus.chorus(0.01, 300, 0.9);
     !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
     document.querySelector("body").addEventListener("click", () => {
-      const note = randomChoice(uiNotes);
-      u.play(note);
+      // const note = randomChoice(uiNotes);
+      // u.play(note);
       synths.forEach((synth) => {
         synth.randomInterpolate();
       });

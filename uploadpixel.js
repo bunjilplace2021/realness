@@ -14,6 +14,7 @@ let backgroundcol;
 
 let amt, startColor, newColor;
 
+let pixelAddEvent = new Event("pixel_added");
 //load shader for camera module
 
 function shaderPreload() {
@@ -171,6 +172,7 @@ function removeData() {
 }
 
 function shaderMousePressed() {
+  window.dispatchEvent(pixelAddEvent);
   detectWebcam(function (hasWebcam) {
     webcam = hasWebcam;
     //console.log(webcam);
