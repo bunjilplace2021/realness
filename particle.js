@@ -1,9 +1,15 @@
 class Particle {
   constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
     this.origposition = createVector(x, y);
-    this.map_position = createVector(map(x, 0, devWidth, 0, width), map(y, 0, devHeight, 0, height));
+    this.map_position = createVector(
+      map(x, 0, devWidth, 0, width),
+      map(y, 0, devHeight, 0, height)
+    );
     this.alignpixel = 100;
-    this.position = createVector((round(this.map_position.x / this.alignpixel)) * this.alignpixel, (round(this.map_position.y / this.alignpixel)) * this.alignpixel);
+    this.position = createVector(
+      round(this.map_position.x / this.alignpixel) * this.alignpixel,
+      round(this.map_position.y / this.alignpixel) * this.alignpixel
+    );
     this.resize_position = createVector();
     this.velocity = createVector();
     this.acceleration = createVector();
@@ -12,13 +18,13 @@ class Particle {
     this.rand = floor(random(0, 3));
     this.img = img_;
     this.radius = 0.0;
-    this.resize = (0.2 * int(random(1, 3))) + (width * 0.0001);
-    this.maxradius = (width >= height ? width : height);
+    this.resize = 0.2 * int(random(1, 3)) + width * 0.0001;
+    this.maxradius = width >= height ? width : height;
     this.origWidth = devWidth;
     this.origHeight = devHeight;
     this.touchtime = touchTime;
-    this.duration = 0.;
-    this.timer = 0.;
+    this.duration = 0;
+    this.timer = 0;
     this.timermax = 150;
     this.alive = true;
     this.active = false;
@@ -29,7 +35,6 @@ class Particle {
   }
 
   colour(rand) {
-
     this.col_array = [];
 
     this.col_array[0] = color(this.img[0], 0, 0);
@@ -42,34 +47,48 @@ class Particle {
     if (pixelShaderToggle) {
       if (this.timer < this.timermax) {
         this.timer = this.timer + 1;
-
       }
     } else {
-
       if (this.timer >= 0) {
         this.timer = this.timer - 1;
-
       }
     }
 
     if (this.UUID == uuid) {
       this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
-      this.fill_col = lerpColor(this.fill_col, this.col, map(this.timer, 0, this.timermax, 0, 1));
+      this.fill_col = lerpColor(
+        this.fill_col,
+        this.col,
+        map(this.timer, 0, this.timermax, 0, 1)
+      );
       this.fill_col.setAlpha(this.fill_alpha);
     } else {
       this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
-      this.fill_col = lerpColor(this.fill_col, this.col, map(this.timer, 0, this.timermax, 0, 1));
-      this.fill_col.setAlpha(map(this.timer, 0, this.timermax, this.fill_alpha, 0));
+      this.fill_col = lerpColor(
+        this.fill_col,
+        this.col,
+        map(this.timer, 0, this.timermax, 0, 1)
+      );
+      this.fill_col.setAlpha(
+        map(this.timer, 0, this.timermax, this.fill_alpha, 0)
+      );
     }
-
 
     //first click - white and lerps to color
-    if (this.firstrun && this.active && this.duration <= 800 && !pixelShaderToggle) {
+    if (
+      this.firstrun &&
+      this.active &&
+      this.duration <= 800 &&
+      !pixelShaderToggle
+    ) {
       this.col = color(this.img[0], this.img[1], this.img[2], this.fill_alpha);
-      this.fill_col = lerpColor(this.col, this.fill_col, map(this.duration, 0, 800, 0, 1));
+      this.fill_col = lerpColor(
+        this.col,
+        this.fill_col,
+        map(this.duration, 0, 800, 0, 1)
+      );
       this.strokeweight = lerp(5, 0, map(this.duration, 0, 800, 0, 1));
     }
-
   }
 
   run(p) {
@@ -77,41 +96,59 @@ class Particle {
     this.display(p);
   }
 
-
   intersects(other) {
-    let d = dist(this.position.x, this.position.y, other.position.x, other.position.y);
-    return (d < (this.radius * 0.5) + (other.radius * 0.5) && this.active == true);
+    let d = dist(
+      this.position.x,
+      this.position.y,
+      other.position.x,
+      other.position.y
+    );
+    return d < this.radius * 0.5 + other.radius * 0.5 && this.active == true;
   }
 
   resize_window() {
+    this.map_position.x = constrain(
+      map(this.origposition.x, 0, this.origWidth, 0, width),
+      0,
+      width
+    );
+    this.map_position.y = constrain(
+      map(this.origposition.y, 0, this.origHeight, 0, height),
+      0,
+      height
+    );
 
-    this.map_position.x = constrain(map(this.origposition.x, 0, this.origWidth, 0, width), 0, width);
-    this.map_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height), 0, height);
+    this.resize_position.x = constrain(
+      map(this.origposition.x, 0, this.origWidth, 0, width),
+      0,
+      width
+    );
+    this.resize_position.y = constrain(
+      map(this.origposition.y, 0, this.origHeight, 0, height),
+      0,
+      height
+    );
 
-    this.resize_position.x = constrain(map(this.origposition.x, 0, this.origWidth, 0, width), 0, width);
-    this.resize_position.y = constrain(map(this.origposition.y, 0, this.origHeight, 0, height), 0, height);
+    this.resize_position.x =
+      round(this.resize_position.x / this.alignpixel) * this.alignpixel;
+    this.resize_position.y =
+      round(this.resize_position.y / this.alignpixel) * this.alignpixel;
 
-    this.resize_position.x = (round(this.resize_position.x / this.alignpixel)) * this.alignpixel;
-    this.resize_position.y = (round(this.resize_position.y / this.alignpixel)) * this.alignpixel;
-
-    this.resize = (0.2 * int(random(1, 3))) + (width * 0.0001);
-    this.maxradius = (width >= height ? width : height);
+    this.resize = 0.2 * int(random(1, 3)) + width * 0.0001;
+    this.maxradius = width >= height ? width : height;
 
     this.velocity.x = 0;
     this.velocity.y = 0;
     this.acceleration.x = -0.1 * (this.position.x - this.resize_position.x);
     this.acceleration.y = -0.1 * (this.position.y - this.resize_position.y);
-
   }
 
   update() {
-
     this.velocity.add(this.acceleration);
     this.position.add(this.velocity);
     this.acceleration.mult(0);
     this.lifespan -= 0.0;
     this.velocity.limit(this.maxspeed);
-
 
     this.colour(this.rand);
 
@@ -124,20 +161,19 @@ class Particle {
       this.duration = this.duration + 1;
     }
 
-if (this.active && pixelShaderToggle && this.UUID == uuid){
-  this.lifespan -= this.intersect;
-  this.fill_alpha -= this.intersect;
-}
+    if (this.active && pixelShaderToggle && this.UUID == uuid) {
+      this.lifespan -= this.intersect;
+      this.fill_alpha -= this.intersect;
+    }
     //  if (!pixelShaderToggle) {
 
     if (this.duration > 500 && this.active == true) {
-
       this.alph_factor = constrain(map(width, 300, 1000, 0.2, 0.1), 0.1, 0.2);
       this.lifespan -= this.alph_factor * (this.rand + 1);
       this.fill_alpha -= this.alph_factor * (this.rand + 1);
     }
     if (this.lifespan <= 0.5 && this.active == true) {
-      this.radius = 0.;
+      this.radius = 0;
       this.fill_alpha = 200.0;
       this.lifespan = 255.0;
       this.duration = 0.0;
@@ -152,10 +188,8 @@ if (this.active && pixelShaderToggle && this.UUID == uuid){
     }
   }
 
-
   // Method to display
   display(p) {
-
     p.push();
 
     // if (pixelShaderToggle && this.UUID == uuid) {

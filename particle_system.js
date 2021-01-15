@@ -8,7 +8,9 @@ class ParticleSystem {
 
   addParticle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID) {
     if (x !== undefined && y !== undefined) {
-      this.particles.push(new Particle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID));
+      this.particles.push(
+        new Particle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID)
+      );
       particlecount = this.particles.length;
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
@@ -16,7 +18,6 @@ class ParticleSystem {
   }
 
   intersection() {
-
     let boundary = new Rectangle(0, 0, width, height);
     let qtree = new QuadTree(boundary, 4);
 
@@ -24,7 +25,11 @@ class ParticleSystem {
       let point = new Point(particle.position.x, particle.position.y, particle);
       qtree.insert(point);
 
-      let range = new Circle(particle.position.x, particle.position.y, particle.radius * 2);
+      let range = new Circle(
+        particle.position.x,
+        particle.position.y,
+        particle.radius * 2
+      );
       let points = qtree.query(range);
 
       for (let point of points) {
@@ -53,9 +58,8 @@ class ParticleSystem {
       for (let i = this.particles.length - 1; i > array_limit; i--) {
         this.particles[i - array_limit].alive = false;
       }
-
     }
-    this.particles = this.particles.filter(particle => !particle.isDead());
+    this.particles = this.particles.filter((particle) => !particle.isDead());
   }
 
   applyForce(f) {
@@ -63,5 +67,4 @@ class ParticleSystem {
       particle.applyForce(f);
     }
   }
-
 }

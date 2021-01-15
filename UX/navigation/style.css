@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   width: 100vw;
   height: 100vh;
   margin: 0;
@@ -21,12 +22,11 @@ canvas {
   display: block;
 }
 
-video{
+video {
   position: absolute;
   width: 0;
   height: 0;
   z-index: -999;
-
 }
 
 .topnav {
@@ -48,8 +48,8 @@ video{
 .topnav a {
   float: left;
   color: black;
-  margin-left: .5em;
-  padding:  .5em;
+  margin-left: 0.5em;
+  padding: 0.5em;
   text-decoration: none;
 }
 
@@ -65,16 +65,16 @@ video{
 }
 
 .active {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
 }
 
-.content  {
+.content {
   position: absolute;
   overflow-y: auto;
-  center: 0;
+  /* center: 0; */
   width: 80%;
-  height:70%;
+  height: 70%;
   padding: 1rem;
 }
 
@@ -98,7 +98,7 @@ video{
 
 .content #myInfo {
   display: none;
-  background:none;
+  background: none;
   overflow-y: auto;
   padding: 1rem;
   color: black;
@@ -107,7 +107,7 @@ video{
 .animated {
   position: absolute;
   text-align: center;
-  center: 0;
+  /* center: 0; */
   padding: 20px;
   animation-duration: 5s;
   -webkit-animation-duration: 5s;
@@ -124,7 +124,7 @@ video{
 @media (hover: none) {
   .topnav a:hover {
     background-color: transparent;
-    opacity: 1.0;
+    opacity: 1;
   }
 
   .content {
@@ -167,7 +167,6 @@ video{
     font-size: 3.5vw;
   }
 } */
-
 
 .fadeOut {
   -webkit-animation-name: fadeOut;
@@ -225,3 +224,4 @@ video{
   100% {
     opacity: 0;
   }
+}
