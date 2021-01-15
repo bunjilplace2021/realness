@@ -34,6 +34,10 @@ getContext().rawContext.suspend();
 
 const isMobile = window.innerWidth < 600;
 let fallBack;
+
+window.safari =
+  navigator.userAgent.includes("Safari") &&
+  !navigator.userAgent.includes("Chrome");
 let safariAudioTrack;
 let isMuted = true;
 let muteClicked = 0;
@@ -71,7 +75,7 @@ if (window.safari) {
   });
   console.log("loaded MediaRecorder polyfill for safari");
 }
-const loadFallback = () => {
+const loadFallback = async () => {
   if (typeof fallBack == "undefined") {
     import(/* webpackChunkName:"fallback" */ "./samples/fallback.mp3").then(
       (file) => {
@@ -79,7 +83,7 @@ const loadFallback = () => {
         safariAudioTrack.load();
         safariAudioTrack.src = fallBack;
         safariAudioTrack.loop = true;
-        safariAudioTrack.addEventListener("canplay", () => {
+        safariAudioTrack.addEventListener("loadedmetadata", () => {
           muteButton.classList = "";
           muteButton.classList.add("fa-volume-off");
           safariAudioTrack.muted = false;
