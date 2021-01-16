@@ -32,6 +32,7 @@ class Particle {
     this.firstrun = true;
     this.strokeweight = 0;
     this.intersect = 0.0;
+    window.dispatchEvent(window.pixelAddEvent);
   }
 
   colour(rand) {

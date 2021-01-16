@@ -46,7 +46,7 @@ let sampleRate = 44100;
 let logging = true;
 // create own audio context
 let soundtrackAudioCtx = new Context({
-  sampleRate: 44100,
+  // sampleRate: 44100,
   latencyHint: "playback",
   updateInterval: 1,
   bufferSize: 1024,

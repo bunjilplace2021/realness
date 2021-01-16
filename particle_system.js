@@ -7,6 +7,8 @@ class ParticleSystem {
   }
 
   addParticle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID) {
+    // fire 'pixel_added' event listener to play UI sound
+    window.dispatchEvent(window.pixelAddEvent);
     if (x !== undefined && y !== undefined) {
       this.particles.push(
         new Particle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID)
@@ -35,10 +37,15 @@ class ParticleSystem {
       for (let point of points) {
         let other = point.userData;
 
-
         //Collision Detection Test
-        if (particle !== other && particle.intersects(other) && pixelShaderToggle && particle.active && particle.UUID ==uuid) {
-        particle.intersect = particle.intersect+0.001;
+        if (
+          particle !== other &&
+          particle.intersects(other) &&
+          pixelShaderToggle &&
+          particle.active &&
+          particle.UUID == uuid
+        ) {
+          particle.intersect = particle.intersect + 0.001;
         }
       }
     }

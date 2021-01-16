@@ -14,7 +14,6 @@ let backgroundcol;
 
 let amt, startColor, newColor;
 
-window.pixelAddEvent = new Event("pixel_added");
 //load shader for camera module
 
 function shaderPreload() {
@@ -204,8 +203,6 @@ function shaderMousePressed() {
   }
 
   if (webcam && !menu_loc) {
-    // fire 'pixel_added' event listener to play UI sound
-    window.dispatchEvent(window.pixelAddEvent);
     test.push(data);
     console.log(data);
   }
