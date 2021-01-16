@@ -213,7 +213,7 @@ const reloadBuffers = (customBuffer = null) => {
     console.log(newBuf);
     synths.forEach((synth) => {
       synth.buffer.copyToChannel(newBuf, 0, 0);
-      synth.setVolume(3);
+      // synth.setVolume(3);
       synth.randomStarts();
       synth.randomInterpolate();
       logging && soundLog("loaded user buffers");

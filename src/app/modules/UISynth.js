@@ -10,7 +10,7 @@ class UISynth {
         release: 0.5,
       },
       harmonicity: 2,
-      volume: -3,
+      volume: 4,
     });
 
     this.master = new Gain(0.1);
