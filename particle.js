@@ -181,6 +181,7 @@ class Particle {
       this.rand = this.rand + 1;
       this.firstrun = false;
       this.intersect = 0.0;
+      window.dispatchEvent(window.radiusLimit);
 
       if (this.rand > 2) {
         this.rand = 0;

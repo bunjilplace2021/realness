@@ -25,7 +25,7 @@ let isSafari = false;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
-
+window.radiusLimit = new Event("radius_reached");
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
   var cnv_y = (windowHeight - height) / 2;
@@ -164,12 +164,11 @@ function particle_draw(p) {
 
   shaderDraw();
 
-  if (pixelShaderToggle){
+  if (pixelShaderToggle) {
     pipShaderDraw();
   }
 
   image(particlepg, 0, 0);
-
 }
 
 function mousePressed() {

@@ -9,13 +9,28 @@ export function removeZeroValues(arr) {
   return arr.filter((val) => val !== 0);
 }
 
-export function debounce(callback, delay) {
-  let timeout;
-  return function () {
-    clearTimeout(timeout);
-    timeout = setTimeout(callback, delay);
+export function debounce(fn, delay) {
+  let timeOutId;
+  return function (...args) {
+    if (timeOutId) {
+      clearTimeout(timeOutId);
+    }
+    timeOutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
   };
 }
+
+export function once(func) {
+  let calls = 1;
+  return function () {
+    if (calls > 0) {
+      func.apply(null, arguments);
+      calls--;
+    }
+  };
+}
+
 export function throttle(fn, delay) {
   let scheduledId;
   return function throttled() {

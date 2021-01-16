@@ -3,6 +3,8 @@ import FireBaseAudio from "./modules/FirebaseAudio";
 import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
+import throttle from "lodash/throttle";
+// import debounce from "lodash/debounce";
 
 // !TODO: GRAPH GAIN STAGING!!!
 // GLOBAL VARIABLES
@@ -20,7 +22,8 @@ import {
 debug.setLogger(console);
 // UTILITIES
 import {
-  throttle,
+  once,
+  debounce,
   fetchSample,
   mapValue,
   resampleBuffer,
@@ -105,10 +108,10 @@ let synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx);
 let f = new FireBaseAudio(soundtrackAudioCtx);
 
-const recordLength = 2000;
+const recordLength = 200;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
 
-const uiNotes = ["C3", "E3", "G3", "C4", "A4"];
+const uiNotes = ["C3", "F3", "A3", "E3", "G3", "C4", "A4"];
 
 // number of different sources to use
 const numSources = isMobile ? 1 : 3;
@@ -154,7 +157,7 @@ muteButton.onclick = async () => {
   }
 };
 
-recordButton.onclick = async () => {
+const recordSnippet = async () => {
   safariAudioTrack && safariAudioTrack.pause();
   recordButton.classList.toggle("red");
   try {
@@ -179,6 +182,9 @@ recordButton.onclick = async () => {
     console.log(error);
     recordButton.classList.remove("red");
   }
+};
+recordButton.onclick = async () => {
+  // recordSnippet();
 };
 
 // list all samples in database
@@ -212,23 +218,48 @@ const reloadBuffers = (customBuffer = null) => {
     let floatBuf = new Float32Array(customBuffer.length);
     floatBuf = customBuffer.getChannelData(0);
     const newBuf = removeZeroValues(floatBuf);
-    console.log(newBuf);
+
     synths.forEach((synth) => {
       synth.buffer.copyToChannel(newBuf, 0, 0);
       synth.randomStarts();
       synth.randomInterpolate();
       logging && soundLog("loaded user buffers");
-      subOsc.start();
+      // subOsc.start();
       // null the buffer so that doesn't try to reload the user buffer on next loop
       customBuffer = null;
     });
   }
 };
+let radiuses = 0;
+window.addEventListener("radius_reached", () => {
+  console.log();
+  radiuses++;
+  const timedAction = setTimeout(reloadBuffers, 100);
+
+  if (radiuses % 20 !== 0) {
+    clearTimeout(timedAction);
+  }
+});
 
 // method to play UI sounds
 const UISound = () => {
+  let count = 0;
+  let recordings = 0;
   window.addEventListener("pixel_added", () => {
-    !isMuted && throttle(u.play(randomChoice(uiNotes)), 100);
+    count++;
+
+    // restrict upload to counter
+    if (count > 20 && count % 5 === 0) {
+      recordings++;
+
+      if (recordings < 3) {
+        recordSnippet();
+      } else {
+        console.log("user recording limit reached");
+      }
+    }
+
+    !isMuted && u.play(randomChoice(uiNotes));
   });
 };
 
@@ -335,9 +366,9 @@ const runLoops = () => {
   }, 10);
   // loop to reload samples every 30 seconds approx
   if (!r.decodedBuffer) {
-    synths[0].transport.scheduleRepeat((time) => {
-      reloadBuffers();
-    }, 30);
+    // synths[0].transport.scheduleRepeat((time) => {
+    //   reloadBuffers();
+    // }, 30);
   }
 };
 
