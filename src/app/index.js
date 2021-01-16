@@ -22,7 +22,7 @@ import {
   mapValue,
   resampleBuffer,
   soundLog,
-  safariFallback,
+  removeZeroValues,
   randomChoice,
 } from "./utilityFunctions";
 
@@ -165,7 +165,6 @@ recordButton.onclick = async () => {
       setTimeout(() => {
         decodedBuffer && recordButton.classList.remove("red");
         reloadBuffers(decodedBuffer);
-
         f.uploadSample(r.audioBlob);
         safariAudioTrack && safariAudioTrack.play();
         soundtrackAudioCtx.destination.volume = 1;
@@ -197,7 +196,7 @@ const reloadBuffers = (customBuffer = null) => {
       let floatBuf = new Float32Array(resampled.length);
       //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
       resampled.copyFromChannel(floatBuf, 0, 0);
-      const newBuf = floatBuf.filter((val) => val !== 0);
+      const newBuf = removeZeroValues(floatBuf);
       synth.buffer.copyToChannel(newBuf, 0, 0);
       // purge buffer
       // floatBuf = null;
@@ -209,16 +208,15 @@ const reloadBuffers = (customBuffer = null) => {
   } else {
     let floatBuf = new Float32Array(customBuffer.length);
     floatBuf = customBuffer.getChannelData(0);
-    const newBuf = floatBuf.filter((val) => val !== 0);
+    const newBuf = removeZeroValues(floatBuf);
     console.log(newBuf);
     synths.forEach((synth) => {
       synth.buffer.copyToChannel(newBuf, 0, 0);
-      // synth.setVolume(3);
       synth.randomStarts();
       synth.randomInterpolate();
       logging && soundLog("loaded user buffers");
       subOsc.start();
-      // null the buffel so that doesn't try to reload the user buffer on next loop
+      // null the buffer so that doesn't try to reload the user buffer on next loop
       customBuffer = null;
     });
   }

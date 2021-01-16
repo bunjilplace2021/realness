@@ -5,6 +5,9 @@ export async function fetchSample(url, ctx) {
     .catch((error) => console.log(error));
 }
 
+export function removeZeroValues(arr) {
+  return arr.filter((val) => val !== 0);
+}
 export async function safariFallback(url, ctx) {
   return new Promise(async (resolve, reject) => {
     resolve(url);

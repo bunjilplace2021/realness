@@ -24,6 +24,10 @@ function firebasesetup() {
 function gotData(data) {
   var test = data.val();
   var keys = Object.keys(test);
+
+  // play sound on particle propagation
+  window.dispatchEvent(window.pixelAddEvent);
+
   ps.addParticle(
     test.mouseX_loc,
     test.mouseY_loc,
