@@ -17,6 +17,7 @@ import {
   setContext,
   start,
   debug,
+  Meter,
 } from "tone";
 
 debug.setLogger(console);
@@ -184,7 +185,7 @@ const recordSnippet = async () => {
   }
 };
 recordButton.onclick = async () => {
-  // recordSnippet();
+  recordSnippet();
 };
 
 // list all samples in database
@@ -201,6 +202,7 @@ const reloadBuffers = (customBuffer = null) => {
     synths.forEach(async (synth) => {
       await f.getSample();
       const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+      console.log(f.audioFile);
       const resampled = await resampleBuffer(buf, sampleRate);
       let floatBuf = new Float32Array(resampled.length);
       //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
@@ -245,6 +247,7 @@ window.addEventListener("radius_reached", () => {
 const UISound = () => {
   let count = 0;
   let recordings = 0;
+  let recordLimit = isMobile ? 1 : 3;
   window.addEventListener("pixel_added", () => {
     count++;
 
@@ -252,7 +255,7 @@ const UISound = () => {
     if (count > 20 && count % 5 === 0) {
       recordings++;
 
-      if (recordings < 3) {
+      if (recordings < recordLimit) {
         recordSnippet();
       } else {
         console.log("user recording limit reached");
@@ -302,6 +305,7 @@ const loadSynths = async () => {
 };
 
 // method to start audio
+window.meter = new Meter();
 const startAudio = async () => {
   // if the audioCtx is suspended - it must be the first time it is run
   if (soundtrackAudioCtx.state === "suspended" && !isMuted) {
@@ -315,7 +319,8 @@ const startAudio = async () => {
       // if the synth isn't already playing...
       if (!synth.isStopped) {
         // setup synth parameters
-        !isMobile && synth.grains.forEach((grain) => (grain.volume.value = -6));
+        !isMobile &&
+          synth.grains.forEach((grain) => (grain.volume.value = 0.6));
         synth.grainOutput.gain.value = 1 / numSources;
         synth.filter.type = "lowpass";
         synth.filter.frequency.value = 880 * (i + 1);
@@ -333,6 +338,7 @@ const startAudio = async () => {
         // connect the synth output to the master processing bus
         synth.output.disconnect(synth.dest);
         masterBus.connectSource(synth.output);
+
         //  if user clicks, randomize synth parameters and play a UI sound
       }
     });
@@ -340,6 +346,8 @@ const startAudio = async () => {
     masterBus.lowpassFilter(5000, 1);
     !isMobile && masterBus.chorus(0.01, 300, 0.9);
     !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
+    masterBus.dest.volume.value = 6;
+    masterBus.dest.connect(window.meter);
     document.querySelector("body").addEventListener("click", () => {
       // const note = randomChoice(uiNotes);
       // u.play(note);
@@ -385,11 +393,11 @@ const pollValues = () => {
       let { radius, maxradius } = ps.particles[ps.particles.length - 1];
       synths.forEach((synth, i) => {
         synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
-        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 880);
+        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 440);
         !isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
       });
       subOsc.filter.frequency.rampTo(
-        mapValue(~~radius, 0, ~~maxradius, 50, 120),
+        mapValue(~~radius, 0, ~~maxradius, 50, 200),
         10
       );
     }
