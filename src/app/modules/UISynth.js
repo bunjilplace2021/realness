@@ -1,8 +1,14 @@
-import { FMSynth, Gain } from "tone";
+import { FMSynth, PolySynth, Gain } from "tone";
 class UISynth {
   constructor(ctx) {
     this.ctx = ctx;
-    this.uiSynth = new FMSynth({
+    this.uiSynth = new PolySynth({
+      polyphony: 1,
+      voice: FMSynth,
+      maxPolyphony: 3,
+    });
+
+    this.uiSynth.set({
       envelope: {
         attack: 0,
         decay: 0.1,
@@ -10,18 +16,19 @@ class UISynth {
         release: 0.5,
       },
       harmonicity: 2,
-      volume: -3,
+      volume: 2,
     });
 
     this.master = new Gain(0.1);
     this.uiSynth.connect(this.master);
   }
   play(note) {
-    this.uiSynth.harmonicity.value = Math.random() * 12;
-    this.uiSynth.modulationIndex.value = Math.random() * 24;
+    this.uiSynth.set({ harmonicity: Math.random() * 12 });
+    this.uiSynth.set({ modulationIndex: Math.random() * 24 });
     try {
       this.uiSynth.triggerAttackRelease(note, 0.1, "+0.01");
     } catch (error) {}
+    // console.log(this.uiSynth);
   }
 }
 

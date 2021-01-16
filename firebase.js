@@ -22,8 +22,10 @@ function firebasesetup() {
 }
 
 function gotData(data) {
+  window.dispatchEvent(window.pixelAddEvent);
   var test = data.val();
   var keys = Object.keys(test);
+
   ps.addParticle(
     test.mouseX_loc,
     test.mouseY_loc,

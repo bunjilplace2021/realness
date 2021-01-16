@@ -23,7 +23,18 @@ export async function safariFallback(url, ctx) {
     // });
   });
 }
-
+export function throttle(fn, limit) {
+  let waiting = false;
+  return (...args) => {
+    if (!waiting) {
+      fn.apply(this, args);
+      waiting = true;
+      setTimeout(() => {
+        waiting = false;
+      }, limit);
+    }
+  };
+}
 //  map one range of values to another
 export function mapValue(input, inMin, inMax, outMin, outMax) {
   return ((input - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;

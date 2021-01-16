@@ -23,6 +23,9 @@ let particlepg;
 
 let isSafari = false;
 
+// ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
+window.pixelAddEvent = new Event("pixel_added");
+
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
   var cnv_y = (windowHeight - height) / 2;
