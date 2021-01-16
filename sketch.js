@@ -164,11 +164,17 @@ function particle_draw(p) {
 
   shaderDraw();
 
-  if (pixelShaderToggle){
+  if (pixelShaderToggle) {
     pipShaderDraw();
   }
 
-  image(particlepg, 0, 0);
+
+ image(particlepg, 0, 0);
+
+ if (pixelShaderToggle) {
+   //pipShaderDraw();
+   image(pippg, 0, 0);
+ }
 
 }
 

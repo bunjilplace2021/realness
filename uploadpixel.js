@@ -114,7 +114,6 @@ function pipShaderDraw(){
 
   if (pixelShaderToggle) {
    image(backgroundpg, 0, 0);
-    image(pippg, 0, 0);
   }
 
 }
