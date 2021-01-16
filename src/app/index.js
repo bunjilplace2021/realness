@@ -196,7 +196,6 @@ const reloadBuffers = (customBuffer = null) => {
       const resampled = await resampleBuffer(buf, sampleRate);
       let floatBuf = new Float32Array(resampled.length);
       //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
-
       resampled.copyFromChannel(floatBuf, 0, 0);
       const newBuf = floatBuf.filter((val) => val !== 0);
       synth.buffer.copyToChannel(newBuf, 0, 0);

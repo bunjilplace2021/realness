@@ -172,7 +172,6 @@ function removeData() {
 }
 
 function shaderMousePressed() {
-  window.dispatchEvent(pixelAddEvent);
   detectWebcam(function (hasWebcam) {
     webcam = hasWebcam;
     //console.log(webcam);
@@ -205,6 +204,8 @@ function shaderMousePressed() {
   }
 
   if (webcam && !menu_loc) {
+    // fire 'pixel_added' event listener to play UI sound
+    window.dispatchEvent(pixelAddEvent);
     test.push(data);
     console.log(data);
   }
