@@ -3,7 +3,7 @@ class UISynth {
   constructor(ctx) {
     this.ctx = ctx;
     this.uiSynth = new PolySynth({
-      polyphony: 2,
+      polyphony: 1,
       voice: FMSynth,
       maxPolyphony: 3,
     });

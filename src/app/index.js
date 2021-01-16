@@ -18,6 +18,7 @@ import {
 
 // UTILITIES
 import {
+  throttle,
   fetchSample,
   mapValue,
   resampleBuffer,
@@ -128,9 +129,9 @@ muteButton.onclick = async () => {
     u.master.gain.value = !isMuted;
     if (muteClicked === 1) {
       u.master.toDestination();
-      document.querySelector("body").addEventListener("click", () => {
-        u.play(uiNotes[~~Math.random * uiNotes.length]);
-      });
+      // document.querySelector("body").addEventListener("click", () => {
+      //   u.play(uiNotes[~~Math.random * uiNotes.length]);
+      // });
       UISound();
       soundtrackAudioCtx.resume();
       safariAudioTrack.play();
@@ -225,8 +226,7 @@ const reloadBuffers = (customBuffer = null) => {
 // method to play UI sounds
 const UISound = () => {
   window.addEventListener("pixel_added", () => {
-    console.log("added particle");
-    u.play(randomChoice(uiNotes));
+    !isMuted && throttle(u.play(randomChoice(uiNotes)), 100);
   });
 };
 

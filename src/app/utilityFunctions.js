@@ -8,6 +8,27 @@ export async function fetchSample(url, ctx) {
 export function removeZeroValues(arr) {
   return arr.filter((val) => val !== 0);
 }
+
+export function debounce(callback, delay) {
+  let timeout;
+  return function () {
+    clearTimeout(timeout);
+    timeout = setTimeout(callback, delay);
+  };
+}
+export function throttle(fn, delay) {
+  let scheduledId;
+  return function throttled() {
+    const context = this;
+    const args = arguments;
+    const throttledCall = fn.apply(context, args);
+    if (scheduledId) return;
+    scheduledId = setTimeout(() => {
+      throttledCall();
+      clearTimeout(scheduledId);
+    }, delay);
+  };
+}
 export async function safariFallback(url, ctx) {
   return new Promise(async (resolve, reject) => {
     resolve(url);
