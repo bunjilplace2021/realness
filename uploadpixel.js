@@ -18,9 +18,9 @@ let amt, startColor, newColor;
 
 function shaderPreload() {
   // load the shader
-  pixelShader = loadShader("shader/effect.vert", "shader/effect.frag");
-  backgroundShader = loadShader("shader/effect.vert", "shader/background.frag");
-  pipShader = loadShader("shader/effect.vert", "shader/pip.frag");
+  pixelShader = loadShader("shader/vertex.vert", "shader/aspect.frag");
+  backgroundShader = loadShader("shader/vertex.vert", "shader/background.frag");
+  pipShader = loadShader("shader/vertex.vert", "shader/pip.frag");
 }
 
 function shaderSetup() {
@@ -43,28 +43,11 @@ function shaderSetup() {
   amt = 0;
 }
 
-function colorDraw(c) {
-  let col = lerpColor(startColor, newColor, smoothstep(0.1, 0.9, amt));
-  amt += 0.005;
-  if (amt >= 1) {
-    amt = 0.0;
-    startColor = newColor;
-    newColor = color(c);
-  }
-
-  return col;
-}
-
-function smoothstep(edge0, edge1, x) {
-  x = constrain((x - edge0) / (edge1 - edge0), 0.0, 1.0);
-  return x * x * (3 - 2 * x);
-}
 
 function shaderDraw() {
   // shader() sets the active shader with our shader
   pixelpg.shader(pixelShader);
-  backgroundpg.shader(backgroundShader);
-  pippg.shader(pipShader);
+
 
   if (pixelShaderToggle) {
     if (lerp_amount < 50) {
@@ -92,21 +75,14 @@ function shaderDraw() {
     }
   }
 
-  if (coltoggle) {
-    if (color_lerp <= 200) {
-      color_lerp = color_lerp + 1;
-    }
-  }
 
-  if (!coltoggle) {
-    if (color_lerp >= 0) {
-      color_lerp = color_lerp - 1;
-    }
-  }
+}
 
-  //if (pixelShaderToggle){
-  backgroundcol = colorDraw(colour);
-  //  }
+function pipShaderDraw(){
+
+  backgroundpg.shader(backgroundShader);
+  pippg.shader(pipShader);
+
   let mx = map(mouseX, 0, width, 0, 1);
   let my = map(mouseY, 0, height, 0, 1);
 
@@ -119,18 +95,6 @@ function shaderDraw() {
   let pip_mx = norm(map(mouseX, 0, width, pipx - width / 5, pipx), 0, width);
   let pip_my = norm(map(mouseY, 0, height, pipy - height / 5, pipy), 0, height);
 
-  backgroundShader.setUniform("u_resolution", [width, height]);
-  backgroundShader.setUniform("u_mouse", [mx, my]);
-  backgroundShader.setUniform("u_pip", [pip_x, pip_y]);
-  backgroundShader.setUniform("u_pip_mouse", [pip_mx, pip_my]);
-  backgroundShader.setUniform("tex1", pixelpg);
-  backgroundShader.setUniform("u_color", [
-    backgroundcol.levels[0],
-    backgroundcol.levels[1],
-    backgroundcol.levels[2],
-  ]);
-  backgroundShader.setUniform("u_lerp", map(color_lerp, 0, 200, 0, 1));
-  backgroundShader.setUniform("u_lerp2", map(lerp_amount, 0, 200, 0, 1));
 
   pipShader.setUniform("u_resolution", [width, height]);
   pipShader.setUniform("u_mouse", [mx, my]);
@@ -142,8 +106,6 @@ function shaderDraw() {
     backgroundcol.levels[1],
     backgroundcol.levels[2],
   ]);
-  pipShader.setUniform("u_lerp", map(color_lerp, 0, 200, 0, 1));
-  pipShader.setUniform("u_lerp2", map(lerp_amount, 0, 200, 0, 1));
 
   // rect gives us some geometry on the screen
   pixelpg.rect(0, 0, width, height);
@@ -151,9 +113,10 @@ function shaderDraw() {
   pippg.rect(0, 0, width, height);
 
   if (pixelShaderToggle) {
-    image(backgroundpg, 0, 0);
+   image(backgroundpg, 0, 0);
     image(pippg, 0, 0);
   }
+
 }
 
 function removeData() {

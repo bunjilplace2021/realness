@@ -158,29 +158,18 @@ function particle_draw(p) {
     p.clear();
   }
 
-  if (!isMobile) {
-    push();
-    noCursor();
-
-    fill(255, 100);
-    noStroke();
-    ellipseMode(CENTER);
-    ellipse(mouseX, mouseY, 40);
-    pop();
-  }
-
   ps.run(p);
   ps.intersection();
   ps.resize_window();
 
   shaderDraw();
 
+  if (pixelShaderToggle){
+    pipShaderDraw();
+  }
+
   image(particlepg, 0, 0);
 
-  if (pixelShaderToggle) {
-    //  image(backgroundpg, 0, 0);
-    image(pippg, 0, 0);
-  }
 }
 
 function mousePressed() {
