@@ -74,7 +74,7 @@ function shaderDraw() {
       pixelShader.setUniform("u_devicecamres", [cam.height, cam.width]);
     }
   }
-
+  pixelpg.rect(0, 0, width, height);
 
 }
 
@@ -108,7 +108,7 @@ function pipShaderDraw(){
   ]);
 
   // rect gives us some geometry on the screen
-  pixelpg.rect(0, 0, width, height);
+
   backgroundpg.rect(0, 0, width, height);
   pippg.rect(0, 0, width, height);
 
