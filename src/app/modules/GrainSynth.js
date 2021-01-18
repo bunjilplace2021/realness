@@ -47,7 +47,7 @@ class GrainSynth {
     });
     this.pitchShifter = new PitchShift({
       pitch: -12,
-      channelCount: 1,
+      // channelCount: 1,
     });
     for (let i = 0; i < this.numVoices; i++) {
       if (window.safari) {
@@ -59,7 +59,7 @@ class GrainSynth {
       }
 
       // this.grains[i].buffer.toMono();
-      this.grains[i].channelCount = 1;
+      // this.grains[i].channelCount = 1;
     }
 
     this.setupMaster();

@@ -3,8 +3,8 @@ import FireBaseAudio from "./modules/FirebaseAudio";
 import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
-import throttle from "lodash/throttle";
-// import debounce from "lodash/debounce";
+
+import debounce from "lodash/debounce";
 
 // !TODO: GRAPH GAIN STAGING!!!
 // GLOBAL VARIABLES
@@ -24,13 +24,14 @@ debug.setLogger(console);
 // UTILITIES
 import {
   once,
-  debounce,
+  aacDecode,
   fetchSample,
   mapValue,
   resampleBuffer,
   soundLog,
   removeZeroValues,
   randomChoice,
+  getNodes,
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -40,12 +41,27 @@ import regeneratorRuntime from "regenerator-runtime";
 getContext().rawContext.suspend();
 
 const isMobile = window.innerWidth < 600;
+window.isSoundStarted = false;
 let fallBack;
 
 window.safari =
   navigator.userAgent.includes("Safari") &&
   !navigator.userAgent.includes("Chrome");
+
+let isMp3Supported = navigator.mediaCapabilities
+  .decodingInfo({
+    type: "file",
+    audio: {
+      contentType: "audio/mp3",
+    },
+  })
+  .then(function (result) {
+    return result.supported;
+  });
+
+// window.safari = false;
 let safariAudioTrack;
+let allowRecording = true;
 let isMuted = true;
 let muteClicked = 0;
 let sampleRate = 44100;
@@ -53,10 +69,10 @@ let sampleRate = 44100;
 let logging = true;
 // create own audio context
 let soundtrackAudioCtx = new Context({
-  // sampleRate: 44100,
   latencyHint: "playback",
   updateInterval: 1,
-  bufferSize: 1024,
+  lookAhead: 0.1,
+  // bufferSize: 4096,
   state: "suspended",
 });
 
@@ -65,6 +81,8 @@ soundtrackAudioCtx.name = "Playback Context";
 /*
 SAFARI FALLBACK
  */
+
+window.soundtrackAudioCtx = soundtrackAudioCtx;
 if (window.safari) {
   safariAudioTrack = new Audio();
   // set to safari specific audio context
@@ -101,6 +119,16 @@ const loadFallback = async () => {
   }
 };
 
+const initAudio = (ctx) => {
+  return new Promise((resolve, reject) => {
+    if (ctx.state === "suspended") {
+      reject(false);
+    } else if (ctx.state === "running") {
+      resolve(true);
+    }
+  });
+};
+
 /* GLOBAL VARIABLES */
 setContext(soundtrackAudioCtx);
 let masterBus;
@@ -109,13 +137,13 @@ let synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx);
 let f = new FireBaseAudio(soundtrackAudioCtx);
 
-const recordLength = 200;
+const recordLength = 500;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
 
 const uiNotes = ["C3", "F3", "A3", "E3", "G3", "C4", "A4"];
 
 // number of different sources to use
-const numSources = isMobile ? 1 : 3;
+const numSources = isMobile ? 1 : 1;
 
 // number of voices per synth
 const numVoices = isMobile ? 2 : 3;
@@ -159,14 +187,14 @@ muteButton.onclick = async () => {
 };
 
 const recordSnippet = async () => {
-  safariAudioTrack && safariAudioTrack.pause();
-  recordButton.classList.toggle("red");
-  try {
-    soundtrackAudioCtx.destination.volume = 0;
-    await r.getPermissions();
-    logging && soundLog("got permissions");
+  if (window.MediaRecorder) {
+    safariAudioTrack && safariAudioTrack.pause();
+    recordButton.classList.toggle("red");
+    try {
+      soundtrackAudioCtx.destination.volume = 0;
+      await r.getPermissions();
+      logging && soundLog("got permissions");
 
-    if (window.MediaRecorder) {
       await r.recordChunks();
       const decodedBuffer = await r.loadToBuffer();
       setTimeout(() => {
@@ -176,12 +204,12 @@ const recordSnippet = async () => {
         safariAudioTrack && safariAudioTrack.play();
         soundtrackAudioCtx.destination.volume = 1;
       }, recordLength);
-    } else {
-      soundLog("MediaRecorder not available in this browser. Trying polyfill.");
+    } catch (error) {
+      console.log(error);
+      recordButton.classList.remove("red");
     }
-  } catch (error) {
-    console.log(error);
-    recordButton.classList.remove("red");
+  } else {
+    console.log("media recording is not supported in this browser");
   }
 };
 recordButton.onclick = async () => {
@@ -196,19 +224,26 @@ const subOsc = new FMOscillator({
   detune: 0,
 });
 
-const reloadBuffers = (customBuffer = null) => {
+const reloadBuffers = async (customBuffer = null) => {
+  const mp3Supported = await isMp3Supported;
   // fetch new samples from database and load them into existing buffers
   if (!customBuffer) {
     synths.forEach(async (synth) => {
       await f.getSample();
-      const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-      console.log(f.audioFile);
-      const resampled = await resampleBuffer(buf, sampleRate);
-      let floatBuf = new Float32Array(resampled.length);
-      //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
-      resampled.copyFromChannel(floatBuf, 0, 0);
-      const newBuf = removeZeroValues(floatBuf);
-      synth.buffer.copyToChannel(newBuf, 0, 0);
+      let buf;
+
+      if (mp3Supported) {
+        buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+        const resampled = await resampleBuffer(buf, sampleRate);
+        let floatBuf = new Float32Array(resampled.length);
+        //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
+        resampled.copyFromChannel(floatBuf, 0, 0);
+        const newBuf = removeZeroValues(floatBuf);
+        synth.buffer.copyToChannel(newBuf, 0, 0);
+      } else {
+        console.log("can't reload buffers on this browser");
+      }
+
       // purge buffer
       // floatBuf = null;
       synth.randomStarts();
@@ -220,11 +255,11 @@ const reloadBuffers = (customBuffer = null) => {
     let floatBuf = new Float32Array(customBuffer.length);
     floatBuf = customBuffer.getChannelData(0);
     const newBuf = removeZeroValues(floatBuf);
-
+    console.log(newBuf);
     synths.forEach((synth) => {
-      synth.buffer.copyToChannel(newBuf, 0, 0);
-      synth.randomStarts();
-      synth.randomInterpolate();
+      synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
+      // synth.randomStarts();
+      // synth.randomInterpolate();
       logging && soundLog("loaded user buffers");
       // subOsc.start();
       // null the buffer so that doesn't try to reload the user buffer on next loop
@@ -234,15 +269,14 @@ const reloadBuffers = (customBuffer = null) => {
 };
 let radiuses = 0;
 window.addEventListener("radius_reached", () => {
-  console.log();
   radiuses++;
-  const timedAction = setTimeout(reloadBuffers, 100);
-
-  if (radiuses % 20 !== 0) {
-    clearTimeout(timedAction);
+  const debounced = debounce(reloadBuffers, 1000);
+  if (radiuses % 20 === 0) {
+    debounced();
   }
 });
 
+window.nodes = getNodes(soundtrackAudioCtx);
 // method to play UI sounds
 const UISound = () => {
   let count = 0;
@@ -285,15 +319,21 @@ const subOscillator = () => {
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
   await f.listAll();
+  const mp3Supported = await isMp3Supported;
+  console.log(`mp3 is ${mp3Supported ? "" : "not"} supported in this browser`);
   for (let i = 0; i < numSources; i++) {
     await f.getSample();
-    const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+    let buf;
+    if (mp3Supported) {
+      buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+    } else {
+      buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
+    }
+
     if (f.audioFile) {
       logging && soundLog("Loaded GrainSynth " + (i + 1));
       if (!window.safari) {
         synths.push(new GrainSynth(buf, soundtrackAudioCtx, numVoices));
-      } else {
-        synths.push(new GrainSynth(f.audioFile, soundtrackAudioCtx, numVoices));
       }
     }
   }
@@ -305,10 +345,10 @@ const loadSynths = async () => {
 };
 
 // method to start audio
-window.meter = new Meter();
+// window.meter = new Meter();
 const startAudio = async () => {
   // if the audioCtx is suspended - it must be the first time it is run
-  if (soundtrackAudioCtx.state === "suspended" && !isMuted) {
+  if (!isMuted) {
     await start();
     await soundtrackAudioCtx.resume();
     masterBus = new MasterBus(soundtrackAudioCtx);
@@ -337,6 +377,7 @@ const startAudio = async () => {
         synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
         // connect the synth output to the master processing bus
         synth.output.disconnect(synth.dest);
+
         masterBus.connectSource(synth.output);
 
         //  if user clicks, randomize synth parameters and play a UI sound
@@ -345,9 +386,9 @@ const startAudio = async () => {
     subOscillator();
     masterBus.lowpassFilter(5000, 1);
     !isMobile && masterBus.chorus(0.01, 300, 0.9);
-    !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
+    // !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
     masterBus.dest.volume.value = 6;
-    masterBus.dest.connect(window.meter);
+    // masterBus.input.connect(window.meter);
     document.querySelector("body").addEventListener("click", () => {
       // const note = randomChoice(uiNotes);
       // u.play(note);
@@ -355,7 +396,7 @@ const startAudio = async () => {
         synth.randomInterpolate();
       });
     });
-    runLoops();
+    // runLoops();
     subOscLoop();
   }
   // don't start audio unless the context is running -- requires user gesture
@@ -432,6 +473,21 @@ const main = async () => {
   if (window.safari) {
     loadFallback();
   } else {
+    // confirm("Please allow Audio playback to continue");
+
+    document.querySelector("#menuicon").addEventListener("click", async () => {
+      if (soundtrackAudioCtx.rawContext.state === "suspended") {
+        console.log("attempting to start audio");
+        await soundtrackAudioCtx.rawContext.resume();
+        await start();
+        window.isSoundStarted = true;
+        console.log(soundtrackAudioCtx.rawContext.state);
+      }
+    });
+
+    isMp3Supported = await isMp3Supported;
+    await soundtrackAudioCtx.rawContext.resume();
+
     loadSynths();
     UISound();
   }

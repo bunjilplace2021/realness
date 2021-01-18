@@ -1,8 +1,31 @@
+import { decodeAudioData } from "standardized-audio-context";
+
 export async function fetchSample(url, ctx) {
   return fetch(url)
     .then((response) => response.arrayBuffer())
     .then((arrayBuffer) => ctx.decodeAudioData(arrayBuffer))
     .catch((error) => console.log(error));
+}
+
+export async function aacDecode(url, ctx) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      import("./samples/fallback.aac").then(async (file) => {
+        const response = await fetch(file.default, { mimeType: "audio/mpeg" });
+        const arrBuffer = await response.arrayBuffer();
+        // console.log(response.type);
+        // console.log(ctx._context._nativeContext);
+        const audioBuffer = await decodeAudioData(
+          ctx._context._nativeContext,
+          arrBuffer
+        );
+        console.log(audioBuffer);
+        resolve(audioBuffer);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 export function removeZeroValues(arr) {
@@ -110,7 +133,7 @@ export function resampleBuffer(input, target_rate) {
     // subtract max volume value from 1, set gain to that value
     const diff = Math.abs(1 - bufferMax);
     const gainNode = off.createGain();
-    gainNode.gain.value = diff;
+    gainNode.gain.value = 1 - diff;
     source.buffer = input;
     source.connect(gainNode);
     // filter.connect(gainNode);
