@@ -131,9 +131,22 @@ export function resampleBuffer(input, target_rate) {
     filter.type = "bandpass";
     //  calculate difference from 1
     // subtract max volume value from 1, set gain to that value
-    const diff = Math.abs(1 - bufferMax);
+    console.log("MAX: " + bufferMax);
     const gainNode = off.createGain();
-    gainNode.gain.value = diff;
+    const diff = Math.abs(0.5 - bufferMax);
+
+    // VOLUME TEST
+    if (bufferMax < 0.5) {
+      // QUIET SOUND, need to bring it up in level
+      gainNode.gain.value = 1.2 + diff;
+    }
+    if (bufferMax > 0.5) {
+      gainNode.gain.value = 0.8 - diff;
+      // LOUD SOUND, need to bring it down in level
+    }
+
+    console.log("DIFF: " + diff);
+
     source.buffer = input;
     source.connect(gainNode);
     // filter.connect(gainNode);

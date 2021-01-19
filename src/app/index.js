@@ -122,7 +122,7 @@ let synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx);
 let f = new FireBaseAudio(soundtrackAudioCtx);
 
-const recordLength = 500;
+const recordLength = 1000;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
 
 const uiNotes = ["C3", "F3", "A3", "E3", "G3", "C4", "A4"];
@@ -208,6 +208,9 @@ const subOsc = new FMOscillator({
   detune: 0,
 });
 
+const checkFileVolume = (buf) => {
+  return Math.max(...buf.getChannelData(0));
+};
 const reloadBuffers = async (customBuffer = null) => {
   const mp3Supported = await isMp3Supported;
   // fetch new samples from database and load them into existing buffers
@@ -216,8 +219,17 @@ const reloadBuffers = async (customBuffer = null) => {
       await f.getSample();
       let buf;
       if (mp3Supported) {
+        let playBuf;
         buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-        const resampled = await resampleBuffer(buf, sampleRate);
+        if (checkFileVolume(buf) > 0) {
+          playBuf = buf;
+          console.log("clip is not silent, continuing");
+        } else {
+          await f.getSample();
+          buf = await fetchSample(f.audioFile);
+          playBuf = buf;
+        }
+        const resampled = await resampleBuffer(playBuf, sampleRate);
         let floatBuf = new Float32Array(resampled.length);
         //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
         resampled.copyFromChannel(floatBuf, 0, 0);
@@ -237,10 +249,10 @@ const reloadBuffers = async (customBuffer = null) => {
   } else {
     let floatBuf = new Float32Array(customBuffer.length);
     floatBuf = customBuffer.getChannelData(0);
-    const newBuf = removeZeroValues(floatBuf);
-    console.log(newBuf);
+    const resampled = await resampleBuffer(customBuffer, sampleRate);
+
     synths.forEach((synth) => {
-      synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
+      synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
       // synth.randomStarts();
       // synth.randomInterpolate();
       logging && soundLog("loaded user buffers");
@@ -308,6 +320,7 @@ const loadSynths = async () => {
     let buf;
     if (mp3Supported) {
       buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+      buf = await resampleBuffer(buf, sampleRate);
     } else {
       buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
     }
@@ -365,7 +378,7 @@ const startAudio = async () => {
     subOscillator();
     masterBus.lowpassFilter(5000, 1);
     !isMobile && masterBus.chorus(0.01, 300, 0.9);
-    // !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
+    !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
     masterBus.dest.volume.value = 6;
     // masterBus.input.connect(window.meter);
     document.querySelector("body").addEventListener("click", () => {

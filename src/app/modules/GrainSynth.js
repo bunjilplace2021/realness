@@ -41,7 +41,7 @@ class GrainSynth {
     this.filter = new Filter(10000, "lowpass", -24, 4);
     this.compressor = new Compressor({
       ratio: 20,
-      threshold: -30,
+      threshold: -24,
       release: 1,
       attack: 0.003,
     });
