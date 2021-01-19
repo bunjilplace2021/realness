@@ -161,7 +161,7 @@ video {
 
 #iPhone {
 display:none;
-width: 100vh;
+width: 100vw;
 text-align: center;
 background: none;
 position: absolute;
