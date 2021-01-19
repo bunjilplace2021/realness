@@ -230,7 +230,7 @@ const reloadBuffers = async (customBuffer = null) => {
       // purge buffer
       // floatBuf = null;
       synth.randomStarts();
-      synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
+      // synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
       synth.randomInterpolate();
       logging && soundLog("reloaded buffers");
     });

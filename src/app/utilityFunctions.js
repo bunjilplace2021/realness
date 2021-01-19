@@ -133,7 +133,7 @@ export function resampleBuffer(input, target_rate) {
     // subtract max volume value from 1, set gain to that value
     const diff = Math.abs(1 - bufferMax);
     const gainNode = off.createGain();
-    gainNode.gain.value = 1 - diff;
+    gainNode.gain.value = diff;
     source.buffer = input;
     source.connect(gainNode);
     // filter.connect(gainNode);
