@@ -134,14 +134,16 @@ export function resampleBuffer(input, target_rate) {
     console.log("MAX: " + bufferMax);
     const gainNode = off.createGain();
     const diff = Math.abs(0.5 - bufferMax);
-
+    if (bufferMax === 0) {
+      reject("silent audio file");
+    }
     // VOLUME TEST
     if (bufferMax < 0.5) {
       // QUIET SOUND, need to bring it up in level
       gainNode.gain.value = 1.2 + diff;
     }
     if (bufferMax > 0.5) {
-      gainNode.gain.value = 0.8 - diff;
+      gainNode.gain.value = 0.7 - diff;
       // LOUD SOUND, need to bring it down in level
     }
 

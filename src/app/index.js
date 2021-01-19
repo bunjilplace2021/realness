@@ -70,7 +70,7 @@ let soundtrackAudioCtx = new Context({
   latencyHint: "playback",
   updateInterval: 1,
   lookAhead: 0.1,
-  // bufferSize: 4096,
+  bufferSize: 1024,
   state: "suspended",
 });
 
@@ -128,7 +128,7 @@ let r = new Recorder(recordLength, soundtrackAudioCtx);
 const uiNotes = ["C3", "F3", "A3", "E3", "G3", "C4", "A4"];
 
 // number of different sources to use
-const numSources = isMobile ? 1 : 1;
+const numSources = isMobile ? 1 : 2;
 
 // number of voices per synth
 const numVoices = isMobile ? 2 : 3;
@@ -318,16 +318,26 @@ const loadSynths = async () => {
   for (let i = 0; i < numSources; i++) {
     await f.getSample();
     let buf;
+    let playBuf;
     if (mp3Supported) {
       buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
       buf = await resampleBuffer(buf, sampleRate);
+
+      if (checkFileVolume(buf) > 0) {
+        playBuf = buf;
+        console.log("clip is not silent, continuing");
+      } else {
+        await f.getSample();
+        buf = await fetchSample(f.audioFile);
+        playBuf = buf;
+      }
     } else {
       buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
     }
     if (f.audioFile) {
       logging && soundLog("Loaded GrainSynth " + (i + 1));
       if (!window.safari) {
-        synths.push(new GrainSynth(buf, soundtrackAudioCtx, numVoices));
+        synths.push(new GrainSynth(playBuf, soundtrackAudioCtx, numVoices));
       }
     }
   }
