@@ -17,11 +17,15 @@ body {
   align-items: center;
   font-family: "Avenir Next", "Avenir", "Nunito Sans", sans-serif;
   -webkit-user-select: none;
+  touch-action: manipulation;
+
 }
 
 canvas {
   display: block;
   -webkit-user-select: none;
+  touch-action: manipulation;
+
 
 }
 
