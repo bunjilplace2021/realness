@@ -77,24 +77,27 @@ video {
 #recordButton {
   text-align: center;
 }
+
 #recordButton:hover {
   opacity: 0.5;
   transition: opacity 0.3s ease-out;
 }
+
 .red {
   color: red;
 }
 
 #mute {
   transition: opacity 0.3s ease-out;
-
   color: white;
 }
 
-.topnav a:hover {
-  background-color: white;
-  color: black;
-  opacity: 0.3;
+@media (hover: hover) and (pointer: fine) {
+  .topnav a:hover {
+    background-color: white;
+    color: black;
+    opacity: 0.3;
+  }
 }
 
 .active {
@@ -110,9 +113,7 @@ video {
 }
 
 /* if backdrop support: very transparent and blurred */
-@supports (
-  (-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))
-) {
+@supports ((-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))) {
   .content {
     -webkit-backdrop-filter: blur(30px);
     backdrop-filter: blur(30px);
@@ -160,12 +161,21 @@ video {
 }
 
 #iPhone {
-display:none;
-width: 100vh;
-text-align: center;
-background: none;
-position: absolute;
-color: white;
+  display: none;
+  width: 100vw;
+  text-align: center;
+  background: none;
+  position: absolute;
+  color: white;
+}
+
+#camera_inst {
+  display: none;
+  width: 100vw;
+  text-align: center;
+  background: none;
+  position: absolute;
+  color: white;
 }
 
 
@@ -188,7 +198,6 @@ color: white;
   padding-left: 14px 0;
 
   } */
-
 .content {
   font-size: calc(0.8em + 0.5vw);
 }
@@ -200,7 +209,6 @@ color: white;
 .content .fa-instagram {
   font-size: calc(1.5em + 0.5vw);
 }
-
 
 /* @media only screen and (min-width: 500) and (max-width: 800px)  {
   .topnav {
@@ -247,7 +255,7 @@ color: white;
   opacity: 0.2;
 }
 
-@keyframes fadeOut {
+/* @keyframes fadeOut {
   0% {
     opacity: 1;
   }
@@ -295,4 +303,4 @@ color: white;
   100% {
     opacity: 0;
   }
-}
+} */
