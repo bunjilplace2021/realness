@@ -297,8 +297,10 @@ function fullScreenMenu() {
   document.body.scrollTop = 0; // <-- pull the page back up to the top
   document.body.style.overflow = "hidden";
 }else{
+  if (width < height){
   document.getElementById("iPhone").style.display = "block";
 setTimeout(function time() {document.getElementById("iPhone").style.display = "none"}, 2000);
+}
 
 }
 }
