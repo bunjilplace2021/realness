@@ -126,29 +126,39 @@ export function resampleBuffer(input, target_rate) {
     // NORMALIZE AND FILTER BUFFERS
     let source = off.createBufferSource();
     const bufferMax = Math.max(...input.getChannelData(0));
-    let filter = off.createBiquadFilter();
-    filter.frequency.value = ~~(Math.random() * 10 + 1) * 110;
-    filter.type = "bandpass";
+
     //  calculate difference from 1
     // subtract max volume value from 1, set gain to that value
-    console.log("MAX: " + bufferMax);
+    // console.log("MAX: " + bufferMax);
     const gainNode = off.createGain();
     const diff = Math.abs(0.5 - bufferMax);
     if (bufferMax === 0) {
       reject("silent audio file");
     }
     // VOLUME TEST
-    if (bufferMax < 0.5) {
+    if (bufferMax < 0.02) {
       // QUIET SOUND, need to bring it up in level
-      gainNode.gain.value = 1.2 + diff;
+      gainNode.gain.value = 4 + diff;
     }
-    if (bufferMax > 0.5) {
+    if (bufferMax < 0.2 && bufferMax > 0.02) {
+      // QUIET SOUND, need to bring it up in level
+      gainNode.gain.value = 2 + diff;
+    }
+    if (bufferMax > 0.2 && bufferMax < 0.5) {
+      // MEDIUM LEVEL SOUND, need to bump volume slightly
+      gainNode.gain.value = 1.7 + diff;
+    }
+    if (bufferMax > 0.5 && bufferMax < 0.7) {
       gainNode.gain.value = 0.7 - diff;
       // LOUD SOUND, need to bring it down in level
     }
+    if (bufferMax > 0.7) {
+      gainNode.gain.value = 0.5 - diff;
+      // VERY LOUD SOUND, need to bring it down in level
+    }
 
-    console.log("DIFF: " + diff);
-
+    // console.log("DIFF: " + diff);
+    // console.log("setting to volume" + gainNode.gain.value);
     source.buffer = input;
     source.connect(gainNode);
     // filter.connect(gainNode);

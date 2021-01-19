@@ -128,7 +128,7 @@ let r = new Recorder(recordLength, soundtrackAudioCtx);
 const uiNotes = ["C3", "F3", "A3", "E3", "G3", "C4", "A4"];
 
 // number of different sources to use
-const numSources = isMobile ? 1 : 2;
+const numSources = isMobile ? 1 : 3;
 
 // number of voices per synth
 const numVoices = isMobile ? 2 : 3;
@@ -216,7 +216,7 @@ const reloadBuffers = async (customBuffer = null) => {
   // fetch new samples from database and load them into existing buffers
   if (!customBuffer) {
     synths.forEach(async (synth) => {
-      await f.getSample();
+      await f.getRandomSample();
       let buf;
       if (mp3Supported) {
         let playBuf;
@@ -225,7 +225,7 @@ const reloadBuffers = async (customBuffer = null) => {
           playBuf = buf;
           console.log("clip is not silent, continuing");
         } else {
-          await f.getSample();
+          await f.getRandomSample();
           buf = await fetchSample(f.audioFile);
           playBuf = buf;
         }
@@ -316,28 +316,36 @@ const loadSynths = async () => {
   const mp3Supported = await isMp3Supported;
   console.log(`mp3 is ${mp3Supported ? "" : "not"} supported in this browser`);
   for (let i = 0; i < numSources; i++) {
-    await f.getSample();
+    await f.getRandomSample();
     let buf;
     let playBuf;
+    let resampled;
     if (mp3Supported) {
-      buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-      buf = await resampleBuffer(buf, sampleRate);
+      buf = await fetchSample(
+        await randomChoice(f.files.items).getDownloadURL(),
+        soundtrackAudioCtx
+      );
 
       if (checkFileVolume(buf) > 0) {
         playBuf = buf;
         console.log("clip is not silent, continuing");
       } else {
-        await f.getSample();
-        buf = await fetchSample(f.audioFile);
+        console.log("clip is silent: reloading");
+
+        buf = await fetchSample(
+          await randomChoice(f.files.items).getDownloadURL()
+        );
+        console.log(buf);
         playBuf = buf;
       }
     } else {
       buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
     }
-    if (f.audioFile) {
+    if (playBuf) {
+      resampled = await resampleBuffer(playBuf, sampleRate);
       logging && soundLog("Loaded GrainSynth " + (i + 1));
       if (!window.safari) {
-        synths.push(new GrainSynth(playBuf, soundtrackAudioCtx, numVoices));
+        synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
       }
     }
   }
@@ -396,7 +404,7 @@ const startAudio = async () => {
         synth.randomInterpolate();
       });
     });
-    // runLoops();
+    runLoops();
     subOscLoop();
   }
   // don't start audio unless the context is running -- requires user gesture

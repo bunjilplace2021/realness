@@ -33,14 +33,14 @@ class FireBaseAudio {
   async listAll() {
     this.files = await this.storageRef.listAll();
   }
-  async getSample() {
+  async getRandomSample() {
     // await this.listAll();
     const ChosenFile = this.files.items[
       ~~(Math.random() * this.files.items.length)
     ];
     this.audioFile = await ChosenFile.getDownloadURL();
   }
-  async fetchSample(url) {
+  async downloadSample(url) {
     return fetch(url, { cors: "opaque" })
       .then((response) => response.arrayBuffer())
       .then((arrayBuffer) => this.audioCtx.decodeAudioData(arrayBuffer))
