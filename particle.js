@@ -78,8 +78,8 @@ class Particle {
 
     if (this.UUID == uuid && mousecount >= 50 && this.firstrun && this.active && this.recordcount == 0) {
       this.col = color(255,255,255, 255);
-    this.fill_col = lerpColor(this.fill_col,  this.col, abs(sin(frameCount*0.125)));
-      this.fill_col.setAlpha(255 * abs(sin(frameCount*0.125)));
+      this.fill_col = lerpColor(this.fill_col,  this.col, abs(sin(frameCount*0.065)));
+      this.radius = this.radius + (sin(frameCount*0.125)*2.0) + .5;
     }
 
     if(mouseIsReleased){
