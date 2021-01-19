@@ -159,22 +159,15 @@ video {
   align-items: center;
 }
 
-.animated {
-  position: absolute;
-  text-align: center;
-  center: 0;
-  padding: 20px;
-  animation-duration: 5s;
-  -webkit-animation-duration: 5s;
-  -moz-animation-duration: 5s;
-  -o-animation-duration: 5s;
-  -ms-animation-duration: 5s;
-  animation-fill-mode: both;
-  -webkit-animation-fill-mode: both;
-  -moz-animation-fill-mode: both;
-  -o-animation-fill-mode: both;
-  -ms-animation-fill-mode: both;
+#iPhone {
+display:none;
+width: 100vh;
+text-align: center;
+background: none;
+position: absolute;
+color: white;
 }
+
 
 @media (hover: none) {
   .topnav a:hover {
@@ -207,6 +200,7 @@ video {
 .content .fa-instagram {
   font-size: calc(1.5em + 0.5vw);
 }
+
 
 /* @media only screen and (min-width: 500) and (max-width: 800px)  {
   .topnav {
