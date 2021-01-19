@@ -179,6 +179,11 @@ function particle_draw(p) {
 
   image(particlepg, 0, 0);
 
+  if (pixelShaderToggle) {
+    image(pippg, 0, 0);
+  }
+
+
  if (mouseIsPressed){
    mousecount = mousecount+1;
  }
