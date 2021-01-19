@@ -22,6 +22,7 @@ let array_limit = 20;
 let particlepg;
 
 let isSafari = false;
+let isiPhone = false;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
@@ -68,7 +69,6 @@ function detectWebcam(callback) {
 
 function checkIfWebKit() {
   var ua = navigator.userAgent.toLowerCase();
-
   var isWebKit = false;
 
   if (
@@ -91,6 +91,12 @@ function checkIfWebKit() {
   }
 
   return isWebKit;
+}
+
+function checkIfiPhone() {
+  isiPhone = !!navigator.platform.match(/iPhone/);
+  console.log(isiPhone);
+  return isiPhone;
 }
 
 function setup() {
@@ -168,11 +174,9 @@ function particle_draw(p) {
     pipShaderDraw();
   }
 
-
- image(particlepg, 0, 0);
+image(particlepg, 0, 0);
 
  if (pixelShaderToggle) {
-   //pipShaderDraw();
    image(pippg, 0, 0);
  }
 
@@ -284,9 +288,17 @@ function cameratoggle() {
 }
 
 function fullScreenMenu() {
+  checkIfiPhone();
+
+  if(!isiPhone){
   let fs = fullscreen();
   fullscreen(!fs);
   fullicons.classList.toggle("fa-compress");
   document.body.scrollTop = 0; // <-- pull the page back up to the top
   document.body.style.overflow = "hidden";
+}else{
+  document.getElementById("iPhone").style.display = "block";
+setTimeout(function time() {document.getElementById("iPhone").style.display = "none"}, 2000);
+
+}
 }
