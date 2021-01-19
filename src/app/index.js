@@ -4,6 +4,8 @@ import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
+import debounce from "lodash/debounce";
+
 // !TODO: GRAPH GAIN STAGING!!!
 // GLOBAL VARIABLES
 import {
@@ -15,18 +17,21 @@ import {
   setContext,
   start,
   debug,
+  Meter,
 } from "tone";
 
 debug.setLogger(console);
 // UTILITIES
 import {
-  throttle,
+  once,
+  aacDecode,
   fetchSample,
   mapValue,
   resampleBuffer,
   soundLog,
   removeZeroValues,
   randomChoice,
+  getNodes,
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -41,6 +46,19 @@ let fallBack;
 window.safari =
   navigator.userAgent.includes("Safari") &&
   !navigator.userAgent.includes("Chrome");
+
+let isMp3Supported = navigator.mediaCapabilities
+  .decodingInfo({
+    type: "file",
+    audio: {
+      contentType: "audio/mp3",
+    },
+  })
+  .then(function (result) {
+    return result.supported;
+  });
+
+// window.safari = false;
 let safariAudioTrack;
 let isMuted = true;
 let muteClicked = 0;
@@ -49,9 +67,9 @@ let sampleRate = 44100;
 let logging = true;
 // create own audio context
 let soundtrackAudioCtx = new Context({
-  // sampleRate: 44100,
   latencyHint: "playback",
   updateInterval: 1,
+  lookAhead: 0.1,
   bufferSize: 1024,
   state: "suspended",
 });
@@ -61,6 +79,8 @@ soundtrackAudioCtx.name = "Playback Context";
 /*
 SAFARI FALLBACK
  */
+
+window.soundtrackAudioCtx = soundtrackAudioCtx;
 if (window.safari) {
   safariAudioTrack = new Audio();
   // set to safari specific audio context
@@ -72,9 +92,6 @@ if (window.safari) {
   window.addEventListener("touchstart", () => {
     safariAudioTrack.autoplay = true;
     safariAudioTrack.muted = false;
-    // safariAudioTrack.play();
-    // safariAudioTrack.pause();
-    // safariAudioTrack.currentTime = 0;
   });
   console.log("loaded MediaRecorder polyfill for safari");
 }
@@ -105,10 +122,10 @@ let synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx);
 let f = new FireBaseAudio(soundtrackAudioCtx);
 
-const recordLength = 2000;
+const recordLength = 1000;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
 
-const uiNotes = ["C3", "E3", "G3", "C4", "A4"];
+const uiNotes = ["C3", "F3", "A3", "E3", "G3", "C4", "A4"];
 
 // number of different sources to use
 const numSources = isMobile ? 1 : 3;
@@ -154,15 +171,14 @@ muteButton.onclick = async () => {
   }
 };
 
-recordButton.onclick = async () => {
-  safariAudioTrack && safariAudioTrack.pause();
-  recordButton.classList.toggle("red");
-  try {
-    soundtrackAudioCtx.destination.volume = 0;
-    await r.getPermissions();
-    logging && soundLog("got permissions");
-
-    if (window.MediaRecorder) {
+const recordSnippet = async () => {
+  if (window.MediaRecorder) {
+    safariAudioTrack && safariAudioTrack.pause();
+    recordButton.classList.toggle("red");
+    try {
+      soundtrackAudioCtx.destination.volume = 0;
+      await r.getPermissions();
+      logging && soundLog("got permissions");
       await r.recordChunks();
       const decodedBuffer = await r.loadToBuffer();
       setTimeout(() => {
@@ -172,13 +188,16 @@ recordButton.onclick = async () => {
         safariAudioTrack && safariAudioTrack.play();
         soundtrackAudioCtx.destination.volume = 1;
       }, recordLength);
-    } else {
-      soundLog("MediaRecorder not available in this browser. Trying polyfill.");
+    } catch (error) {
+      console.log(error);
+      recordButton.classList.remove("red");
     }
-  } catch (error) {
-    console.log(error);
-    recordButton.classList.remove("red");
+  } else {
+    console.log("media recording is not supported in this browser");
   }
+};
+recordButton.onclick = async () => {
+  recordSnippet();
 };
 
 // list all samples in database
@@ -189,49 +208,92 @@ const subOsc = new FMOscillator({
   detune: 0,
 });
 
-const reloadBuffers = (customBuffer = null) => {
+const checkFileVolume = (buf) => {
+  return Math.max(...buf.getChannelData(0));
+};
+const reloadBuffers = async (customBuffer = null) => {
+  const mp3Supported = await isMp3Supported;
   // fetch new samples from database and load them into existing buffers
   if (!customBuffer) {
     synths.forEach(async (synth) => {
-      await f.getSample();
-      const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-      const resampled = await resampleBuffer(buf, sampleRate);
-      let floatBuf = new Float32Array(resampled.length);
-      //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
-      resampled.copyFromChannel(floatBuf, 0, 0);
-      const newBuf = removeZeroValues(floatBuf);
-      synth.buffer.copyToChannel(newBuf, 0, 0);
+      await f.getRandomSample();
+      let buf;
+      if (mp3Supported) {
+        let playBuf;
+        buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+        if (checkFileVolume(buf) > 0) {
+          playBuf = buf;
+          console.log("clip is not silent, continuing");
+        } else {
+          await f.getRandomSample();
+          buf = await fetchSample(f.audioFile);
+          playBuf = buf;
+        }
+        const resampled = await resampleBuffer(playBuf, sampleRate);
+        let floatBuf = new Float32Array(resampled.length);
+        //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
+        resampled.copyFromChannel(floatBuf, 0, 0);
+        const newBuf = removeZeroValues(floatBuf);
+        synth.buffer.copyToChannel(newBuf, 0, 0);
+      } else {
+        console.log("can't reload buffers on this browser");
+      }
+
       // purge buffer
       // floatBuf = null;
       synth.randomStarts();
-      synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
+      // synth.rampVolume(1, soundtrackAudioCtx.currentTime + 10);
       synth.randomInterpolate();
       logging && soundLog("reloaded buffers");
     });
   } else {
     let floatBuf = new Float32Array(customBuffer.length);
     floatBuf = customBuffer.getChannelData(0);
-    const newBuf = removeZeroValues(floatBuf);
-    console.log(newBuf);
+    const resampled = await resampleBuffer(customBuffer, sampleRate);
+
     synths.forEach((synth) => {
-      synth.buffer.copyToChannel(newBuf, 0, 0);
-      synth.randomStarts();
-      synth.randomInterpolate();
+      synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
+      // synth.randomStarts();
+      // synth.randomInterpolate();
       logging && soundLog("loaded user buffers");
-      subOsc.start();
+      // subOsc.start();
       // null the buffer so that doesn't try to reload the user buffer on next loop
       customBuffer = null;
     });
   }
 };
 
+// RADIUS LIMIT LISTENER
+let radiuses = 0;
+window.addEventListener("radius_reached", () => {
+  radiuses++;
+  const debounced = debounce(reloadBuffers, 1000);
+  if (radiuses % 20 === 0) {
+    debounced();
+  }
+});
+
 // method to play UI sounds
 const UISound = () => {
+  let count = 0;
+  let recordings = 0;
+  let recordLimit = isMobile ? 1 : 3;
   window.addEventListener("pixel_added", () => {
-    !isMuted && throttle(u.play(randomChoice(uiNotes)), 100);
+    count++;
+    // restrict upload to counter
+    if (count > 20 && count % 5 === 0) {
+      recordings++;
+      if (recordings < recordLimit) {
+        recordSnippet();
+      } else {
+        console.log("user recording limit reached");
+      }
+    }
+    !isMuted && u.play(randomChoice(uiNotes));
   });
 };
 
+// SETUP subOscillator
 const subOscillator = () => {
   subOsc.filter = new Filter();
   subOsc.connect(subOsc.filter);
@@ -251,15 +313,39 @@ const subOscillator = () => {
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
   await f.listAll();
+  const mp3Supported = await isMp3Supported;
+  console.log(`mp3 is ${mp3Supported ? "" : "not"} supported in this browser`);
   for (let i = 0; i < numSources; i++) {
-    await f.getSample();
-    const buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-    if (f.audioFile) {
+    await f.getRandomSample();
+    let buf;
+    let playBuf;
+    let resampled;
+    if (mp3Supported) {
+      buf = await fetchSample(
+        await randomChoice(f.files.items).getDownloadURL(),
+        soundtrackAudioCtx
+      );
+
+      if (checkFileVolume(buf) > 0) {
+        playBuf = buf;
+        console.log("clip is not silent, continuing");
+      } else {
+        console.log("clip is silent: reloading");
+
+        buf = await fetchSample(
+          await randomChoice(f.files.items).getDownloadURL()
+        );
+        console.log(buf);
+        playBuf = buf;
+      }
+    } else {
+      buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
+    }
+    if (playBuf) {
+      resampled = await resampleBuffer(playBuf, sampleRate);
       logging && soundLog("Loaded GrainSynth " + (i + 1));
       if (!window.safari) {
-        synths.push(new GrainSynth(buf, soundtrackAudioCtx, numVoices));
-      } else {
-        synths.push(new GrainSynth(f.audioFile, soundtrackAudioCtx, numVoices));
+        synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
       }
     }
   }
@@ -271,9 +357,10 @@ const loadSynths = async () => {
 };
 
 // method to start audio
+// window.meter = new Meter();
 const startAudio = async () => {
   // if the audioCtx is suspended - it must be the first time it is run
-  if (soundtrackAudioCtx.state === "suspended" && !isMuted) {
+  if (!isMuted) {
     await start();
     await soundtrackAudioCtx.resume();
     masterBus = new MasterBus(soundtrackAudioCtx);
@@ -284,7 +371,8 @@ const startAudio = async () => {
       // if the synth isn't already playing...
       if (!synth.isStopped) {
         // setup synth parameters
-        !isMobile && synth.grains.forEach((grain) => (grain.volume.value = -6));
+        !isMobile &&
+          synth.grains.forEach((grain) => (grain.volume.value = 0.6));
         synth.grainOutput.gain.value = 1 / numSources;
         synth.filter.type = "lowpass";
         synth.filter.frequency.value = 880 * (i + 1);
@@ -309,9 +397,9 @@ const startAudio = async () => {
     masterBus.lowpassFilter(5000, 1);
     !isMobile && masterBus.chorus(0.01, 300, 0.9);
     !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
+    masterBus.dest.volume.value = 6;
+    // masterBus.input.connect(window.meter);
     document.querySelector("body").addEventListener("click", () => {
-      // const note = randomChoice(uiNotes);
-      // u.play(note);
       synths.forEach((synth) => {
         synth.randomInterpolate();
       });
@@ -324,21 +412,15 @@ const startAudio = async () => {
     console.log("audio context is closed by user gesture, restarting");
     await soundtrackAudioCtx.rawContext.resume();
   }
-
   // main synth setup loop
 };
 
+// Loops to synchronize with cisual content
 const runLoops = () => {
   // // loop to poll paprticle system values
   synths[0].transport.scheduleRepeat((time) => {
     pollValues();
   }, 10);
-  // loop to reload samples every 30 seconds approx
-  if (!r.decodedBuffer) {
-    synths[0].transport.scheduleRepeat((time) => {
-      reloadBuffers();
-    }, 30);
-  }
 };
 
 const subOscLoop = () => {
@@ -354,11 +436,11 @@ const pollValues = () => {
       let { radius, maxradius } = ps.particles[ps.particles.length - 1];
       synths.forEach((synth, i) => {
         synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
-        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 880);
+        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 440);
         !isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
       });
       subOsc.filter.frequency.rampTo(
-        mapValue(~~radius, 0, ~~maxradius, 50, 120),
+        mapValue(~~radius, 0, ~~maxradius, 50, 200),
         10
       );
     }
@@ -366,12 +448,19 @@ const pollValues = () => {
     console.warn("particle system not defined, threw error" + error);
   }
 };
+
+// STOP AUDIO
 const stopAudio = () => {
   if (soundtrackAudioCtx.state === "running") {
     soundtrackAudioCtx.rawContext.suspend();
   }
 };
+// RESTART AUDIO
+const restartAudio = () => {
+  soundtrackAudioCtx.rawContext.resume();
+};
 
+// Change UI
 const changeMuteButton = () => {
   if (muteButton.classList.contains("fa-volume-off")) {
     muteButton.classList.remove("fa-volume-off");
@@ -382,17 +471,23 @@ const changeMuteButton = () => {
   }
 };
 
-const restartAudio = () => {
-  soundtrackAudioCtx.rawContext.resume();
-};
-
 //  MAIN ///
 // load synths!
-
 const main = async () => {
   if (window.safari) {
     loadFallback();
   } else {
+    document.querySelector("#menuicon").addEventListener("click", async () => {
+      if (soundtrackAudioCtx.rawContext.state === "suspended") {
+        console.log("attempting to start audio");
+        await soundtrackAudioCtx.rawContext.resume();
+        await start();
+        window.isSoundStarted = true;
+        console.log(soundtrackAudioCtx.rawContext.state);
+      }
+    });
+    isMp3Supported = await isMp3Supported;
+    await soundtrackAudioCtx.rawContext.resume();
     loadSynths();
     UISound();
   }

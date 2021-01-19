@@ -40,7 +40,7 @@ module.exports = {
         loader: "babel-loader",
       },
       {
-        test: /\.(mp3)$/,
+        test: /\.(mp3|aac)$/,
 
         loader: "file-loader",
       },

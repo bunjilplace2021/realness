@@ -1,3 +1,5 @@
+import { decodeAudioData } from "standardized-audio-context";
+
 export async function fetchSample(url, ctx) {
   return fetch(url)
     .then((response) => response.arrayBuffer())
@@ -5,17 +7,53 @@ export async function fetchSample(url, ctx) {
     .catch((error) => console.log(error));
 }
 
+export async function aacDecode(url, ctx) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      import("./samples/fallback.aac").then(async (file) => {
+        const response = await fetch(file.default, { mimeType: "audio/mpeg" });
+        const arrBuffer = await response.arrayBuffer();
+        // console.log(response.type);
+        // console.log(ctx._context._nativeContext);
+        const audioBuffer = await decodeAudioData(
+          ctx._context._nativeContext,
+          arrBuffer
+        );
+        console.log(audioBuffer);
+        resolve(audioBuffer);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
 export function removeZeroValues(arr) {
   return arr.filter((val) => val !== 0);
 }
 
-export function debounce(callback, delay) {
-  let timeout;
-  return function () {
-    clearTimeout(timeout);
-    timeout = setTimeout(callback, delay);
+export function debounce(fn, delay) {
+  let timeOutId;
+  return function (...args) {
+    if (timeOutId) {
+      clearTimeout(timeOutId);
+    }
+    timeOutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
   };
 }
+
+export function once(func) {
+  let calls = 1;
+  return function () {
+    if (calls > 0) {
+      func.apply(null, arguments);
+      calls--;
+    }
+  };
+}
+
 export function throttle(fn, delay) {
   let scheduledId;
   return function throttled() {
@@ -88,14 +126,39 @@ export function resampleBuffer(input, target_rate) {
     // NORMALIZE AND FILTER BUFFERS
     let source = off.createBufferSource();
     const bufferMax = Math.max(...input.getChannelData(0));
-    let filter = off.createBiquadFilter();
-    filter.frequency.value = ~~(Math.random() * 10 + 1) * 110;
-    filter.type = "bandpass";
+
     //  calculate difference from 1
     // subtract max volume value from 1, set gain to that value
-    const diff = Math.abs(1 - bufferMax);
+    // console.log("MAX: " + bufferMax);
     const gainNode = off.createGain();
-    gainNode.gain.value = diff;
+    const diff = Math.abs(0.5 - bufferMax);
+    if (bufferMax === 0) {
+      reject("silent audio file");
+    }
+    // VOLUME TEST
+    if (bufferMax < 0.02) {
+      // QUIET SOUND, need to bring it up in level
+      gainNode.gain.value = 4 + diff;
+    }
+    if (bufferMax < 0.2 && bufferMax > 0.02) {
+      // QUIET SOUND, need to bring it up in level
+      gainNode.gain.value = 2 + diff;
+    }
+    if (bufferMax > 0.2 && bufferMax < 0.5) {
+      // MEDIUM LEVEL SOUND, need to bump volume slightly
+      gainNode.gain.value = 1.7 + diff;
+    }
+    if (bufferMax > 0.5 && bufferMax < 0.7) {
+      gainNode.gain.value = 0.7 - diff;
+      // LOUD SOUND, need to bring it down in level
+    }
+    if (bufferMax > 0.7) {
+      gainNode.gain.value = 0.5 - diff;
+      // VERY LOUD SOUND, need to bring it down in level
+    }
+
+    // console.log("DIFF: " + diff);
+    // console.log("setting to volume" + gainNode.gain.value);
     source.buffer = input;
     source.connect(gainNode);
     // filter.connect(gainNode);

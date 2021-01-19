@@ -40,14 +40,14 @@ class GrainSynth {
     this.grainOutput.name = "Grain Output";
     this.filter = new Filter(10000, "lowpass", -24, 4);
     this.compressor = new Compressor({
-      ratio: 12,
-      threshold: -30,
+      ratio: 20,
+      threshold: -24,
       release: 1,
       attack: 0.003,
     });
     this.pitchShifter = new PitchShift({
       pitch: -12,
-      channelCount: 1,
+      // channelCount: 1,
     });
     for (let i = 0; i < this.numVoices; i++) {
       if (window.safari) {
@@ -59,7 +59,7 @@ class GrainSynth {
       }
 
       // this.grains[i].buffer.toMono();
-      this.grains[i].channelCount = 1;
+      // this.grains[i].channelCount = 1;
     }
 
     this.setupMaster();
@@ -286,7 +286,7 @@ class GrainSynth {
     // generate random values
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
-      overlap: this.randArrayFromRange(numGrains, 0.9, 1),
+      overlap: this.randArrayFromRange(numGrains, 0.01, 1),
       grainSize: this.randArrayFromRange(numGrains, 0.001, 0.05),
       playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
       loopEnd: this.randArrayFromRange(
@@ -295,7 +295,7 @@ class GrainSynth {
         this.grains[0].buffer.duration
       ),
     };
-    this.setClockFrequency(Math.random() * 5, 10);
+    this.setClockFrequency(Math.random() * 1, 10);
     //set values to random values
     // TODO: Interpolate between current and random values
     this.setCurrentValues(randomValues);

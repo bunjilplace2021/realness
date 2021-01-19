@@ -29,7 +29,7 @@ let mouseIsReleased = false;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
-
+window.radiusLimit = new Event("radius_reached");
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
   var cnv_y = (windowHeight - height) / 2;
@@ -177,11 +177,7 @@ function particle_draw(p) {
     pipShaderDraw();
   }
 
-image(particlepg, 0, 0);
-
- if (pixelShaderToggle) {
-   image(pippg, 0, 0);
- }
+  image(particlepg, 0, 0);
 
  if (mouseIsPressed){
    mousecount = mousecount+1;
@@ -315,17 +311,18 @@ setTimeout(function time() {document.getElementById("camera_inst").style.display
 function fullScreenMenu() {
   checkIfiPhone();
 
-  if(!isiPhone){
-  let fs = fullscreen();
-  fullscreen(!fs);
-  fullicons.classList.toggle("fa-compress");
-  document.body.scrollTop = 0; // <-- pull the page back up to the top
-  document.body.style.overflow = "hidden";
-}else{
-  if (width < height){
-  document.getElementById("iPhone").style.display = "block";
-setTimeout(function time() {document.getElementById("iPhone").style.display = "none"}, 2000);
-}
-
-}
+  if (!isiPhone) {
+    let fs = fullscreen();
+    fullscreen(!fs);
+    fullicons.classList.toggle("fa-compress");
+    document.body.scrollTop = 0; // <-- pull the page back up to the top
+    document.body.style.overflow = "hidden";
+  } else {
+    if (width < height) {
+      document.getElementById("iPhone").style.display = "block";
+      setTimeout(function time() {
+        document.getElementById("iPhone").style.display = "none";
+      }, 2000);
+    }
+  }
 }

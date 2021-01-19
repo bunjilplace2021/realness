@@ -8,6 +8,22 @@ class Recorder {
   async getPermissions() {
     // get permission to record
     try {
+      const mp3 = await navigator.mediaCapabilities
+        .decodingInfo({
+          type: "file",
+          audio: {
+            contentType: "audio/mp3",
+          },
+        })
+        .then((result) => {
+          return result.supported;
+        });
+
+      if (mp3 === true) {
+        this.type = "audio/mpeg-3";
+      } else {
+        this.type = "audio/aac";
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       this.stream = stream;
       return true;
@@ -32,7 +48,7 @@ class Recorder {
         // console.log("stopped recorder");
       }, this.length);
       this.mediaRecorder.addEventListener("stop", () => {
-        this.audioBlob = new Blob(this.audioChunks, { type: "audio/mpeg-3" });
+        this.audioBlob = new Blob(this.audioChunks, { type: this.type });
         this.audioUrl = URL.createObjectURL(this.audioBlob);
         resolve(this.audioBlob);
       });
