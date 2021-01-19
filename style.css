@@ -16,14 +16,13 @@ body {
   /* This centers our sketch vertically. */
   align-items: center;
   font-family: "Avenir Next", "Avenir", "Nunito Sans", sans-serif;
+  -webkit-user-select: none;
 }
 
 canvas {
   display: block;
-}
+  -webkit-user-select: none;
 
-canvas #can {
-  filter: blur(30px);
 }
 
 video {
