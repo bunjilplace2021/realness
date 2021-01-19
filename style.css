@@ -91,10 +91,12 @@ video {
   color: white;
 }
 
+@media (hover: hover) and (pointer: fine) {
 .topnav a:hover {
   background-color: white;
   color: black;
   opacity: 0.3;
+}
 }
 
 .active {
@@ -247,7 +249,7 @@ color: white;
   opacity: 0.2;
 }
 
-@keyframes fadeOut {
+/* @keyframes fadeOut {
   0% {
     opacity: 1;
   }
@@ -295,4 +297,4 @@ color: white;
   100% {
     opacity: 0;
   }
-}
+} */
