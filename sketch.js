@@ -24,6 +24,9 @@ let particlepg;
 let isSafari = false;
 let isiPhone = false;
 
+let mousecount = 0;
+let mouseIsReleased = false;
+
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
 
@@ -180,11 +183,21 @@ image(particlepg, 0, 0);
    image(pippg, 0, 0);
  }
 
+ if (mouseIsPressed){
+   mousecount = mousecount+1;
+ }
+
 }
 
 function mousePressed() {
   //sample and upload pixel to firebase
   shaderMousePressed();
+  mouseIsReleased = false;
+}
+
+function mouseReleased() {
+mousecount = 0;
+mouseIsReleased = true;
 }
 
 function keyPressed() {

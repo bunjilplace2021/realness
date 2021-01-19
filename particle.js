@@ -32,6 +32,7 @@ class Particle {
     this.firstrun = true;
     this.strokeweight = 0;
     this.intersect = 0.0;
+    this.recordcount = 0.0;
   }
 
   colour(rand) {
@@ -72,6 +73,17 @@ class Particle {
       this.fill_col.setAlpha(
         map(this.timer, 0, this.timermax, this.fill_alpha, 0)
       );
+    }
+
+
+    if (this.UUID == uuid && mousecount >= 50 && this.firstrun && this.active && this.recordcount == 0) {
+      this.col = color(255,255,255, 255);
+    this.fill_col = lerpColor(this.fill_col,  this.col, abs(sin(frameCount*0.125)));
+      this.fill_col.setAlpha(255 * abs(sin(frameCount*0.125)));
+    }
+
+    if(mouseIsReleased){
+      this.recordcount = this.recordcount +1;
     }
 
     //first click - white and lerps to color
