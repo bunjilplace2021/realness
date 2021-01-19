@@ -283,7 +283,19 @@ function volumemute() {
 }
 
 function cameratoggle() {
+
+  detectWebcam(function (hasWebcam) {
+    webcam = hasWebcam;
+    //console.log(webcam);
+    console.log("Webcam: " + (hasWebcam ? "yes" : "no"));
+  });
+
+if(webcam){
   pixelShaderToggle = !pixelShaderToggle;
+}else{
+  document.getElementById("camera_inst").style.display = "block";
+setTimeout(function time() {document.getElementById("camera_inst").style.display = "none"}, 2000);
+}
   //icons.classList.toggle("select");
 }
 
