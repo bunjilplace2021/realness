@@ -50,6 +50,8 @@ let safariAudioTrack;
 let isMuted = true;
 let muteClicked = 0;
 let sampleRate = 44100;
+
+let recordingAllowed = false;
 let recordLimit = isMobile ? 1 : 3;
 let recordings = 0;
 let recordingLimitReached = false;
@@ -288,7 +290,7 @@ const UISound = () => {
 
 const startRecording = async () => {
 	return new Promise(async (resolve, reject) => {
-		if (window.MediaRecorder) {
+		if (window.MediaRecorder && recordingAllowed) {
 			safariAudioTrack && safariAudioTrack.pause();
 			recordButton.classList.toggle('red');
 			try {
@@ -307,7 +309,7 @@ const startRecording = async () => {
 	});
 };
 const stopRecording = async () => {
-	if (!r.recording) {
+	if (!r.recording && recordingAllowed) {
 		recordedBuffer && recordButton.classList.remove('red');
 		reloadBuffers(recordedBuffer);
 		f.uploadSample(r.audioBlob);
@@ -316,7 +318,11 @@ const stopRecording = async () => {
 	}
 };
 
-window.addEventListener('down', () => {
+window.addEventListener('down', async () => {
+	if (!recordingAllowed) {
+		recordingAllowed = await r.getPermissions();
+		soundLog(`user has ${recordingAllowed ? '' : 'not'} allowed recording.`);
+	}
 	if (!isMuted) {
 		recordings++;
 
@@ -515,7 +521,6 @@ const changeMuteButton = () => {
 // load synths!
 
 const main = async () => {
-	await r.getPermissions();
 	if (window.safari) {
 		loadFallback();
 	} else {
