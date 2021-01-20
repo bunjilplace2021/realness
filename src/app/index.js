@@ -84,7 +84,7 @@ if (window.safari) {
 		safariAudioTrack.autoplay = true;
 		safariAudioTrack.muted = false;
 	});
-	console.log('loaded MediaRecorder polyfill for safari');
+	soundLog('loaded MediaRecorder polyfill for safari');
 }
 const loadFallback = async () => {
 	if (typeof fallBack == 'undefined') {
@@ -178,11 +178,11 @@ const recordSnippet = async () => {
 				soundtrackAudioCtx.destination.volume = 1;
 			}, recordLength);
 		} catch (error) {
-			console.log(error);
+			soundLog(error);
 			recordButton.classList.remove('red');
 		}
 	} else {
-		console.log('media recording is not supported in this browser');
+		soundLog('media recording is not supported in this browser');
 	}
 };
 recordButton.onclick = async () => {
@@ -212,7 +212,7 @@ const reloadBuffers = async (customBuffer = null) => {
 				buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
 				if (checkFileVolume(buf) > 0) {
 					playBuf = buf;
-					console.log('clip is not silent, continuing');
+					soundLog('clip is not silent, continuing');
 				} else {
 					await f.getRandomSample();
 					buf = await fetchSample(f.audioFile);
@@ -225,7 +225,7 @@ const reloadBuffers = async (customBuffer = null) => {
 				const newBuf = removeZeroValues(floatBuf);
 				synth.buffer.copyToChannel(newBuf, 0, 0);
 			} else {
-				console.log("can't reload buffers on this browser");
+				soundLog("can't reload buffers on this browser");
 			}
 
 			// purge buffer
@@ -278,7 +278,7 @@ const UISound = () => {
 		// 		recordSnippet();
 		// 	} else {
 		// 		recordingLimitReached = true;
-		// 		console.log('user recording limit reached');
+		// 		soundLog('user recording limit reached');
 		// 	}
 		// }
 
@@ -297,12 +297,12 @@ const startRecording = async () => {
 				recordedBuffer = await r.loadToBuffer();
 				resolve(true);
 			} catch (error) {
-				console.log(error);
+				soundLog(error);
 				recordButton.classList.remove('red');
 				reject(false);
 			}
 		} else {
-			console.log('media recording is not supported in this browser');
+			soundLog('media recording is not supported in this browser');
 		}
 	});
 };
@@ -317,22 +317,30 @@ const stopRecording = async () => {
 };
 
 window.addEventListener('down', () => {
-	recordings++;
-	console.log(recordings, recordLimit);
-	if (!recordings >= recordLimit) {
-		recordingLimitReached = true;
-	}
-	if (!recordingLimitReached && !isMuted) {
-		startRecording();
-	} else {
-		console.log('user recording limit reached');
+	if (!isMuted) {
+		recordings++;
+
+		soundLog(recordings > recordLimit);
+		if (recordings > recordLimit) {
+			recordingLimitReached = true;
+		}
+		if (!recordingLimitReached) {
+			debounce(startRecording, 100);
+		} else {
+			soundLog('user recording limit reached');
+		}
 	}
 });
 window.addEventListener('released', () => {
-	if (!isMuted && !recordingLimitReached) {
-		stopRecording();
+	if (!isMuted) {
+		if (!recordingLimitReached) {
+			// make recording at least 100ms
+			setTimeout(() => {
+				stopRecording();
+			}, 100);
+		}
+		soundLog('mouse is released');
 	}
-	console.log('mouse is released');
 });
 // SETUP subOscillator
 const subOscillator = () => {
@@ -355,7 +363,7 @@ const subOscillator = () => {
 const loadSynths = async () => {
 	await f.listAll();
 	const mp3Supported = await isMp3Supported;
-	console.log(`mp3 is ${mp3Supported ? '' : 'not'} supported in this browser`);
+	soundLog(`mp3 is ${mp3Supported ? '' : 'not'} supported in this browser`);
 	for (let i = 0; i < numSources; i++) {
 		await f.getRandomSample();
 		let buf;
@@ -364,14 +372,14 @@ const loadSynths = async () => {
 		if (mp3Supported) {
 			buf = await fetchSample(await randomChoice(f.files.items).getDownloadURL(), soundtrackAudioCtx);
 
-			if (checkFileVolume(buf) > 0) {
+			if (buf && checkFileVolume(buf) > 0) {
 				playBuf = buf;
-				console.log('clip is not silent, continuing');
+				soundLog('clip is not silent, continuing');
 			} else {
-				console.log('clip is silent: reloading');
+				soundLog('clip is silent: reloading');
 
 				buf = await fetchSample(await randomChoice(f.files.items).getDownloadURL());
-				console.log(buf);
+				soundLog(buf);
 				playBuf = buf;
 			}
 		} else {
@@ -444,7 +452,7 @@ const startAudio = async () => {
 	}
 	// don't start audio unless the context is running -- requires user gesture
 	if (soundtrackAudioCtx.state === 'closed') {
-		console.log('audio context is closed by user gesture, restarting');
+		soundLog('audio context is closed by user gesture, restarting');
 		await soundtrackAudioCtx.rawContext.resume();
 	}
 	// main synth setup loop
@@ -513,11 +521,11 @@ const main = async () => {
 	} else {
 		document.querySelector('#menuicon').addEventListener('click', async () => {
 			if (soundtrackAudioCtx.rawContext.state === 'suspended') {
-				console.log('attempting to start audio');
+				soundLog('attempting to start audio');
 				await soundtrackAudioCtx.rawContext.resume();
 				await start();
 				window.isSoundStarted = true;
-				console.log(soundtrackAudioCtx.rawContext.state);
+				soundLog(soundtrackAudioCtx.rawContext.state);
 			}
 		});
 		isMp3Supported = await isMp3Supported;
