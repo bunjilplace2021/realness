@@ -277,10 +277,7 @@ const UISound = () => {
 				console.log('user recording limit reached');
 			}
 		}
-		// let idx = ~~mapValue(pixelX, 0, window.innerWidth, 0, uiNotes.length);
 
-		// const note = uiNotes[idx];
-		// console.log(note);
 		!isMuted && u.play([pixelX, pixelY]);
 	});
 };
