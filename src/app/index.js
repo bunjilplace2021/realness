@@ -13,7 +13,6 @@ import {getContext, Context, FMOscillator, Filter, Noise, setContext, start, deb
 debug.setLogger(console);
 // UTILITIES
 import {
-	once,
 	aacDecode,
 	fetchSample,
 	mapValue,
@@ -51,6 +50,10 @@ let safariAudioTrack;
 let isMuted = true;
 let muteClicked = 0;
 let sampleRate = 44100;
+let recordLimit = isMobile ? 1 : 3;
+let recordings = 0;
+let recordingLimitReached = false;
+let recordedBuffer = null;
 // Turn on logging
 let logging = true;
 // create own audio context
@@ -163,7 +166,7 @@ const recordSnippet = async () => {
 		recordButton.classList.toggle('red');
 		try {
 			soundtrackAudioCtx.destination.volume = 0;
-			await r.getPermissions();
+
 			logging && soundLog('got permissions');
 			await r.recordChunks();
 			const decodedBuffer = await r.loadToBuffer();
@@ -263,25 +266,74 @@ window.addEventListener('radius_reached', () => {
 const UISound = () => {
 	let count = 0;
 	let recordings = 0;
-	let recordLimit = isMobile ? 1 : 3;
+
 	window.addEventListener('pixel_added', (e) => {
 		const {pixelX, pixelY} = e.data;
 
-		count++;
-		// restrict upload to counter
-		if (count > 20 && count % 5 === 0) {
-			recordings++;
-			if (recordings < recordLimit) {
-				recordSnippet();
-			} else {
-				console.log('user recording limit reached');
-			}
-		}
+		// count++;
+		// // restrict upload to counter
+		// if (count > 20 && count % 5 === 0) {
+		// 	recordings++;
+		// 	if (recordings < recordLimit) {
+		// 		recordSnippet();
+		// 	} else {
+		// 		recordingLimitReached = true;
+		// 		console.log('user recording limit reached');
+		// 	}
+		// }
 
 		!isMuted && u.play([pixelX, pixelY]);
 	});
 };
 
+const startRecording = async () => {
+	return new Promise(async (resolve, reject) => {
+		if (window.MediaRecorder) {
+			safariAudioTrack && safariAudioTrack.pause();
+			recordButton.classList.toggle('red');
+			try {
+				soundtrackAudioCtx.destination.volume.rampTo(0, 1);
+				await r.recordChunks();
+				recordedBuffer = await r.loadToBuffer();
+				resolve(true);
+			} catch (error) {
+				console.log(error);
+				recordButton.classList.remove('red');
+				reject(false);
+			}
+		} else {
+			console.log('media recording is not supported in this browser');
+		}
+	});
+};
+const stopRecording = async () => {
+	if (!r.recording) {
+		recordedBuffer && recordButton.classList.remove('red');
+		reloadBuffers(recordedBuffer);
+		f.uploadSample(r.audioBlob);
+		safariAudioTrack && safariAudioTrack.play();
+		soundtrackAudioCtx.destination.volume.rampTo(1, 1);
+	}
+};
+
+window.addEventListener('down', () => {
+	recordings++;
+	console.log(recordings, recordLimit);
+	if (!recordings >= recordLimit) {
+		recordingLimitReached = true;
+	}
+	if (!recordingLimitReached && !isMuted) {
+		startRecording();
+	} else {
+		console.log('user recording limit reached');
+	}
+});
+window.addEventListener('released', () => {
+	if (!isMuted && !recordingLimitReached) {
+		stopRecording();
+	}
+	console.log('mouse is released');
+});
 // SETUP subOscillator
 const subOscillator = () => {
 	subOsc.filter = new Filter();
@@ -453,7 +505,9 @@ const changeMuteButton = () => {
 
 //  MAIN ///
 // load synths!
+
 const main = async () => {
+	await r.getPermissions();
 	if (window.safari) {
 		loadFallback();
 	} else {
