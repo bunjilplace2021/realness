@@ -5,7 +5,7 @@ class Particle {
       map(x, 0, devWidth, 0, width),
       map(y, 0, devHeight, 0, height)
     );
-    this.alignpixel = 200;
+    this.alignpixel = 100;
     this.position = createVector(
       round(this.map_position.x / this.alignpixel) * this.alignpixel,
       round(this.map_position.y / this.alignpixel) * this.alignpixel
