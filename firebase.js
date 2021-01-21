@@ -32,7 +32,7 @@ function gotData(data) {
 	ps.addParticle(
 		test.mouseX_loc,
 		test.mouseY_loc,
-		0,
+		test.rand,
 		test.colour_loc,
 		test.deviceWidth,
 		test.deviceHeight,

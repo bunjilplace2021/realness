@@ -27,6 +27,8 @@ let isiPhone = false;
 let mousecount = 0;
 let mouseIsReleased = false;
 
+let initload = true;
+
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
 window.radiusLimit = new Event("radius_reached");
@@ -194,6 +196,7 @@ function mousePressed() {
   //sample and upload pixel to firebase
   shaderMousePressed();
   mouseIsReleased = false;
+  initload = false;
 }
 
 function mouseReleased() {

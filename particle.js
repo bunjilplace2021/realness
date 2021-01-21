@@ -5,7 +5,7 @@ class Particle {
       map(x, 0, devWidth, 0, width),
       map(y, 0, devHeight, 0, height)
     );
-    this.alignpixel = 100;
+    this.alignpixel = 200;
     this.position = createVector(
       round(this.map_position.x / this.alignpixel) * this.alignpixel,
       round(this.map_position.y / this.alignpixel) * this.alignpixel
@@ -15,7 +15,7 @@ class Particle {
     this.acceleration = createVector();
     this.lifespan = 255.0;
     this.fill_alpha = 200.0;
-    this.rand = floor(random(0, 3));
+    this.rand = rand;
     this.img = img_;
     this.radius = 0.0;
     this.resize = 0.2 * int(random(1, 3)) + width * 0.0001;
@@ -33,17 +33,18 @@ class Particle {
     this.strokeweight = 0;
     this.intersect = 0.0;
     this.recordcount = 0.0;
+    this.initload = initload;
   }
 
-  colour(rand) {
+  colour() {
     this.col_array = [];
 
     this.col_array[0] = color(this.img[0], 0, 0);
     this.col_array[1] = color(0, this.img[1], 0);
     this.col_array[2] = color(0, 0, this.img[2]);
 
-    this.fill_col = this.col_array[rand];
-    this.stroke_col = this.col_array[rand];
+    this.fill_col = this.col_array[this.rand];
+    this.stroke_col = this.col_array[this.rand];
 
     if (pixelShaderToggle) {
       if (this.timer < this.timermax) {
@@ -162,7 +163,7 @@ class Particle {
     this.lifespan -= 0.0;
     this.velocity.limit(this.maxspeed);
 
-    this.colour(this.rand);
+    this.colour();
 
     if (touchtime >= this.touchtime) {
       this.active = true;
@@ -190,16 +191,14 @@ class Particle {
       this.lifespan = 255.0;
       this.duration = 0.0;
       this.active = false;
-      this.rand = this.rand + 1;
+      this.rand = floor(random(0, 3));
       this.firstrun = false;
       this.intersect = 0.0;
+      this.initload = false;
 
       // dispatch radiusLimit event
       window.dispatchEvent(window.radiusLimit);
 
-      if (this.rand > 2) {
-        this.rand = 0;
-      }
     }
   }
 
@@ -222,11 +221,16 @@ class Particle {
 
     p.fill(this.fill_col);
     p.ellipseMode(CENTER);
-    if (this.firstrun && this.UUID == uuid) {
+
+    if(this.initload){
+      p.ellipse(this.position.x, this.position.y, this.radius);
+    }else{
+    if (this.firstrun) {
       p.ellipse(this.map_position.x, this.map_position.y, this.radius);
     } else {
       p.ellipse(this.position.x, this.position.y, this.radius);
     }
+  }
     p.pop();
   }
 

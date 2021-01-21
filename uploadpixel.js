@@ -140,12 +140,14 @@ function shaderMousePressed() {
   });
 
   colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
+  let rand_gen = floor(random(0, 3));
 
   // texture upside down?
   var data = {
     uuid: uuid,
     mouseX_loc: mouseX,
     mouseY_loc: mouseY,
+    rand: rand_gen,
     colour_loc: colour,
     deviceWidth: width,
     deviceHeight: height,
