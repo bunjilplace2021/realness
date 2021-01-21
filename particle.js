@@ -14,7 +14,7 @@ class Particle {
     this.velocity = createVector();
     this.acceleration = createVector();
     this.lifespan = 255.0;
-    this.fill_alpha = 200.0;
+    this.fill_alpha = 100.0;
     this.rand = rand;
     this.img = img_;
     this.radius = 0.0;
