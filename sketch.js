@@ -202,6 +202,7 @@ function mousePressed() {
   //sample and upload pixel to firebase
   shaderMousePressed();
   mouseIsReleased = false;
+  initload = false;
 }
 
 function mouseReleased() {
