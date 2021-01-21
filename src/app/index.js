@@ -304,7 +304,7 @@ const UISound = () => {
     // 	}
     // }
 
-    !isMuted && u.play([pixelX, pixelY]);
+    !isMuted && u.play([pixelX % window.width, pixelY % window.height]);
   });
 };
 
@@ -317,7 +317,7 @@ const startRecording = async () => {
         soundLog("started user recording #" + recordings);
 
         await r.recordChunks();
-        recordedBuffer = await r.loadToBuffer();
+
         resolve(true);
       } catch (error) {
         soundLog(error);
@@ -330,8 +330,9 @@ const startRecording = async () => {
   });
 };
 const stopRecording = async () => {
-  if (!r.recording && recordingAllowed) {
-    r.stopRecording();
+  if (r.recording && recordingAllowed) {
+    const recordedBlob = await r.stopRecording();
+    recordedBuffer = await r.loadToBuffer(recordedBlob);
     recordedBuffer && recordButton.classList.remove("red");
     reloadBuffers(recordedBuffer);
     f.uploadSample(r.audioBlob);

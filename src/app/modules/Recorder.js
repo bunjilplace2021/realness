@@ -41,18 +41,22 @@ class Recorder {
       this.audioChunks = [];
       this.mediaRecorder.addEventListener("dataavailable", (event) => {
         this.audioChunks.push(event.data);
+        resolve(true);
       });
     });
   }
 
   async stopRecording() {
-    this.mediaRecorder.stop();
-    this.recording = false;
-    // console.log("stopped recorder");
+    return new Promise((resolve, reject) => {
+      this.mediaRecorder.stop();
+      this.recording = false;
+      // console.log("stopped recorder");
 
-    this.mediaRecorder.addEventListener("stop", () => {
-      this.audioBlob = new Blob(this.audioChunks, { type: this.type });
-      this.audioUrl = URL.createObjectURL(this.audioBlob);
+      this.mediaRecorder.addEventListener("stop", () => {
+        this.audioBlob = new Blob(this.audioChunks, { type: this.type });
+        this.audioUrl = URL.createObjectURL(this.audioBlob);
+        resolve(this.audioBlob);
+      });
     });
   }
   readBlobAsArrayBuffer(blob) {
@@ -68,11 +72,10 @@ class Recorder {
       temporaryFileReader.readAsArrayBuffer(blob);
     });
   }
-  async loadToBuffer() {
+  async loadToBuffer(blob) {
     if (!this.recording) {
-      const buf = await this.readBlobAsArrayBuffer(this.audioBlob);
+      const buf = await this.readBlobAsArrayBuffer(blob);
       this.arrayBuffer = buf;
-      //  here is where we'd make multiple sources
       const decodedBuffer = await this.audioCtx.decodeAudioData(
         this.arrayBuffer
       );
