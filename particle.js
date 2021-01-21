@@ -195,6 +195,7 @@ class Particle {
       this.firstrun = false;
       this.intersect = 0.0;
       this.initload = false;
+      initload = false; //global flag
 
       // dispatch radiusLimit event
       window.dispatchEvent(window.radiusLimit);
