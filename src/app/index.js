@@ -473,7 +473,7 @@ const startAudio = async () => {
     });
     subOscillator();
     masterBus.lowpassFilter(5000, 1);
-    !isMobile && masterBus.chorus(0.01, 300, 0.9);
+    masterBus.chorus(0.01, 300, 0.9);
     !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
     masterBus.dest.volume.value = 6;
     // masterBus.input.connect(window.meter);
