@@ -34,6 +34,8 @@ window.pixelAddEvent = new Event("pixel_added");
 window.radiusLimit = new Event("radius_reached");
 window.down = new Event("down");
 window.released = new Event("released");
+// set minimum record length for users
+window.minimumRecordLength = 200;
 
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
@@ -191,11 +193,13 @@ function particle_draw(p) {
   if (mouseIsPressed) {
     mousecount = mousecount + 1;
   }
+  console.log(mousecount);
 }
 
 function mousePressed() {
   // dispatchevent to sound sketch
   window.dispatchEvent(window.down);
+
   //sample and upload pixel to firebase
   shaderMousePressed();
   mouseIsReleased = false;
@@ -203,8 +207,10 @@ function mousePressed() {
 
 function mouseReleased() {
   // dispatch event to sound sketch
+  setTimeout(() => {
+    window.dispatchEvent(window.released);
+  }, window.minimumRecordLength);
 
-  window.dispatchEvent(window.released);
   mousecount = 0;
   mouseIsReleased = true;
 }
