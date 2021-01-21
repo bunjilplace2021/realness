@@ -193,7 +193,6 @@ function particle_draw(p) {
   if (mouseIsPressed) {
     mousecount = mousecount + 1;
   }
-  console.log(mousecount);
 }
 
 function mousePressed() {

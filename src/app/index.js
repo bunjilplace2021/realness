@@ -303,8 +303,8 @@ const UISound = () => {
     // 		soundLog('user recording limit reached');
     // 	}
     // }
-
-    !isMuted && u.play([pixelX % window.width, pixelY % window.height]);
+    console.log();
+    !isMuted && u.play([pixelX, window.height - pixelY]);
   });
 };
 
