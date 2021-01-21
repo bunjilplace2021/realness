@@ -331,11 +331,11 @@ const startRecording = async () => {
 };
 const stopRecording = async () => {
   if (!r.recording && recordingAllowed) {
+    r.stopRecording();
     recordedBuffer && recordButton.classList.remove("red");
     reloadBuffers(recordedBuffer);
     f.uploadSample(r.audioBlob);
     safariAudioTrack && safariAudioTrack.play();
-
     soundLog("stopped user recording #" + recordings);
   }
 };

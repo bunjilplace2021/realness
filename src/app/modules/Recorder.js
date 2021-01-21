@@ -42,16 +42,17 @@ class Recorder {
       this.mediaRecorder.addEventListener("dataavailable", (event) => {
         this.audioChunks.push(event.data);
       });
-      setTimeout(() => {
-        this.mediaRecorder.stop();
-        this.recording = false;
-        // console.log("stopped recorder");
-      }, this.length);
-      this.mediaRecorder.addEventListener("stop", () => {
-        this.audioBlob = new Blob(this.audioChunks, { type: this.type });
-        this.audioUrl = URL.createObjectURL(this.audioBlob);
-        resolve(this.audioBlob);
-      });
+    });
+  }
+
+  async stopRecording() {
+    this.mediaRecorder.stop();
+    this.recording = false;
+    // console.log("stopped recorder");
+
+    this.mediaRecorder.addEventListener("stop", () => {
+      this.audioBlob = new Blob(this.audioChunks, { type: this.type });
+      this.audioUrl = URL.createObjectURL(this.audioBlob);
     });
   }
   readBlobAsArrayBuffer(blob) {
