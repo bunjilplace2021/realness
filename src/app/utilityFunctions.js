@@ -1,7 +1,7 @@
 import {decodeAudioData, OfflineAudioContext} from 'standardized-audio-context';
 
-export async function fetchSample(url, ctx) {
-	return fetch(url)
+export async function fetchSample(url, ctx, contentType = 'audio/mpeg-3') {
+	return fetch(url, {contentType})
 		.then((response) => response.arrayBuffer())
 		.then((arrayBuffer) => ctx.decodeAudioData(arrayBuffer))
 		.catch((error) => console.log(error));
@@ -118,8 +118,15 @@ export function resampleBuffer(input, target_rate) {
 		let off = new OfflineAudioContext(input.numberOfChannels, final_length, target_rate);
 		// NORMALIZE AND FILTER BUFFERS
 		let source = off.createBufferSource();
-		const bufferMax = Math.max(...input.getChannelData(0));
 
+		let buffData = input.getChannelData(0);
+		let bufferMax = buffData[0];
+		for (var i = 0; i < buffData.length; i++) {
+			if (buffData[i] > bufferMax) {
+				bufferMax = buffData[i];
+			}
+		}
+		//  const bufferMax = Math.max.apply(Math, input.getChannelData(0));
 		//  calculate difference from 1
 		// subtract max volume value from 1, set gain to that value
 		// console.log("MAX: " + bufferMax);
@@ -183,4 +190,19 @@ export function soundLog(str) {
 		`%cSound: ${str}`,
 		"color:#233E82; font-family:'Arial';color:white; font-weight: 500; background:black;"
 	);
+}
+
+export function checkFileVolume(buf) {
+	if (buf.getChannelData) {
+		console.log(buf.getChannelData(0).length);
+		if (buf.getChannelData(0).length < 65536) {
+			if (Math.max(...buf.getChannelData(0)) > 0) {
+				return true;
+			}
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
 }

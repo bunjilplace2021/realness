@@ -14,14 +14,12 @@ import {
 } from 'tone';
 
 import regeneratorRuntime from 'regenerator-runtime';
-import {forEach} from 'async';
 // TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
 // TODO: ADD PRESETS LOADED FROM JSON
 class GrainSynth {
 	constructor(buffer, ctx, voices = 2) {
 		// workaround to suspend audiocontext without warnings
 		getContext().rawContext.suspend();
-		getContext().isOffline = true;
 
 		this.grains = [];
 		this.presets = [];
@@ -94,8 +92,8 @@ class GrainSynth {
 		this.output.gain.setValueAtTime(0.7 / this.numVoices, now());
 		// this.pitchShifter.windowSize = 1;
 		this.filter.connect(this.compressor);
-		this.compressor.connect(this.pitchShifter);
-		this.pitchShifter.connect(this.output);
+		this.compressor.connect(this.output);
+		// this.pitchShifter.connect(this.output);
 		this.output.connect(this.dest);
 
 		// higher windowsize sounds better!
@@ -281,7 +279,8 @@ class GrainSynth {
 			playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
 			loopEnd: this.randArrayFromRange(numGrains, 0, this.grains[0].buffer.duration)
 		};
-		this.setClockFrequency(Math.random() * 1, 10);
+		this.setClockFrequency(Math.random() * 0.1, 10);
+
 		//set values to random values
 		// TODO: Interpolate between current and random values
 		this.setCurrentValues(randomValues);

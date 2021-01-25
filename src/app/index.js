@@ -20,7 +20,7 @@ import {
 	soundLog,
 	removeZeroValues,
 	randomChoice,
-	getNodes
+	checkFileVolume
 } from './utilityFunctions';
 
 import regeneratorRuntime from 'regenerator-runtime';
@@ -32,7 +32,7 @@ getContext().rawContext.suspend();
 const isMobile = window.innerWidth < 600;
 let fallBack;
 
-window.safari = navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
+window.safari = navigator.userAgent.includes('iPhone') && !navigator.userAgent.includes('Chrome');
 
 let isMp3Supported = navigator.mediaCapabilities
 	.decodingInfo({
@@ -43,7 +43,7 @@ let isMp3Supported = navigator.mediaCapabilities
 		return result.supported;
 	});
 
-// window.safari = false;
+window.safari = false;
 let safariAudioTrack;
 let isMuted = true;
 let muteClicked = 0;
@@ -62,7 +62,7 @@ let soundtrackAudioCtx = new Context({
 	latencyHint: 'playback',
 	updateInterval: 1,
 	lookAhead: 0.5,
-	bufferSize: 1024,
+	bufferSize: 2048,
 	state: 'suspended'
 });
 
@@ -76,7 +76,11 @@ window.soundtrackAudioCtx = soundtrackAudioCtx;
 if (window.safari) {
 	safariAudioTrack = new Audio();
 	// set to safari specific audio context
-	setContext(new webkitAudioContext());
+
+	if (window.webkitAudioContext) {
+		setContext(new webkitAudioContext());
+	}
+
 	window.OfflineAudioContext = window.webkitOfflineAudioContext;
 	// add polyfill for Media Recorder
 	import('audio-recorder-polyfill').then((audioRecorder) => {
@@ -199,13 +203,6 @@ const subOsc = new FMOscillator({
 	detune: 0
 });
 
-const checkFileVolume = (buf) => {
-	if (buf.getChannelData && Math.max(...buf.getChannelData(0)) > 0) {
-		return true;
-	} else {
-		return false;
-	}
-};
 const reloadBuffers = async (customBuffer = null) => {
 	const mp3Supported = await isMp3Supported;
 	// fetch new samples from database and load them into existing buffers
@@ -250,14 +247,14 @@ const reloadBuffers = async (customBuffer = null) => {
 		});
 	} else {
 		if (customBuffer && checkFileVolume(customBuffer) > 0) {
-			let floatBuf = new Float32Array(customBuffer.length);
-			floatBuf = customBuffer.getChannelData(0);
 			const resampled = await resampleBuffer(customBuffer, sampleRate);
 
 			synths.forEach((synth) => {
 				synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
+				synth.setLoopStart(0);
+				synth.setLoopEnd(resampled.duration);
 				// synth.randomStarts();
-				// synth.randomInterpolate();
+				synth.randomInterpolate();
 				logging && soundLog('loaded user buffers');
 				// subOsc.start();
 				// null the buffer so that doesn't try to reload the user buffer on next loop
@@ -284,19 +281,7 @@ const UISound = () => {
 
 	window.addEventListener('pixel_added', (e) => {
 		const {pixelX, pixelY} = e.data;
-
-		// count++;
-		// // restrict upload to counter
-		// if (count > 20 && count % 5 === 0) {
-		// 	recordings++;
-		// 	if (recordings < recordLimit) {
-		// 		recordSnippet();
-		// 	} else {
-		// 		recordingLimitReached = true;
-		// 		soundLog('user recording limit reached');
-		// 	}
-		// }
-		console.log();
+		console.log('pixel added');
 		!isMuted && u.play([pixelX, window.height - pixelY]);
 	});
 };
@@ -376,7 +361,7 @@ const subOscillator = () => {
 	masterBus.connectSource(subOsc.filter);
 	subOsc.volume.value = -48;
 	subOsc.volume.targetRampTo(-24, 10);
-	subOsc.filter.frequency.value = 80;
+	subOsc.filter.frequency.value = 60;
 	subOsc.filter.gain.value = 10;
 	noise.start('+1');
 	subOsc.start('+1');
@@ -405,7 +390,7 @@ const loadSynths = async () => {
 			} else {
 				soundLog('clip is silent: reloading');
 
-				buf = await fetchSample(await randomChoice(f.files.items).getDownloadURL());
+				buf = await fetchSample(await randomChoice(f.files.items).getDownloadURL(), soundtrackAudioCtx);
 				soundLog(buf);
 				playBuf = buf;
 			}
@@ -415,7 +400,11 @@ const loadSynths = async () => {
 		}
 		if (playBuf) {
 			if (window.OfflineAudioContext) {
-				resampled = await resampleBuffer(playBuf, sampleRate);
+				try {
+					resampled = await resampleBuffer(playBuf, sampleRate);
+				} catch (e) {
+					resampled = playBuf;
+				}
 			} else {
 				resampled = playBuf;
 			}
@@ -451,7 +440,7 @@ const startAudio = async () => {
 				!isMobile && synth.grains.forEach((grain) => (grain.volume.value = 0.6));
 				synth.grainOutput.gain.value = 1 / numSources;
 				synth.filter.type = 'lowpass';
-				synth.filter.frequency.value = 880 * (i + 1);
+				synth.filter.frequency.value = 440 * (i + 1);
 				synth.setDetune((i + 1) * 220 - numSources * 440);
 				synth.setPitchShift(-12 / (i + 1));
 				// if lower frequency value, higher resonance for low-end drones
@@ -473,7 +462,7 @@ const startAudio = async () => {
 		masterBus.lowpassFilter(5000, 1);
 		masterBus.chorus(0.01, 300, 0.9);
 		!isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
-		masterBus.dest.volume.value = 6;
+		// masterBus.dest.volume.value = 6;
 		// masterBus.input.connect(window.meter);
 		document.querySelector('body').addEventListener('click', () => {
 			synths.forEach((synth) => {
@@ -565,6 +554,9 @@ const main = async () => {
 			}
 		});
 		isMp3Supported = await isMp3Supported;
+		if (!isMp3Supported) {
+			f.suffix = 'aac';
+		}
 		await soundtrackAudioCtx.rawContext.resume();
 		loadSynths();
 		UISound();

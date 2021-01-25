@@ -13,7 +13,7 @@ module.exports = {
 	},
 	devServer: {
 		before: (app, server) => {
-			server._watch(path.join(__dirname, '.'));
+			server._watch(path.join(__dirname, './src'));
 		},
 		publicPath: '/sound',
 		contentBase: path.resolve(__dirname, '.'),

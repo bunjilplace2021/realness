@@ -185,18 +185,14 @@ function particle_draw(p) {
 
 	if (mouseIsPressed) {
 		mousecount = mousecount + 1;
+		if (mousecount === 30 && mousePressed) {
+			window.dispatchEvent(window.down);
+		}
 	}
 }
 
 function mousePressed() {
 	// dispatchevent to sound sketch
-	let timeout;
-	if (timeout) {
-		clearTimeout(timeout);
-	}
-	timeout = setTimeout(() => {
-		window.dispatchEvent(window.down);
-	}, 200);
 
 	//sample and upload pixel to firebase
 	shaderMousePressed();
@@ -212,7 +208,7 @@ function mouseReleased() {
 	timeout = setTimeout(() => {
 		window.dispatchEvent(window.released);
 	}, window.minimumRecordLength);
-	if (mousecount % 60 == 0) {
+	if (mousecount % 60 == 0 && mouseIsReleased) {
 		clearTimeout(timeout);
 		window.dispatchEvent(window.released);
 	}
@@ -319,6 +315,7 @@ function cameratoggle() {
 		webcam = hasWebcam;
 		//console.log(webcam);
 		console.log('Webcam: ' + (hasWebcam ? 'yes' : 'no'));
+		// still play UI sounds if user has not allowed webcam
 	});
 
 	if (webcam) {
