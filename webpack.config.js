@@ -21,7 +21,11 @@ module.exports = {
 		host: '0.0.0.0',
 		port: 3000,
 		hot: true,
-		stats: 'errors-only'
+		stats: 'errors-only',
+		watchOptions: {
+			poll: false,
+			ignored: ['node_modules']
+		}
 	},
 
 	plugins: [new webpack.ProgressPlugin(), new MiniCssExtractPlugin({filename: 'main.[chunkhash].css'})],

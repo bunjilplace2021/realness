@@ -190,7 +190,7 @@ function particle_draw(p) {
 
 function mousePressed() {
 	// dispatchevent to sound sketch
-	console.log(mousecount);
+	
 	window.dispatchEvent(window.down);
 
 	//sample and upload pixel to firebase

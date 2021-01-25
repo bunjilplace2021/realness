@@ -37,9 +37,7 @@ window.safari = navigator.userAgent.includes('Safari') && !navigator.userAgent.i
 let isMp3Supported = navigator.mediaCapabilities
 	.decodingInfo({
 		type: 'file',
-		audio: {
-			contentType: 'audio/mp3'
-		}
+		audio: {contentType: 'audio/mp3'}
 	})
 	.then(function(result) {
 		return result.supported;
@@ -54,15 +52,16 @@ let sampleRate = 44100;
 let recordingAllowed = false;
 let recordLimit = isMobile ? 1 : 3;
 let recordings = 0;
-let recordingLimitReached = false;
+window.recordingLimitReached = false;
 let recordedBuffer = null;
 // Turn on logging
 let logging = true;
 // create own audio context
 let soundtrackAudioCtx = new Context({
+	sampleRate,
 	latencyHint: 'playback',
 	updateInterval: 1,
-	lookAhead: 0.1,
+	lookAhead: 0.5,
 	bufferSize: 1024,
 	state: 'suspended'
 });
@@ -78,6 +77,7 @@ if (window.safari) {
 	safariAudioTrack = new Audio();
 	// set to safari specific audio context
 	setContext(new webkitAudioContext());
+	window.OfflineAudioContext = window.webkitOfflineAudioContext;
 	// add polyfill for Media Recorder
 	import('audio-recorder-polyfill').then((audioRecorder) => {
 		window.MediaRecorder = audioRecorder.default;
@@ -119,10 +119,10 @@ let r = new Recorder(recordLength, soundtrackAudioCtx);
 const uiNotes = ['C3', 'F3', 'A3', 'E3', 'G3', 'C4', 'A4'];
 
 // number of different sources to use
-const numSources = isMobile ? 1 : 3;
+let numSources = isMobile ? 1 : 3;
 
 // number of voices per synth
-const numVoices = isMobile ? 2 : 3;
+let numVoices = isMobile ? 2 : 3;
 const muteButton = document.querySelector('#mute');
 const recordButton = document.querySelector('#recordButton');
 
@@ -200,8 +200,8 @@ const subOsc = new FMOscillator({
 });
 
 const checkFileVolume = (buf) => {
-	if (buf.getChannelData) {
-		return Math.max(...buf.getChannelData(0));
+	if (buf.getChannelData && Math.max(...buf.getChannelData(0)) > 0) {
+		return true;
 	} else {
 		return false;
 	}
@@ -213,6 +213,7 @@ const reloadBuffers = async (customBuffer = null) => {
 		synths.forEach(async (synth) => {
 			await f.getRandomSample();
 			let buf;
+			let newBuf;
 			if (mp3Supported) {
 				let playBuf;
 				buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
@@ -224,11 +225,17 @@ const reloadBuffers = async (customBuffer = null) => {
 					buf = await fetchSample(f.audioFile);
 					playBuf = buf;
 				}
-				const resampled = await resampleBuffer(playBuf, sampleRate);
-				let floatBuf = new Float32Array(resampled.length);
-				//  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
-				resampled.copyFromChannel(floatBuf, 0, 0);
-				const newBuf = removeZeroValues(floatBuf);
+				try {
+					const resampled = await resampleBuffer(playBuf, sampleRate);
+					let floatBuf = new Float32Array(resampled.length);
+					//  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
+					resampled.copyFromChannel(floatBuf, 0, 0);
+					newBuf = removeZeroValues(floatBuf);
+				} catch (e) {
+					console.log('reverting to original buffer');
+					newBuf = buf;
+				}
+
 				synth.buffer.copyToChannel(newBuf, 0, 0);
 			} else {
 				soundLog("can't reload buffers on this browser");
@@ -337,9 +344,9 @@ window.addEventListener('down', async () => {
 
 		soundLog(recordings > recordLimit);
 		if (recordings > recordLimit) {
-			recordingLimitReached = true;
+			window.recordingLimitReached = true;
 		}
-		if (!recordingLimitReached) {
+		if (!window.recordingLimitReached) {
 			startRecording();
 		} else {
 			soundLog('user recording limit reached');
@@ -348,7 +355,7 @@ window.addEventListener('down', async () => {
 });
 window.addEventListener('released', () => {
 	if (!isMuted) {
-		if (!recordingLimitReached) {
+		if (!window.recordingLimitReached) {
 			// make recording at least 100ms
 			setTimeout(() => {
 				stopRecording();
@@ -378,7 +385,12 @@ const subOscillator = () => {
 const loadSynths = async () => {
 	await f.listAll();
 	const mp3Supported = await isMp3Supported;
-	soundLog(`mp3 is ${mp3Supported ? '' : 'not'} supported in this browser`);
+
+	if (!mp3Supported) {
+		numSources = 1;
+		numVoices = 2;
+	}
+	soundLog(`mp3 is ${mp3Supported ? '' : 'not'}supported in this browser`);
 	for (let i = 0; i < numSources; i++) {
 		await f.getRandomSample();
 		let buf;
@@ -399,9 +411,15 @@ const loadSynths = async () => {
 			}
 		} else {
 			buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
+			playBuf = buf;
 		}
 		if (playBuf) {
-			resampled = await resampleBuffer(playBuf, sampleRate);
+			if (window.OfflineAudioContext) {
+				resampled = await resampleBuffer(playBuf, sampleRate);
+			} else {
+				resampled = playBuf;
+			}
+
 			logging && soundLog('Loaded GrainSynth ' + (i + 1));
 			if (!window.safari) {
 				synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
@@ -476,9 +494,13 @@ const startAudio = async () => {
 // Loops to synchronize with cisual content
 const runLoops = () => {
 	// // loop to poll paprticle system values
-	synths[0].transport.scheduleRepeat((time) => {
-		pollValues();
-	}, 10);
+	try {
+		synths[0].transport.scheduleRepeat((time) => {
+			pollValues();
+		}, 10);
+	} catch (e) {
+		console.log(e);
+	}
 };
 
 const subOscLoop = () => {
@@ -553,6 +575,6 @@ const main = async () => {
 main();
 
 // ! allow hot reloading of the files in project (webpack)
-if (module.hot) {
-	module.hot.accept();
-}
+// if (module.hot) {
+// 	module.hot.accept();
+// }
