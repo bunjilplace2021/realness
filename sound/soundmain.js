@@ -13131,14 +13131,20 @@ let isMp3Supported = navigator.mediaCapabilities.decodingInfo({
 let safariAudioTrack;
 let isMuted = true;
 let muteClicked = 0;
-let sampleRate = 44100; // Turn on logging
+let sampleRate = 44100;
+let recordingAllowed = false;
+let recordLimit = isMobile ? 1 : 3;
+let recordings = 0;
+window.recordingLimitReached = false;
+let recordedBuffer = null; // Turn on logging
 
 let logging = true; // create own audio context
 
 let soundtrackAudioCtx = new tone__WEBPACK_IMPORTED_MODULE_6__.Context({
+  sampleRate,
   latencyHint: 'playback',
   updateInterval: 1,
-  lookAhead: 0.1,
+  lookAhead: 0.5,
   bufferSize: 1024,
   state: 'suspended'
 });
@@ -13152,7 +13158,8 @@ window.soundtrackAudioCtx = soundtrackAudioCtx;
 if (window.safari) {
   safariAudioTrack = new Audio(); // set to safari specific audio context
 
-  (0,tone__WEBPACK_IMPORTED_MODULE_6__.setContext)(new webkitAudioContext()); // add polyfill for Media Recorder
+  (0,tone__WEBPACK_IMPORTED_MODULE_6__.setContext)(new webkitAudioContext());
+  window.OfflineAudioContext = window.webkitOfflineAudioContext; // add polyfill for Media Recorder
 
   __webpack_require__.e(/*! import() */ "node_modules_audio-recorder-polyfill_index_js").then(__webpack_require__.bind(__webpack_require__, /*! audio-recorder-polyfill */ "./node_modules/audio-recorder-polyfill/index.js")).then(audioRecorder => {
     window.MediaRecorder = audioRecorder.default;
@@ -13161,7 +13168,7 @@ if (window.safari) {
     safariAudioTrack.autoplay = true;
     safariAudioTrack.muted = false;
   });
-  console.log('loaded MediaRecorder polyfill for safari');
+  (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('loaded MediaRecorder polyfill for safari');
 }
 
 const loadFallback = async () => {
@@ -13193,9 +13200,9 @@ const recordLength = 1000;
 let r = new _modules_Recorder__WEBPACK_IMPORTED_MODULE_2__.default(recordLength, soundtrackAudioCtx);
 const uiNotes = ['C3', 'F3', 'A3', 'E3', 'G3', 'C4', 'A4']; // number of different sources to use
 
-const numSources = isMobile ? 1 : 3; // number of voices per synth
+let numSources = isMobile ? 1 : 3; // number of voices per synth
 
-const numVoices = isMobile ? 2 : 3;
+let numVoices = isMobile ? 2 : 3;
 const muteButton = document.querySelector('#mute');
 const recordButton = document.querySelector('#recordButton');
 /* EVENT LISTENERS */
@@ -13244,7 +13251,6 @@ const recordSnippet = async () => {
 
     try {
       soundtrackAudioCtx.destination.volume = 0;
-      await r.getPermissions();
       logging && (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('got permissions');
       await r.recordChunks();
       const decodedBuffer = await r.loadToBuffer();
@@ -13256,11 +13262,11 @@ const recordSnippet = async () => {
         soundtrackAudioCtx.destination.volume = 1;
       }, recordLength);
     } catch (error) {
-      console.log(error);
+      (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)(error);
       recordButton.classList.remove('red');
     }
   } else {
-    console.log('media recording is not supported in this browser');
+    (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('media recording is not supported in this browser');
   }
 };
 
@@ -13276,7 +13282,11 @@ const subOsc = new tone__WEBPACK_IMPORTED_MODULE_6__.FMOscillator({
 });
 
 const checkFileVolume = buf => {
-  return Math.max(...buf.getChannelData(0));
+  if (buf.getChannelData && Math.max(...buf.getChannelData(0)) > 0) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 const reloadBuffers = async (customBuffer = null) => {
@@ -13286,6 +13296,7 @@ const reloadBuffers = async (customBuffer = null) => {
     synths.forEach(async synth => {
       await f.getRandomSample();
       let buf;
+      let newBuf;
 
       if (mp3Supported) {
         let playBuf;
@@ -13293,21 +13304,27 @@ const reloadBuffers = async (customBuffer = null) => {
 
         if (checkFileVolume(buf) > 0) {
           playBuf = buf;
-          console.log('clip is not silent, continuing');
+          (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('clip is not silent, continuing');
         } else {
           await f.getRandomSample();
           buf = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.fetchSample)(f.audioFile);
           playBuf = buf;
         }
 
-        const resampled = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.resampleBuffer)(playBuf, sampleRate);
-        let floatBuf = new Float32Array(resampled.length); //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
+        try {
+          const resampled = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.resampleBuffer)(playBuf, sampleRate);
+          let floatBuf = new Float32Array(resampled.length); //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
 
-        resampled.copyFromChannel(floatBuf, 0, 0);
-        const newBuf = (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.removeZeroValues)(floatBuf);
+          resampled.copyFromChannel(floatBuf, 0, 0);
+          newBuf = (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.removeZeroValues)(floatBuf);
+        } catch (e) {
+          console.log('reverting to original buffer');
+          newBuf = buf;
+        }
+
         synth.buffer.copyToChannel(newBuf, 0, 0);
       } else {
-        console.log("can't reload buffers on this browser");
+        (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)("can't reload buffers on this browser");
       } // purge buffer
       // floatBuf = null;
 
@@ -13318,18 +13335,20 @@ const reloadBuffers = async (customBuffer = null) => {
       logging && (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('reloaded buffers');
     });
   } else {
-    let floatBuf = new Float32Array(customBuffer.length);
-    floatBuf = customBuffer.getChannelData(0);
-    const resampled = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.resampleBuffer)(customBuffer, sampleRate);
-    synths.forEach(synth => {
-      synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0); // synth.randomStarts();
-      // synth.randomInterpolate();
+    if (customBuffer && checkFileVolume(customBuffer) > 0) {
+      let floatBuf = new Float32Array(customBuffer.length);
+      floatBuf = customBuffer.getChannelData(0);
+      const resampled = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.resampleBuffer)(customBuffer, sampleRate);
+      synths.forEach(synth => {
+        synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0); // synth.randomStarts();
+        // synth.randomInterpolate();
 
-      logging && (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('loaded user buffers'); // subOsc.start();
-      // null the buffer so that doesn't try to reload the user buffer on next loop
+        logging && (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('loaded user buffers'); // subOsc.start();
+        // null the buffer so that doesn't try to reload the user buffer on next loop
 
-      customBuffer = null;
-    });
+        customBuffer = null;
+      });
+    }
   }
 }; // RADIUS LIMIT LISTENER
 
@@ -13347,28 +13366,93 @@ window.addEventListener('radius_reached', () => {
 const UISound = () => {
   let count = 0;
   let recordings = 0;
-  let recordLimit = isMobile ? 1 : 3;
   window.addEventListener('pixel_added', e => {
     const {
       pixelX,
       pixelY
-    } = e.data;
-    count++; // restrict upload to counter
+    } = e.data; // count++;
+    // // restrict upload to counter
+    // if (count > 20 && count % 5 === 0) {
+    // 	recordings++;
+    // 	if (recordings < recordLimit) {
+    // 		recordSnippet();
+    // 	} else {
+    // 		recordingLimitReached = true;
+    // 		soundLog('user recording limit reached');
+    // 	}
+    // }
 
-    if (count > 20 && count % 5 === 0) {
-      recordings++;
+    console.log();
+    !isMuted && u.play([pixelX, window.height - pixelY]);
+  });
+};
 
-      if (recordings < recordLimit) {
-        recordSnippet();
-      } else {
-        console.log('user recording limit reached');
+const startRecording = async () => {
+  return new Promise(async (resolve, reject) => {
+    if (window.MediaRecorder && recordingAllowed) {
+      safariAudioTrack && safariAudioTrack.pause();
+      recordButton.classList.toggle('red');
+
+      try {
+        (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('started user recording #' + recordings);
+        await r.recordChunks();
+        resolve(true);
+      } catch (error) {
+        (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)(error);
+        recordButton.classList.remove('red');
+        reject(false);
       }
+    } else {
+      (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('media recording is not supported in this browser');
+    }
+  });
+};
+
+const stopRecording = async () => {
+  if (r.recording && recordingAllowed) {
+    const recordedBlob = await r.stopRecording();
+    recordedBuffer = await r.loadToBuffer(recordedBlob);
+    recordedBuffer && recordButton.classList.remove('red');
+    reloadBuffers(recordedBuffer);
+    f.uploadSample(r.audioBlob);
+    safariAudioTrack && safariAudioTrack.play();
+    (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('stopped user recording #' + recordings);
+  }
+};
+
+window.addEventListener('down', async () => {
+  if (!recordingAllowed) {
+    recordingAllowed = await r.getPermissions();
+    (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)(`user has ${recordingAllowed ? '' : 'not'} allowed recording.`);
+  }
+
+  if (!isMuted && recordingAllowed) {
+    recordings++;
+    (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)(recordings > recordLimit);
+
+    if (recordings > recordLimit) {
+      window.recordingLimitReached = true;
     }
 
-    !isMuted && u.play([pixelX, pixelY]);
-  });
-}; // SETUP subOscillator
+    if (!window.recordingLimitReached) {
+      startRecording();
+    } else {
+      (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('user recording limit reached');
+    }
+  }
+});
+window.addEventListener('released', () => {
+  if (!isMuted) {
+    if (!window.recordingLimitReached) {
+      // make recording at least 100ms
+      setTimeout(() => {
+        stopRecording();
+      }, 100);
+    }
 
+    (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('mouse is released');
+  }
+}); // SETUP subOscillator
 
 const subOscillator = () => {
   subOsc.filter = new tone__WEBPACK_IMPORTED_MODULE_6__.Filter();
@@ -13391,7 +13475,13 @@ const subOscillator = () => {
 const loadSynths = async () => {
   await f.listAll();
   const mp3Supported = await isMp3Supported;
-  console.log(`mp3 is ${mp3Supported ? '' : 'not'} supported in this browser`);
+
+  if (!mp3Supported) {
+    numSources = 1;
+    numVoices = 2;
+  }
+
+  (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)(`mp3 is ${mp3Supported ? '' : 'not'}supported in this browser`);
 
   for (let i = 0; i < numSources; i++) {
     await f.getRandomSample();
@@ -13402,21 +13492,27 @@ const loadSynths = async () => {
     if (mp3Supported) {
       buf = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.fetchSample)(await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.randomChoice)(f.files.items).getDownloadURL(), soundtrackAudioCtx);
 
-      if (checkFileVolume(buf) > 0) {
+      if (buf && checkFileVolume(buf) > 0) {
         playBuf = buf;
-        console.log('clip is not silent, continuing');
+        (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('clip is not silent, continuing');
       } else {
-        console.log('clip is silent: reloading');
+        (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('clip is silent: reloading');
         buf = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.fetchSample)(await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.randomChoice)(f.files.items).getDownloadURL());
-        console.log(buf);
+        (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)(buf);
         playBuf = buf;
       }
     } else {
       buf = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.aacDecode)(f.audioFile, soundtrackAudioCtx);
+      playBuf = buf;
     }
 
     if (playBuf) {
-      resampled = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.resampleBuffer)(playBuf, sampleRate);
+      if (window.OfflineAudioContext) {
+        resampled = await (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.resampleBuffer)(playBuf, sampleRate);
+      } else {
+        resampled = playBuf;
+      }
+
       logging && (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('Loaded GrainSynth ' + (i + 1));
 
       if (!window.safari) {
@@ -13470,7 +13566,7 @@ const startAudio = async () => {
     });
     subOscillator();
     masterBus.lowpassFilter(5000, 1);
-    !isMobile && masterBus.chorus(0.01, 300, 0.9);
+    masterBus.chorus(0.01, 300, 0.9);
     !isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
     masterBus.dest.volume.value = 6; // masterBus.input.connect(window.meter);
 
@@ -13485,7 +13581,7 @@ const startAudio = async () => {
 
 
   if (soundtrackAudioCtx.state === 'closed') {
-    console.log('audio context is closed by user gesture, restarting');
+    (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('audio context is closed by user gesture, restarting');
     await soundtrackAudioCtx.rawContext.resume();
   } // main synth setup loop
 
@@ -13494,9 +13590,13 @@ const startAudio = async () => {
 
 const runLoops = () => {
   // // loop to poll paprticle system values
-  synths[0].transport.scheduleRepeat(time => {
-    pollValues();
-  }, 10);
+  try {
+    synths[0].transport.scheduleRepeat(time => {
+      pollValues();
+    }, 10);
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 const subOscLoop = () => {
@@ -13556,11 +13656,11 @@ const main = async () => {
   } else {
     document.querySelector('#menuicon').addEventListener('click', async () => {
       if (soundtrackAudioCtx.rawContext.state === 'suspended') {
-        console.log('attempting to start audio');
+        (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)('attempting to start audio');
         await soundtrackAudioCtx.rawContext.resume();
         await (0,tone__WEBPACK_IMPORTED_MODULE_6__.start)();
         window.isSoundStarted = true;
-        console.log(soundtrackAudioCtx.rawContext.state);
+        (0,_utilityFunctions__WEBPACK_IMPORTED_MODULE_7__.soundLog)(soundtrackAudioCtx.rawContext.state);
       }
     });
     isMp3Supported = await isMp3Supported;
@@ -13572,8 +13672,9 @@ const main = async () => {
 
 
 main(); // ! allow hot reloading of the files in project (webpack)
-
-if (false) {}
+// if (module.hot) {
+// 	module.hot.accept();
+// }
 
 /***/ }),
 
@@ -13706,12 +13807,12 @@ class GrainSynth {
     this.toneContext = ctx;
     this.transport = this.toneContext.transport;
     this.dest = this.toneContext.destination;
-    this.dest.name = "Grainsynth Destination";
+    this.dest.name = 'Grainsynth Destination';
     this.effectsChain = []; //  make nodes
 
     this.grainOutput = new tone__WEBPACK_IMPORTED_MODULE_0__.Gain(1);
-    this.grainOutput.name = "Grain Output";
-    this.filter = new tone__WEBPACK_IMPORTED_MODULE_0__.Filter(10000, "lowpass", -24, 4);
+    this.grainOutput.name = 'Grain Output';
+    this.filter = new tone__WEBPACK_IMPORTED_MODULE_0__.Filter(10000, 'lowpass', -24, 4);
     this.compressor = new tone__WEBPACK_IMPORTED_MODULE_0__.Compressor({
       ratio: 20,
       threshold: -24,
@@ -13748,7 +13849,7 @@ class GrainSynth {
     Object.entries(this).forEach(entry => {
       const node = entry[1];
 
-      if (typeof node === "object" && node.connect) {
+      if (typeof node === 'object' && node.connect) {
         console.log(node);
       }
     });
@@ -13765,9 +13866,9 @@ class GrainSynth {
 
   setupMaster() {
     this.output = new tone__WEBPACK_IMPORTED_MODULE_0__.Gain(1);
-    this.output.name = "Output";
-    this.output.gain.setValueAtTime(0.7 / this.numVoices, (0,tone__WEBPACK_IMPORTED_MODULE_0__.now)());
-    this.pitchShifter.windowSize = 1;
+    this.output.name = 'Output';
+    this.output.gain.setValueAtTime(0.7 / this.numVoices, (0,tone__WEBPACK_IMPORTED_MODULE_0__.now)()); // this.pitchShifter.windowSize = 1;
+
     this.filter.connect(this.compressor);
     this.compressor.connect(this.pitchShifter);
     this.pitchShifter.connect(this.output);
@@ -13920,7 +14021,7 @@ class GrainSynth {
 
   getCurrentValues() {
     const currentValues = [];
-    const grainParams = ["detune", "overlap", "grainSize", "loopStart", "loopEnd", "playbackRate"];
+    const grainParams = ['detune', 'overlap', 'grainSize', 'loopStart', 'loopEnd', 'playbackRate'];
     grainParams.forEach(grainParam => {
       currentValues.push(currentValues[grainParam] = this.getGrainValues(grainParam));
     });
@@ -14225,11 +14326,16 @@ class Recorder {
       this.audioChunks = [];
       this.mediaRecorder.addEventListener("dataavailable", event => {
         this.audioChunks.push(event.data);
+        resolve(true);
       });
-      setTimeout(() => {
-        this.mediaRecorder.stop();
-        this.recording = false; // console.log("stopped recorder");
-      }, this.length);
+    });
+  }
+
+  async stopRecording() {
+    return new Promise((resolve, reject) => {
+      this.mediaRecorder.stop();
+      this.recording = false; // console.log("stopped recorder");
+
       this.mediaRecorder.addEventListener("stop", () => {
         this.audioBlob = new Blob(this.audioChunks, {
           type: this.type
@@ -14256,11 +14362,10 @@ class Recorder {
     });
   }
 
-  async loadToBuffer() {
+  async loadToBuffer(blob) {
     if (!this.recording) {
-      const buf = await this.readBlobAsArrayBuffer(this.audioBlob);
-      this.arrayBuffer = buf; //  here is where we'd make multiple sources
-
+      const buf = await this.readBlobAsArrayBuffer(blob);
+      this.arrayBuffer = buf;
       const decodedBuffer = await this.audioCtx.decodeAudioData(this.arrayBuffer);
       return new Promise((resolve, reject) => {
         try {
@@ -14396,7 +14501,7 @@ async function aacDecode(url, ctx) {
     try {
       __webpack_require__.e(/*! import() */ "src_app_samples_fallback_aac").then(__webpack_require__.bind(__webpack_require__, /*! ./samples/fallback.aac */ "./src/app/samples/fallback.aac")).then(async file => {
         const response = await fetch(file.default, {
-          mimeType: "audio/mpeg"
+          mimeType: 'audio/mpeg'
         });
         const arrBuffer = await response.arrayBuffer(); // console.log(response.type);
         // console.log(ctx._context._nativeContext);
@@ -14476,8 +14581,8 @@ function isBetween(x, min, max) {
 }
 function resampleBuffer(input, target_rate) {
   return new Promise(async (resolve, reject) => {
-    if (typeof target_rate != "number" && target_rate <= 0) {
-      reject("Samplerate is not a number");
+    if (typeof target_rate != 'number' && target_rate <= 0) {
+      reject('Samplerate is not a number');
     } // if can set samplerate (eg.not on safari)
 
 
@@ -14490,7 +14595,7 @@ function resampleBuffer(input, target_rate) {
     }
 
     let final_length = input.length * resampling_ratio;
-    let off = new OfflineAudioContext(input.numberOfChannels, final_length, target_rate); // NORMALIZE AND FILTER BUFFERS
+    let off = new standardized_audio_context__WEBPACK_IMPORTED_MODULE_0__.OfflineAudioContext(input.numberOfChannels, final_length, target_rate); // NORMALIZE AND FILTER BUFFERS
 
     let source = off.createBufferSource();
     const bufferMax = Math.max(...input.getChannelData(0)); //  calculate difference from 1
@@ -14501,7 +14606,7 @@ function resampleBuffer(input, target_rate) {
     const diff = Math.abs(0.5 - bufferMax);
 
     if (bufferMax === 0) {
-      reject("silent audio file");
+      reject('silent audio file');
     } // VOLUME TEST
 
 
@@ -14549,7 +14654,7 @@ function getNodes(obj) {
       const node = entry[1];
       console.log(typeof node);
 
-      if (typeof node === "object") {}
+      if (typeof node === 'object') {}
     }
   });
 }
@@ -64728,7 +64833,7 @@ module.exports = v4;
 /******/ 		// This function allow to reference all chunks
 /******/ 		__webpack_require__.miniCssF = (chunkId) => {
 /******/ 			// return url for filenames based on template
-/******/ 			return "main." + {"node_modules_audio-recorder-polyfill_index_js":"716a96017a48a86b9227","fallback":"1db4f3d89a1b5af0965e","src_app_samples_fallback_aac":"a8c71d5257bdcdfcb064"}[chunkId] + ".css";
+/******/ 			return "main." + {"node_modules_audio-recorder-polyfill_index_js":"0759f3758a14e3ff3195","fallback":"d70a8c61b26219c751ef","src_app_samples_fallback_aac":"3b6e13e3dd4084c5d3e4"}[chunkId] + ".css";
 /******/ 		};
 /******/ 	})();
 /******/ 	
@@ -64752,7 +64857,7 @@ module.exports = v4;
 /******/ 	/* webpack/runtime/load script */
 /******/ 	(() => {
 /******/ 		var inProgress = {};
-/******/ 		var dataWebpackPrefix = "my-webpack-project:";
+/******/ 		var dataWebpackPrefix = "realness:";
 /******/ 		// loadScript function to load a script via script tag
 /******/ 		__webpack_require__.l = (url, done, key) => {
 /******/ 			if(inProgress[url]) { inProgress[url].push(done); return; }
@@ -64924,7 +65029,7 @@ module.exports = v4;
 /******/ 		
 /******/ 		}
 /******/ 		
-/******/ 		var chunkLoadingGlobal = self["webpackChunkmy_webpack_project"] = self["webpackChunkmy_webpack_project"] || [];
+/******/ 		var chunkLoadingGlobal = self["webpackChunkrealness"] = self["webpackChunkrealness"] || [];
 /******/ 		var parentChunkLoadingFunction = chunkLoadingGlobal.push.bind(chunkLoadingGlobal);
 /******/ 		chunkLoadingGlobal.push = webpackJsonpCallback;
 /******/ 	})();

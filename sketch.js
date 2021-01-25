@@ -190,8 +190,13 @@ function particle_draw(p) {
 
 function mousePressed() {
 	// dispatchevent to sound sketch
-	
-	window.dispatchEvent(window.down);
+	let timeout;
+	if (timeout) {
+		clearTimeout(timeout);
+	}
+	timeout = setTimeout(() => {
+		window.dispatchEvent(window.down);
+	}, 200);
 
 	//sample and upload pixel to firebase
 	shaderMousePressed();
@@ -201,10 +206,16 @@ function mousePressed() {
 
 function mouseReleased() {
 	// dispatch event to sound sketch
-	setTimeout(() => {
+	let timeout;
+	timeout && clearTimeout(timeout);
+
+	timeout = setTimeout(() => {
 		window.dispatchEvent(window.released);
 	}, window.minimumRecordLength);
-
+	if (mousecount % 60 == 0) {
+		clearTimeout(timeout);
+		window.dispatchEvent(window.released);
+	}
 	mousecount = 0;
 	mouseIsReleased = true;
 }

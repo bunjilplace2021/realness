@@ -270,11 +270,11 @@ const reloadBuffers = async (customBuffer = null) => {
 // RADIUS LIMIT LISTENER
 let radiuses = 0;
 window.addEventListener('radius_reached', () => {
-	// radiuses++;
-	// const debounced = debounce(reloadBuffers, 1000);
-	// if (radiuses % 20 === 0) {
-	//   debounced();
-	// }
+	radiuses++;
+	const debounced = debounce(reloadBuffers, 1000);
+	if (radiuses % 20 === 0) {
+		debounced();
+	}
 });
 
 // method to play UI sounds
