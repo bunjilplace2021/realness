@@ -69,7 +69,7 @@ class GrainSynth {
 		});
 		this.grainOutput.connect(this.filter);
 	}
-
+	setLength() {}
 	getNodes() {
 		Object.entries(this).forEach((entry) => {
 			const node = entry[1];
@@ -92,8 +92,15 @@ class GrainSynth {
 		this.output.gain.setValueAtTime(0.7 / this.numVoices, now());
 		// this.pitchShifter.windowSize = 1;
 		this.filter.connect(this.compressor);
-		this.compressor.connect(this.output);
-		// this.pitchShifter.connect(this.output);
+		this.compressor.connect(this.pitchShifter);
+		this.pitchShifter.connect(this.output);
+
+		if (!window.isMp3) {
+			this.compressor.disconnect(this.pitchShifter);
+			this.pitchShifter.disconnect(this.output);
+			this.compressor.connect(this.output);
+		}
+
 		this.output.connect(this.dest);
 
 		// higher windowsize sounds better!
@@ -207,7 +214,6 @@ class GrainSynth {
 	randomStarts() {
 		this.grains.forEach((grain) => {
 			grain.stop();
-
 			grain.start(now(), Math.random() * grain.buffer.duration);
 		});
 	}
@@ -274,12 +280,14 @@ class GrainSynth {
 		// generate random values
 		const randomValues = {
 			detune: this.randArrayFromRange(numGrains, -1000, 100),
-			overlap: this.randArrayFromRange(numGrains, 0.01, 1),
+			overlap: this.randArrayFromRange(numGrains, 0.01, 0.5),
 			grainSize: this.randArrayFromRange(numGrains, 0.001, 0.05),
 			playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
+
 			loopEnd: this.randArrayFromRange(numGrains, 0, this.grains[0].buffer.duration)
 		};
-		this.setClockFrequency(Math.random() * 0.1, 10);
+		console.log(randomValues);
+		this.setClockFrequency(0.01, 1);
 
 		//set values to random values
 		// TODO: Interpolate between current and random values

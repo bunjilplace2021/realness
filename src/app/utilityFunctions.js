@@ -1,7 +1,7 @@
 import {decodeAudioData, OfflineAudioContext} from 'standardized-audio-context';
 
 export async function fetchSample(url, ctx, contentType = 'audio/mpeg-3') {
-	return fetch(url, {contentType})
+	return fetch(url)
 		.then((response) => response.arrayBuffer())
 		.then((arrayBuffer) => ctx.decodeAudioData(arrayBuffer))
 		.catch((error) => console.log(error));
@@ -11,7 +11,7 @@ export async function aacDecode(url, ctx) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			import('./samples/fallback.aac').then(async (file) => {
-				const response = await fetch(file.default, {mimeType: 'audio/mpeg'});
+				const response = await fetch(file.default, {mimeType: 'audio/aac'});
 				const arrBuffer = await response.arrayBuffer();
 				// console.log(response.type);
 				// console.log(ctx._context._nativeContext);
@@ -103,7 +103,10 @@ export function resampleBuffer(input, target_rate) {
 		if (typeof target_rate != 'number' && target_rate <= 0) {
 			reject('Samplerate is not a number');
 		}
-
+		if (!input) {
+			reject('Input buffer is undefined');
+		}
+		console.log(input);
 		// if can set samplerate (eg.not on safari)
 		let resampling_ratio;
 

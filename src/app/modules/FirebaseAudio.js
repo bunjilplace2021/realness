@@ -23,7 +23,7 @@ class FireBaseAudio {
 			measurementId: 'G-QLSEEEE02P'
 		};
 		// Initialize Firebase
-		if (fileType === 'audio-mpeg-3') {
+		if (fileType === 'audio/mpeg-3') {
 			this.suffix = 'mp3';
 		} else {
 			this.suffix = 'aac';

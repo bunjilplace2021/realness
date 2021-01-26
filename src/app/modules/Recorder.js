@@ -8,7 +8,7 @@ class Recorder {
 	async getPermissions() {
 		// get permission to record
 		try {
-			const mp3 = await navigator.mediaCapabilities
+			const mp3 = navigator.mediaCapabilities
 				.decodingInfo({
 					type: 'file',
 					audio: {
@@ -19,7 +19,7 @@ class Recorder {
 					return result.supported;
 				});
 
-			if (mp3 === true) {
+			if ((await mp3) === true) {
 				this.type = 'audio/mpeg-3';
 			} else {
 				this.type = 'audio/aac';
@@ -35,7 +35,6 @@ class Recorder {
 	async recordChunks() {
 		return new Promise((resolve, reject) => {
 			this.recording = true;
-
 			this.mediaRecorder = new MediaRecorder(this.stream);
 			this.mediaRecorder.start();
 			this.audioChunks = [];
@@ -82,7 +81,7 @@ class Recorder {
 			try {
 				decodedBuffer = await this.audioCtx.decodeAudioData(this.arrayBuffer);
 			} catch (e) {
-				decodedBuffer = this.audioContext.decordeAudioData((buffer) => {
+				decodedBuffer = this.audioContext.decodeAudioData((buffer) => {
 					console.log(buffer);
 					return buffer;
 				});

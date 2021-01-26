@@ -6,9 +6,9 @@ import UISynth from './modules/UISynth';
 
 import debounce from 'lodash/debounce';
 
-// !TODO: GRAPH GAIN STAGING!!!
+// !TODO: Homegenize buffer loading process to "loadbuffers" function
 // GLOBAL VARIABLES
-import {getContext, Context, FMOscillator, Filter, Noise, setContext, start, debug, Meter} from 'tone';
+import {getContext, Context, FMOscillator, Filter, Noise, setContext, start, debug} from 'tone';
 
 debug.setLogger(console);
 // UTILITIES
@@ -18,7 +18,6 @@ import {
 	mapValue,
 	resampleBuffer,
 	soundLog,
-	removeZeroValues,
 	randomChoice,
 	checkFileVolume
 } from './utilityFunctions';
@@ -62,7 +61,7 @@ let soundtrackAudioCtx = new Context({
 	latencyHint: 'playback',
 	updateInterval: 1,
 	lookAhead: 0.5,
-	bufferSize: 2048,
+	bufferSize: 4096,
 	state: 'suspended'
 });
 
@@ -80,7 +79,6 @@ if (window.safari) {
 	if (window.webkitAudioContext) {
 		setContext(new webkitAudioContext());
 	}
-
 	window.OfflineAudioContext = window.webkitOfflineAudioContext;
 	// add polyfill for Media Recorder
 	import('audio-recorder-polyfill').then((audioRecorder) => {
@@ -214,23 +212,25 @@ const reloadBuffers = async (customBuffer = null) => {
 			if (mp3Supported) {
 				let playBuf;
 				buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+				console.log(buf);
 				if (checkFileVolume(buf) > 0) {
 					playBuf = buf;
 					soundLog('clip is not silent, continuing');
 				} else {
 					await f.getRandomSample();
-					buf = await fetchSample(f.audioFile);
+					buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
 					playBuf = buf;
 				}
 				try {
 					const resampled = await resampleBuffer(playBuf, sampleRate);
-					let floatBuf = new Float32Array(resampled.length);
+
 					//  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
-					resampled.copyFromChannel(floatBuf, 0, 0);
-					newBuf = removeZeroValues(floatBuf);
+					newBuf = removeZeroValues(resampled.getChannelData(0));
+
+					// newBuf = resampled.getChannelData(0);
 				} catch (e) {
 					console.log('reverting to original buffer');
-					newBuf = buf;
+					newBuf = buf.getChannelData(0);
 				}
 
 				synth.buffer.copyToChannel(newBuf, 0, 0);
@@ -252,7 +252,7 @@ const reloadBuffers = async (customBuffer = null) => {
 			synths.forEach((synth) => {
 				synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
 				synth.setLoopStart(0);
-				synth.setLoopEnd(resampled.duration);
+				// synth.setLoopEnd(resampled.duration);
 				// synth.randomStarts();
 				synth.randomInterpolate();
 				logging && soundLog('loaded user buffers');
@@ -365,6 +365,7 @@ const subOscillator = () => {
 	subOsc.filter.gain.value = 10;
 	noise.start('+1');
 	subOsc.start('+1');
+	// subOsc.disconnect();
 };
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
@@ -402,6 +403,7 @@ const loadSynths = async () => {
 			if (window.OfflineAudioContext) {
 				try {
 					resampled = await resampleBuffer(playBuf, sampleRate);
+					resampled = removeZeroValues(resampled);
 				} catch (e) {
 					resampled = playBuf;
 				}
@@ -412,6 +414,7 @@ const loadSynths = async () => {
 			logging && soundLog('Loaded GrainSynth ' + (i + 1));
 			if (!window.safari) {
 				synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
+				window.synths = synths;
 			}
 		}
 	}
@@ -440,7 +443,7 @@ const startAudio = async () => {
 				!isMobile && synth.grains.forEach((grain) => (grain.volume.value = 0.6));
 				synth.grainOutput.gain.value = 1 / numSources;
 				synth.filter.type = 'lowpass';
-				synth.filter.frequency.value = 440 * (i + 1);
+				synth.filter.frequency.value = 880 * (i + 1);
 				synth.setDetune((i + 1) * 220 - numSources * 440);
 				synth.setPitchShift(-12 / (i + 1));
 				// if lower frequency value, higher resonance for low-end drones
@@ -458,7 +461,7 @@ const startAudio = async () => {
 				//  if user clicks, randomize synth parameters and play a UI sound
 			}
 		});
-		subOscillator();
+		// subOscillator();
 		masterBus.lowpassFilter(5000, 1);
 		masterBus.chorus(0.01, 300, 0.9);
 		!isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
@@ -504,8 +507,8 @@ const pollValues = () => {
 		if (ps && ps.particles) {
 			let {radius, maxradius} = ps.particles[ps.particles.length - 1];
 			synths.forEach((synth, i) => {
-				synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
-				let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 220, 440);
+				// synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
+				let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 440, 880);
 				!isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
 			});
 			subOsc.filter.frequency.rampTo(mapValue(~~radius, 0, ~~maxradius, 50, 200), 10);
@@ -557,6 +560,7 @@ const main = async () => {
 		if (!isMp3Supported) {
 			f.suffix = 'aac';
 		}
+		window.isMp3 = isMp3Supported;
 		await soundtrackAudioCtx.rawContext.resume();
 		loadSynths();
 		UISound();
