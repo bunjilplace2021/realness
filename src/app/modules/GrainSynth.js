@@ -14,12 +14,14 @@ import {
 } from 'tone';
 
 import regeneratorRuntime from 'regenerator-runtime';
+import {forEach} from 'async';
 // TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
 // TODO: ADD PRESETS LOADED FROM JSON
 class GrainSynth {
 	constructor(buffer, ctx, voices = 2) {
 		// workaround to suspend audiocontext without warnings
 		getContext().rawContext.suspend();
+		getContext().isOffline = true;
 
 		this.grains = [];
 		this.presets = [];
@@ -43,7 +45,6 @@ class GrainSynth {
 			release: 1,
 			attack: 0.003
 		});
-
 		this.pitchShifter = new PitchShift({
 			pitch: -12
 			// channelCount: 1,
@@ -69,7 +70,7 @@ class GrainSynth {
 		});
 		this.grainOutput.connect(this.filter);
 	}
-	setLength() {}
+
 	getNodes() {
 		Object.entries(this).forEach((entry) => {
 			const node = entry[1];
@@ -90,19 +91,17 @@ class GrainSynth {
 		this.output = new Gain(1);
 		this.output.name = 'Output';
 		this.output.gain.setValueAtTime(0.7 / this.numVoices, now());
-		// this.pitchShifter.windowSize = 1;
+		this.pitchShifter.windowSize = 1;
 		this.filter.connect(this.compressor);
-		this.compressor.connect(this.pitchShifter);
-		this.pitchShifter.connect(this.output);
 
-		if (!window.isMp3) {
-			this.compressor.disconnect(this.pitchShifter);
-			this.pitchShifter.disconnect(this.output);
+		if (window.isMp3) {
+			this.compressor.connect(this.pitchShifter);
+			this.pitchShifter.connect(this.output);
+		} else {
 			this.compressor.connect(this.output);
 		}
 
 		this.output.connect(this.dest);
-
 		// higher windowsize sounds better!
 	}
 	isGrainLoaded(grain) {
@@ -214,6 +213,7 @@ class GrainSynth {
 	randomStarts() {
 		this.grains.forEach((grain) => {
 			grain.stop();
+
 			grain.start(now(), Math.random() * grain.buffer.duration);
 		});
 	}
@@ -280,15 +280,12 @@ class GrainSynth {
 		// generate random values
 		const randomValues = {
 			detune: this.randArrayFromRange(numGrains, -1000, 100),
-			overlap: this.randArrayFromRange(numGrains, 0.01, 0.5),
+			overlap: this.randArrayFromRange(numGrains, 0.01, 1),
 			grainSize: this.randArrayFromRange(numGrains, 0.001, 0.05),
 			playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
-
 			loopEnd: this.randArrayFromRange(numGrains, 0, this.grains[0].buffer.duration)
 		};
-		console.log(randomValues);
-		this.setClockFrequency(0.01, 1);
-
+		this.setClockFrequency(Math.random() * 1, 10);
 		//set values to random values
 		// TODO: Interpolate between current and random values
 		this.setCurrentValues(randomValues);

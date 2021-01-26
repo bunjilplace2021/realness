@@ -429,6 +429,7 @@ const loadSynths = async () => {
 // window.meter = new Meter();
 const startAudio = async () => {
 	// if the audioCtx is suspended - it must be the first time it is run
+
 	if (!isMuted) {
 		await start();
 		await soundtrackAudioCtx.resume();
@@ -461,7 +462,7 @@ const startAudio = async () => {
 				//  if user clicks, randomize synth parameters and play a UI sound
 			}
 		});
-		// subOscillator();
+		subOscillator();
 		masterBus.lowpassFilter(5000, 1);
 		masterBus.chorus(0.01, 300, 0.9);
 		!isMobile && masterBus.reverb(true, 0.3, 4, 0.7);
@@ -507,7 +508,7 @@ const pollValues = () => {
 		if (ps && ps.particles) {
 			let {radius, maxradius} = ps.particles[ps.particles.length - 1];
 			synths.forEach((synth, i) => {
-				// synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
+				synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
 				let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 440, 880);
 				!isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
 			});
@@ -559,6 +560,8 @@ const main = async () => {
 		isMp3Supported = await isMp3Supported;
 		if (!isMp3Supported) {
 			f.suffix = 'aac';
+			numSources = 2;
+			numVoices = 2;
 		}
 		window.isMp3 = isMp3Supported;
 		await soundtrackAudioCtx.rawContext.resume();
