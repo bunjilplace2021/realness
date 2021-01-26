@@ -63,14 +63,6 @@ function preload() {
   shaderPreload();
 }
 
-function detectWebcam(callback) {
-  //check if webcam device exists and/or permission granted by device label
-  let md = navigator.mediaDevices;
-  if (!md || !md.enumerateDevices) return callback(false);
-  md.enumerateDevices().then((devices) => {
-    callback(devices.some((device) => "" != device.label));
-  });
-}
 
 function checkIfWebKit() {
   var ua = navigator.userAgent.toLowerCase();
@@ -300,12 +292,6 @@ function volumemute() {
 }
 
 function cameratoggle() {
-
-  detectWebcam(function (hasWebcam) {
-    webcam = hasWebcam;
-    //console.log(webcam);
-    console.log("Webcam: " + (hasWebcam ? "yes" : "no"));
-  });
 
 if(webcam){
   pixelShaderToggle = !pixelShaderToggle;

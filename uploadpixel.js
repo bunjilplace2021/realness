@@ -132,12 +132,36 @@ function removeData() {
   //color_lerp = 0;
 }
 
+
+function hasGetUserMedia() {
+return !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
+  navigator.mozGetUserMedia || navigator.msGetUserMedia);
+}
+
 function shaderMousePressed() {
-  detectWebcam(function (hasWebcam) {
-    webcam = hasWebcam;
-    //console.log(webcam);
-    console.log("Webcam: " + (hasWebcam ? "yes" : "no"));
-  });
+
+hasGetUserMedia();
+
+if (hasGetUserMedia()) {
+  var errorCallback = function(e) {
+    webcam = false;
+    console.log('No webcam', e);
+  };
+
+  // Not showing vendor prefixes.
+  navigator.getUserMedia({
+  video: true,
+
+  }, function(localMediaStream) {
+    webcam = true;
+    console.log('Webcam connected');
+  }, errorCallback);
+} else {
+  console.log('cant get data');
+}
+
+
+
 
   colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
   let rand_gen = floor(random(0, 3));
