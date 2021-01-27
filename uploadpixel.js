@@ -11,6 +11,7 @@ let menu_loc = false;
 let coltoggle = false;
 let color_lerp = 0;
 let backgroundcol;
+let webcam_permission = false;
 
 let amt, startColor, newColor;
 
@@ -133,23 +134,45 @@ function removeData() {
 }
 
 
-function hasGetUserMedia() {
+function hasGetUserMedia() { //permission check
   let constraints =  {video: true};
 
     navigator.mediaDevices.getUserMedia(constraints)
   .then(function(stream) {
+    webcam_permission = true;
     webcam = true;
     console.log('webcam connected');
   })
   .catch(function(err) {
     webcam = false;
+    webcam_permission = false;
    console.log('No Webcam', err);
   });
 }
 
+function webcamCheck() { //check if still connected
+  navigator.mediaDevices.enumerateDevices()
+  .then(devices => {
+        const cameras = devices.filter(d => d.kind === 'videoinput');
+        if (cameras.length > 0){
+          webcam = true;
+        }else{
+          webcam = false;
+        }
+
+    })
+  .catch(function(err) {
+    console.log(err.name + ": " + err.message);
+      webcam = false;
+  });
+
+}
+
 function shaderMousePressed() {
 
-//hasGetUserMedia();
+if (webcam_permission){
+  webcamCheck();
+}
 
   colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
   let rand_gen = floor(random(0, 3));
