@@ -47,7 +47,6 @@ let safariAudioTrack;
 let isMuted = true;
 let muteClicked = 0;
 let sampleRate = 44100;
-
 let recordingAllowed = false;
 let recordLimit = isMobile ? 1 : 3;
 let recordings = 0;
