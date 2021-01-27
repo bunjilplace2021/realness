@@ -26,7 +26,7 @@ function shaderPreload() {
 function shaderSetup() {
   // initialize the webcam at the window size
 
-  cam = createCapture(VIDEO);
+  cam = createCapture(VIDEO,hasGetUserMedia());
 
   cam.elt.setAttribute("playsinline", "");
 
@@ -134,34 +134,22 @@ function removeData() {
 
 
 function hasGetUserMedia() {
-return !!(navigator.getUserMedia || navigator.webkitGetUserMedia ||
-  navigator.mozGetUserMedia || navigator.msGetUserMedia);
+  let constraints =  {video: true};
+
+    navigator.mediaDevices.getUserMedia(constraints)
+  .then(function(stream) {
+    webcam = true;
+    console.log('webcam connected');
+  })
+  .catch(function(err) {
+    webcam = false;
+   console.log('No Webcam', err);
+  });
 }
 
 function shaderMousePressed() {
 
 hasGetUserMedia();
-
-if (hasGetUserMedia()) {
-  var errorCallback = function(e) {
-    webcam = false;
-    console.log('No webcam', e);
-  };
-
-  // Not showing vendor prefixes.
-  navigator.getUserMedia({
-  video: true,
-
-  }, function(localMediaStream) {
-    webcam = true;
-    console.log('Webcam connected');
-  }, errorCallback);
-} else {
-  console.log('cant get data');
-}
-
-
-
 
   colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
   let rand_gen = floor(random(0, 3));
