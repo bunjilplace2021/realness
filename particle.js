@@ -99,10 +99,10 @@ class Particle {
 
     if (this.UUID == uuid && mousecount >= 50 && this.firstrun && this.active && this.recordcount == 0) {
 
-      for (var i = 0; i < 5; i++) {
+      for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
         if (this.diam > 0) {
-          this.fade = map(this.diam, 0, 400, 255, 0);
+          this.fade = map(this.diam, 0, 200, 255, 0);
           p.fill(this.fade);
           p.noStroke();
           p.ellipse(this.map_position.x,this.map_position.y, this.diam);
