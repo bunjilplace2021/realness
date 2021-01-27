@@ -12,7 +12,7 @@ class UISynth {
 			envelope: {
 				attack: 0,
 				decay: 0.1,
-				sustain: 1.0,
+
 				release: 0.5
 			},
 			harmonicity: 2,
@@ -26,8 +26,10 @@ class UISynth {
 		this.uiSynth.set({harmonicity: Math.random() * 12});
 		this.uiSynth.set({modulationIndex: Math.random() * 24});
 		try {
-			this.uiSynth.triggerAttackRelease(note, 0.1, '+0.01');
-		} catch (error) {}
+			this.uiSynth.triggerAttackRelease(note, 0.1);
+		} catch (error) {
+			this.uiSynth.stop();
+		}
 		// console.log(this.uiSynth);
 	}
 }

@@ -50,7 +50,9 @@ let sampleRate = 44100;
 let recordingAllowed = false;
 let recordLimit = isMobile ? 1 : 3;
 let recordings = 0;
+
 window.recordingLimitReached = false;
+window.recording = false;
 let recordedBuffer = null;
 // Turn on logging
 let logging = true;
@@ -292,9 +294,9 @@ const startRecording = async () => {
 			recordButton.classList.toggle('red');
 			try {
 				soundLog('started user recording #' + recordings);
-
+				// User is recording, send recording indicator to window object
+				window.recording = true;
 				await r.recordChunks();
-
 				resolve(true);
 			} catch (error) {
 				soundLog(error);
@@ -315,6 +317,7 @@ const stopRecording = async () => {
 		f.uploadSample(r.audioBlob);
 		safariAudioTrack && safariAudioTrack.play();
 		soundLog('stopped user recording #' + recordings);
+		window.recording = false;
 	}
 };
 
