@@ -149,7 +149,7 @@ function hasGetUserMedia() {
 
 function shaderMousePressed() {
 
-hasGetUserMedia();
+//hasGetUserMedia();
 
   colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
   let rand_gen = floor(random(0, 3));
