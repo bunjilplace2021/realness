@@ -97,7 +97,7 @@ class Particle {
 
   holdevent(p) {
 
-    if (this.UUID == uuid && mousecount >= 50 && this.firstrun && this.active && this.recordcount == 0 && !window.recordLimitReached) {
+    if (this.UUID == uuid && window.recording && this.firstrun && this.active && this.recordcount == 0 && window.recordLimitReached == false) {
 
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
