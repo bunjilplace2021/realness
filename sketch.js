@@ -142,6 +142,7 @@ function draw() {
   if (!instload_toggle) {
     particle_draw(particlepg);
   }
+  console.log(window.recording, window.recordingLimitReached);
 
 
 }
@@ -202,7 +203,6 @@ function mousePressed() {
   shaderMousePressed();
   mouseIsReleased = false;
   initload = false;
-  console.log(window.recording,window.recordLimitReached);
 }
 
 function mouseReleased() {
