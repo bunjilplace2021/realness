@@ -125,7 +125,9 @@ function removeData() {
 
 function hasGetUserMedia() {
 	//permission check
-	let constraints = {video: true};
+	let constraints = {video: true,
+    audio: true
+  };
 
 	navigator.mediaDevices
 		.getUserMedia(constraints)
