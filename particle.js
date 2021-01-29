@@ -107,15 +107,18 @@ class Particle {
           p.noStroke();
           p.ellipse(this.map_position.x,this.map_position.y, this.diam);
         }
+        if(i=2 && this.fade<=0){
+            this.recordcount = this.recordcount + 1;
+        }
       }
 
       this.outerDiam = this.outerDiam + 3;
     }
 
 
-  if (mouseIsReleased) {
-    this.recordcount = this.recordcount + 1;
-  }
+  //if (mouseIsReleased) {
+
+  //}
 
 
 }
