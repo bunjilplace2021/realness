@@ -101,7 +101,7 @@ if (window.recording){
   this.recordcount = this.recordcount + 1;
 }
 
-    if (this.UUID == uuid && window.recording && this.firstrun && this.active && this.recordcount == 1 && window.recordingLimitReached== false) {
+    if (this.UUID == uuid && this.firstrun && this.active && this.recordcount == 1 && window.recordingLimitReached== false) {
 
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
