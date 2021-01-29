@@ -333,12 +333,20 @@ const startRecording = async () => {
 const stopRecording = async () => {
   if (r.recording && recordingAllowed) {
     const recordedBlob = await r.stopRecording();
-    recordedBuffer = await r.loadToBuffer(recordedBlob);
+    try {
+      recordedBuffer = await r.loadToBuffer(recordedBlob);
+    } catch (error) {
+      console.log(error);
+    }
+
     recordedBuffer && recordButton.classList.remove("red");
     reloadBuffers(recordedBuffer);
     f.uploadSample(r.audioBlob);
     safariAudioTrack && safariAudioTrack.play();
     soundLog("stopped user recording #" + recordings);
+    window.recording = false;
+    safariAudioTrack ? (safariAudioTrack.muted = false) : null;
+  } else {
     window.recording = false;
   }
 };
@@ -350,7 +358,6 @@ window.addEventListener("down", async () => {
   }
   if (!isMuted && recordingAllowed) {
     recordings++;
-
     soundLog(recordings > recordLimit);
     if (recordings > recordLimit) {
       window.recordingLimitReached = true;
