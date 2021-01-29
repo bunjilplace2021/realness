@@ -35,7 +35,7 @@ class Particle {
     this.recordcount = 0.0;
     this.initload = initload;
     this.outerDiam = 0;
-    this.start = 0;
+
   }
 
   colour() {
@@ -97,13 +97,11 @@ class Particle {
 
   holdevent(p) {
 
-
 if (window.recording){
-  this.start = this.start + 1;
+  this.recordcount = this.recordcount + 1;
 }
 
-
-    if (this.UUID == uuid && this.start == 1 && this.firstrun && this.active && this.recordcount == 0 && window.recordingLimitReached== false) {
+    if (this.UUID == uuid && window.recording && this.firstrun && this.active && this.recordcount == 1 && window.recordingLimitReached== false) {
 
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
@@ -120,13 +118,7 @@ if (window.recording){
       if (this.outerDiam >=500 ) {
         this.recordcount = this.recordcount + 1;
       }
-
     }
-
-
-
-
-
 }
 
 run(p) {
