@@ -183,17 +183,20 @@ function particle_draw(p) {
   }
 
 
- if (mouseIsPressed){
+ if (mouseIsPressed && !instload_toggle){
    mousecount = mousecount+1;
  }
 
 }
 
 function mousePressed() {
+
+  if(!instload_toggle){
   //sample and upload pixel to firebase
   shaderMousePressed();
   mouseIsReleased = false;
   initload = false;
+}
 }
 
 function mouseReleased() {
@@ -321,11 +324,14 @@ function volumemute() {
 
 function cameratoggle() {
 
+if (!instload_toggle){
+
 if(webcam){
   pixelShaderToggle = !pixelShaderToggle;
 }else{
   document.getElementById("camera_inst").style.display = "block";
 setTimeout(function time() {document.getElementById("camera_inst").style.display = "none"}, 2000);
+}
 }
   //icons.classList.toggle("select");
 }
