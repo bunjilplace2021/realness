@@ -157,7 +157,7 @@ let numSources = isMobile ? 1 : 3;
 // number of voices per synth
 let numVoices = isMobile ? 2 : 3;
 const muteButton = document.querySelector("#mute");
-const recordButton = document.querySelector("#recordButton");
+// const recordButton = document.querySelector("#recordButton");
 
 /* EVENT LISTENERS */
 
@@ -313,7 +313,7 @@ const startRecording = async () => {
   return new Promise(async (resolve, reject) => {
     if (window.MediaRecorder && recordingAllowed) {
       safariAudioTrack && safariAudioTrack.pause();
-      recordButton.classList.toggle("red");
+      // recordButton.classList.toggle("red");
       try {
         soundLog("started user recording #" + recordings);
         // User is recording, send recording indicator to window object
@@ -322,7 +322,7 @@ const startRecording = async () => {
         resolve(true);
       } catch (error) {
         soundLog(error);
-        recordButton.classList.remove("red");
+        // recordButton.classList.remove("red");
         reject(false);
       }
     } else {
@@ -341,7 +341,7 @@ const stopRecording = async () => {
       console.log(error);
     }
 
-    recordedBuffer && recordButton.classList.remove("red");
+    // recordedBuffer && recordButton.classList.remove("red");
     reloadBuffers(recordedBuffer);
     f.uploadSample(r.audioBlob);
     safariAudioTrack && safariAudioTrack.play();
