@@ -110,13 +110,15 @@ class Particle {
       }
 
       this.outerDiam = this.outerDiam + 3;
-      console.log(this.outerDiam);
+
+      if (this.outerDiam >=500 ) {
+        this.recordcount = this.recordcount + 1;
+      }
+
     }
 
 
-  if (mouseIsReleased) {
-    this.recordcount = this.recordcount + 1;
-  }
+
 
 
 }
