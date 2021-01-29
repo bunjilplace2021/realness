@@ -107,18 +107,16 @@ class Particle {
           p.noStroke();
           p.ellipse(this.map_position.x,this.map_position.y, this.diam);
         }
-        if(i=2 && this.fade<=0){
-            this.recordcount = this.recordcount + 1;
-        }
       }
 
       this.outerDiam = this.outerDiam + 3;
+      console.log(this.outerDiam);
     }
 
 
-  //if (mouseIsReleased) {
-
-  //}
+  if (mouseIsReleased) {
+    this.recordcount = this.recordcount + 1;
+  }
 
 
 }
