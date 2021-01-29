@@ -326,6 +326,8 @@ const startRecording = async () => {
         reject(false);
       }
     } else {
+      window.recording = false;
+      safariAudioTrack.play();
       soundLog("media recording is not supported in this browser");
     }
   });
