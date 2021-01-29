@@ -4,6 +4,7 @@ var isAndroid = false;
 var pixelShaderToggle = false;
 var instruction_toggle = false;
 var didactic_toggle = false;
+var instload_toggle = true;
 
 let hideicon = false;
 
@@ -134,10 +135,13 @@ function setup() {
   shaderSetup();
 
   ps = new ParticleSystem(createVector(width / 2, height / 2), img);
+  init_instructions();
 }
 
 function draw() {
-  particle_draw(particlepg);
+  if (!instload_toggle) {
+    particle_draw(particlepg);
+  }
 }
 
 function shaderToggle() {
@@ -248,7 +252,6 @@ function infoInstructions() {
   menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
 
-  // if (pixelShaderToggle) {
   document.getElementById("top").style.backgroundColor =
     "rgba(127, 127, 127, 0.2)";
   document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
@@ -268,6 +271,10 @@ function infoInstructions() {
     myLinks.style.background = "none";
     myInfo.style.overflowY = "hidden";
     didactic_toggle = false;
+    instload_toggle = false;
+    instructions.style.display = "none";
+    document.getElementById("top").style.height = "auto";
+    instructions.style.overflowY = "hidden";
     document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.0)";
     document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
     document.getElementById("top").style.backdropFilter = "blur(0px)";
@@ -279,24 +286,38 @@ function infoInstructions() {
 
 function didactic() {
   didactic_toggle = !didactic_toggle;
+  instload_toggle = false;
+
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  //myInfo.style.background = "rgba(127, 127, 127, 0.2)";
+
+  instructions.style.display = "none";
+  document.getElementById("top").style.height = "auto";
+  instructions.style.overflowY = "hidden";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
     document.getElementById("top").style.height = "100%";
-    //  myInfo.style.background = "rgba(127, 127, 127, 0.2)";
-    //  document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
-    //  document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
-    //  myInfo.style.overflowY = "scroll";
   } else {
     myInfo.style.display = "none";
     document.getElementById("top").style.height = "auto";
-    //  myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
-    //  document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
-    //  document.getElementById("myInfo").style.backdropFilter = "blur(none)";
+  }
+}
+
+function init_instructions() {
+  infoInstructions();
+
+  instructions.style.display = "block";
+  instructions.style.overflowY = "scroll";
+
+  if (instload_toggle) {
+    instructions.style.display = "block";
+    document.getElementById("top").style.height = "100%";
+  } else {
+    instructions.style.display = "none";
+    document.getElementById("top").style.height = "auto";
+    instructions.style.overflowY = "hidden";
   }
 }
 
@@ -305,13 +326,15 @@ function volumemute() {
 }
 
 function cameratoggle() {
-  if (webcam) {
-    pixelShaderToggle = !pixelShaderToggle;
-  } else {
-    document.getElementById("camera_inst").style.display = "block";
-    setTimeout(function time() {
-      document.getElementById("camera_inst").style.display = "none";
-    }, 2000);
+  if (!instload_toggle) {
+    if (webcam) {
+      pixelShaderToggle = !pixelShaderToggle;
+    } else {
+      document.getElementById("camera_inst").style.display = "block";
+      setTimeout(function time() {
+        document.getElementById("camera_inst").style.display = "none";
+      }, 2000);
+    }
   }
   //icons.classList.toggle("select");
 }

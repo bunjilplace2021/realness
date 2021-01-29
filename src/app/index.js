@@ -106,7 +106,7 @@ if (window.safari) {
   soundLog("loaded MediaRecorder polyfill for safari");
 }
 
-document.querySelector("#menuicon").addEventListener("click", async () => {
+const initSound = async () => {
   if (soundtrackAudioCtx.rawContext.state === "suspended") {
     soundLog("attempting to start audio");
     await soundtrackAudioCtx.rawContext.resume();
@@ -114,7 +114,8 @@ document.querySelector("#menuicon").addEventListener("click", async () => {
     window.isSoundStarted = true;
     soundLog("Audio context is: " + soundtrackAudioCtx.rawContext.state);
   }
-});
+};
+
 const loadFallback = async () => {
   if (typeof fallBack == "undefined") {
     import(/* webpackChunkName:"fallback" */ "./samples/fallback.mp3").then(
@@ -157,10 +158,15 @@ let numSources = isMobile ? 1 : 3;
 // number of voices per synth
 let numVoices = isMobile ? 2 : 3;
 const muteButton = document.querySelector("#mute");
+const playButton = document.querySelector("#play");
 // const recordButton = document.querySelector("#recordButton");
 
 /* EVENT LISTENERS */
-
+playButton.addEventListener("click", () => {
+  initSound();
+  playButton.style.display = "none";
+  muteButton.style.display = "inline-block";
+});
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = async () => {
   //  if safari - load synths on unmute
@@ -402,63 +408,66 @@ const subOscillator = () => {
 };
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
-  await f.listAll();
-  const mp3Supported = await isMp3Supported;
+  return new Promise(async (resolve, reject) => {
+    await f.listAll();
+    const mp3Supported = await isMp3Supported;
 
-  if (!mp3Supported) {
-    numSources = 1;
-    numVoices = 1;
-  }
-  soundLog(`mp3 is ${mp3Supported ? "" : "not "}supported in this browser`);
-  for (let i = 0; i < numSources; i++) {
-    await f.getRandomSample();
-    let buf;
-    let playBuf;
-    let resampled;
-    if (mp3Supported) {
-      buf = await fetchSample(
-        await randomChoice(f.files.items).getDownloadURL(),
-        soundtrackAudioCtx
-      );
-
-      if (buf && checkFileVolume(buf) > 0) {
-        playBuf = buf;
-        soundLog("clip is not silent, continuing");
-      } else {
-        soundLog("clip is silent: reloading");
-
+    if (!mp3Supported) {
+      numSources = 1;
+      numVoices = 1;
+    }
+    soundLog(`mp3 is ${mp3Supported ? "" : "not "}supported in this browser`);
+    for (let i = 0; i < numSources; i++) {
+      await f.getRandomSample();
+      let buf;
+      let playBuf;
+      let resampled;
+      if (mp3Supported) {
         buf = await fetchSample(
           await randomChoice(f.files.items).getDownloadURL(),
           soundtrackAudioCtx
         );
-        soundLog(buf);
-        playBuf = buf;
-      }
-    } else {
-      buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
-      playBuf = buf;
-    }
-    if (playBuf) {
-      if (window.OfflineAudioContext) {
-        try {
-          resampled = await resampleBuffer(playBuf, sampleRate);
-          resampled = removeZeroValues(resampled);
-        } catch (e) {
-          resampled = playBuf;
+
+        if (buf && checkFileVolume(buf) > 0) {
+          playBuf = buf;
+          soundLog("clip is not silent, continuing");
+        } else {
+          soundLog("clip is silent: reloading");
+
+          buf = await fetchSample(
+            await randomChoice(f.files.items).getDownloadURL(),
+            soundtrackAudioCtx
+          );
+          soundLog(buf);
+          playBuf = buf;
         }
       } else {
-        resampled = playBuf;
+        buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
+        playBuf = buf;
       }
-      synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
-      window.synths = synths;
-      logging && soundLog("Loaded GrainSynth " + (i + 1));
+      if (playBuf) {
+        if (window.OfflineAudioContext) {
+          try {
+            resampled = await resampleBuffer(playBuf, sampleRate);
+            resampled = removeZeroValues(resampled);
+          } catch (e) {
+            resampled = playBuf;
+          }
+        } else {
+          resampled = playBuf;
+        }
+        synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
+        window.synths = synths;
+        logging && soundLog("Loaded GrainSynth " + (i + 1));
+      }
     }
-  }
-  synthsLoaded = true;
-  muteButton.classList = [];
-  muteButton.classList.add("fa", "fa-volume-off");
-  muteButton.disabled = false;
-  logging && soundLog("Voices loaded");
+    synthsLoaded = true;
+    muteButton.classList = [];
+    muteButton.classList.add("fa", "fa-volume-off");
+    muteButton.disabled = false;
+    logging && soundLog("Voices loaded");
+    resolve(true);
+  });
 };
 
 // method to start audio
@@ -597,7 +606,7 @@ const main = async () => {
     try {
       window.isMp3 = isMp3Supported;
       await soundtrackAudioCtx.rawContext.resume();
-      loadSynths();
+      await loadSynths();
       UISound();
     } catch (error) {
       loadFallback();

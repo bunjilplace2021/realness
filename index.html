@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>realness</title>
+  <title>Realness</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.12.0/firebase-database.js"></script>
@@ -108,15 +108,19 @@
       <a href="javascript:void(0);" onclick="fullScreenMenu()">
         <i class="fa fa-expand" id="fullicons"></i>
       </a>
+      <a href="javascript:void(0);">
+        <i class="fa fa-play" id="play"></i>
+        <i class="fa fa-circle-o-notch fa-spin fa-fw disabled" style="display:none;" id="mute"></i>
+      </a>
+
+
       <a href="javascript:void(0);" onclick="cameratoggle()">
         <i class="fa fa-camera" id="icons"></i>
       </a>
-      <a href="javascript:void(0);">
-        <i class="fa fa-circle-o-notch fa-spin fa-fw disabled" id="mute"></i>
-      </a>
-      <a>
+
+      <!-- <a>
         <i class="fa fa-microphone" id="recordButton" id="icons"></i>
-      </a>
+      </a> -->
 
       <a href="javascript:void(0);" onclick="didactic()">
         <i class="fa fa-info-circle" id="icons"></i>
@@ -126,28 +130,70 @@
   </div>
 
   <div class="iPhone_rotate">
-  <div id="iPhone">
-    <p>Rotate iphone for full screen</p>
+    <div id="iPhone">
+      <p>Rotate iphone for full screen</p>
+    </div>
   </div>
-</div>
 
-<div class="cam">
-<div id="camera_inst">
-  <p>Webcam must be connected and permission granted to add pixels</p>
-</div>
-</div>
+  <div class="cam">
+    <div id="camera_inst">
+      <p>Webcam must be connected and permission granted to add pixels</p>
+    </div>
+  </div>
 
   <!-- <div class="animated fadeOut" div id="Intro">
     <p>[ INTRO - INSTRUCTION DIDACTIC ]</p>
   </div> -->
 
+  <div class="content">
+    <div id="instructions">
+
+      <p><i>Realness</i> is an interactive artwork that samples pixels and recorded
+        audio from the webcam and requires access to function.
+      <p>
+
+      <p>Click allow when prompted by web browser.</p>
+      <br>
+      <div>Click/tap to sample and upload webcam pixel</div>
+      <div>Click/tap and hold to record and upload microphone sample</div>
+      <br>
+      <div> <a href="javascript:void(0);" onclick="fullScreenMenu()">
+          <i class="fa fa-expand" id="fullicons"></i>
+        </a>Full screen mode</div>
+      <div><a href="javascript:void(0);">
+          <i class="fa fa-volume-off" id="icons"></i>
+        </a>Unmute soundtrack</div>
+      <a href="javascript:void(0);" onclick="cameratoggle()">
+        <i class="fa fa-camera" id="icons"></i>
+      </a>
+      <div>View webcam and pixel selections.</div>
+      <div><a href="javascript:void(0);" onclick="didactic()">
+          <i class="fa fa-info-circle" id="icons"></i>
+        </a>Artwork info</div>
+
+
+    </div>
+  </div>
+
 
   <div class="content">
     <div id="myInfo">
-      <a href="https://www.wesleydowling.com" target="_blank">Wesley Dowling</a> <a
-        href="https://www.instagram.com/wesleydowling/" target="_blank" class="fa fa-instagram"></a>
-      <p>Bunjil Place and City of Casey presents a new work by new media artist Wesley Dowling with sound design by Liam
-        Power on the Bunjil Place outdoor screen for the 2021 Midsumma Festival.</p>
+
+      <div><i>Realness,</i> 2021</div>
+
+      <div>Visuals: <a href="https://www.wesleydowling.com" target="_blank">Wesley Dowling</a><a
+          href="https://www.instagram.com/wesleydowling/" target="_blank" class="fa fa-instagram"></a></div>
+      <div>Sound Design: <a href="https://www.liamfpower.com" target="_blank">Liam Power</a>
+        <a href="https://www.instagram.com/verylowfrequencies/" target="_blank" class="fa fa-instagram"></a>
+        <a href="https://vimeo.com/liamfpower" target="_blank" class="fa fa-vimeo"></a><a
+          href="https://soundcloud.com/verylowfrequency" target="_blank" class="fa fa-soundcloud"></a>
+        <a href="https://verylowfrequency.bandcamp.com/" target="_blank" class="fa fa-bandcamp"></a>
+      </div>
+      <br>
+      <p><a href="https://www.bunjilplace.vic.gov.au" target="_blank">Bunjil Place and City of Casey</a> presents
+        <i>Realness</i> on the Bunjil Place
+        outdoor screen for the <a href="https://www.midsumma.org.au" target="_blank">2021 Midsumma Festival</a>.
+      </p>
       <p><i>Realness</i> is an interactive, participatory web browser-based artwork that samples pixels and recorded
         audio from the webcams of user's devices. The artwork is an accumulated browser history of captured data and
         user interactions. The
@@ -172,9 +218,9 @@
       </p>
       <p>Proudly supported by</p>
       <div>
-        <a href="https://www.bunjilplace.vic.gov.au">
+        <a href="https://www.bunjilplace.vic.gov.au" style="text-decoration: none">
           <img src="logos/bunjil.png" alt="Bunjil Place" class="logos">
-          <a href="https://www.midsumma.org.au">
+          <a href="https://www.midsumma.org.au" style="text-decoration: none">
             <img src="logos/midsumma.png" alt="Midsumma Festival" class="logos">
       </div>
       <p><a href="Privacy_Notice.pdf" download>Privacy</a></p>
