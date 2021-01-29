@@ -4,7 +4,6 @@ var isAndroid = false;
 var pixelShaderToggle = false;
 var instruction_toggle = false;
 var didactic_toggle = false;
-var instload_toggle = true;
 
 let hideicon = false;
 
@@ -135,10 +134,10 @@ function setup() {
   shaderSetup();
 
   ps = new ParticleSystem(createVector(width / 2, height / 2), img);
-  init_instructions();
 }
 
 function draw() {
+
   if (!instload_toggle) {
     particle_draw(particlepg);
   }
@@ -185,8 +184,10 @@ function particle_draw(p) {
     image(pippg, 0, 0);
   }
 
-  if (mouseIsPressed) {
+
+  if (mouseIsPressed && !instload_toggle) {
     mousecount = mousecount + 1;
+    
     if (mousecount === 30 && mousePressed) {
       window.dispatchEvent(window.down);
     }
@@ -194,12 +195,13 @@ function particle_draw(p) {
 }
 
 function mousePressed() {
-  // dispatchevent to sound sketch
 
+  if(!instload_toggle){
   //sample and upload pixel to firebase
   shaderMousePressed();
   mouseIsReleased = false;
   initload = false;
+}
 }
 
 function mouseReleased() {
@@ -252,6 +254,7 @@ function infoInstructions() {
   menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
 
+  // if (pixelShaderToggle) {
   document.getElementById("top").style.backgroundColor =
     "rgba(127, 127, 127, 0.2)";
   document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
@@ -271,10 +274,6 @@ function infoInstructions() {
     myLinks.style.background = "none";
     myInfo.style.overflowY = "hidden";
     didactic_toggle = false;
-    instload_toggle = false;
-    instructions.style.display = "none";
-    document.getElementById("top").style.height = "auto";
-    instructions.style.overflowY = "hidden";
     document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.0)";
     document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
     document.getElementById("top").style.backdropFilter = "blur(0px)";
@@ -286,14 +285,9 @@ function infoInstructions() {
 
 function didactic() {
   didactic_toggle = !didactic_toggle;
-  instload_toggle = false;
-
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-
-  instructions.style.display = "none";
-  document.getElementById("top").style.height = "auto";
-  instructions.style.overflowY = "hidden";
+  //myInfo.style.background = "rgba(127, 127, 127, 0.2)";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
@@ -301,6 +295,7 @@ function didactic() {
   } else {
     myInfo.style.display = "none";
     document.getElementById("top").style.height = "auto";
+    //  myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
   }
 }
@@ -321,11 +316,13 @@ function init_instructions() {
   }
 }
 
+
 function volumemute() {
   volicons.classList.toggle("fa-volume-mute");
 }
 
 function cameratoggle() {
+
   if (!instload_toggle) {
     if (webcam) {
       pixelShaderToggle = !pixelShaderToggle;
