@@ -32,6 +32,7 @@ class Particle {
     this.firstrun = true;
     this.strokeweight = 0;
     this.intersect = 0.0;
+    this.recording = false;
     this.recordcount = 0.0;
     this.initload = initload;
     this.outerDiam = 0;
@@ -97,11 +98,12 @@ class Particle {
 
   holdevent(p) {
 
+
 if (window.recording){
-  this.recordcount = this.recordcount + 1;
+  this.recording = true;
 }
 
-    if (this.UUID == uuid && this.firstrun && this.active && this.recordcount == 1 && window.recordingLimitReached== false) {
+    if (this.UUID == uuid && this.recording && this.firstrun && this.active && this.recordcount == 0 && window.recordingLimitReached== false) {
 
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
@@ -118,7 +120,13 @@ if (window.recording){
       if (this.outerDiam >=500 ) {
         this.recordcount = this.recordcount + 1;
       }
+
     }
+
+
+
+
+
 }
 
 run(p) {
