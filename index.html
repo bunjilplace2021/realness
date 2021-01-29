@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>realness</title>
+  <title>Realness</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.12.0/firebase-database.js"></script>
@@ -104,6 +104,7 @@
       <i class="fa fa-bars" id="menuicon"></i>
     </a>
     <div id="myLinks">
+
       <a href="javascript:void(0);" onclick="fullScreenMenu()">
         <i class="fa fa-expand" id="fullicons"></i>
       </a>
@@ -111,9 +112,16 @@
         <i class="fa fa-play" id="play"></i>
         <i class="fa fa-circle-o-notch fa-spin fa-fw disabled" style="display:none;" id="mute"></i>
       </a>
+
+
       <a href="javascript:void(0);" onclick="cameratoggle()">
         <i class="fa fa-camera" id="icons"></i>
       </a>
+
+      <!-- <a>
+        <i class="fa fa-microphone" id="recordButton" id="icons"></i>
+      </a> -->
+
       <a href="javascript:void(0);" onclick="didactic()">
         <i class="fa fa-info-circle" id="icons"></i>
       </a>
@@ -122,16 +130,16 @@
   </div>
 
   <div class="iPhone_rotate">
-  <div id="iPhone">
-    <p>Rotate iphone for full screen</p>
+    <div id="iPhone">
+      <p>Rotate iphone for full screen</p>
+    </div>
   </div>
-</div>
 
-<div class="cam">
-<div id="camera_inst">
-  <p>Webcam must be connected and permission granted to add pixels</p>
-</div>
-</div>
+  <div class="cam">
+    <div id="camera_inst">
+      <p>Webcam must be connected and permission granted to add pixels</p>
+    </div>
+  </div>
 
   <!-- <div class="animated fadeOut" div id="Intro">
     <p>[ INTRO - INSTRUCTION DIDACTIC ]</p>
@@ -214,9 +222,9 @@
       </p>
       <p>Proudly supported by</p>
       <div>
-        <a href="https://www.bunjilplace.vic.gov.au">
+        <a href="https://www.bunjilplace.vic.gov.au" style="text-decoration: none">
           <img src="logos/bunjil.png" alt="Bunjil Place" class="logos">
-          <a href="https://www.midsumma.org.au">
+          <a href="https://www.midsumma.org.au" style="text-decoration: none">
             <img src="logos/midsumma.png" alt="Midsumma Festival" class="logos">
       </div>
       <p><a href="Privacy_Notice.pdf" download>Privacy</a></p>

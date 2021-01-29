@@ -57,7 +57,7 @@ video {
 
 .topnav a {
   float: left;
-  width: calc(100% / 6);
+  width: calc(100% / 5);
   color: white;
   text-align: center;
   text-decoration: none;
@@ -132,6 +132,9 @@ video {
   float: right;
   text-align: center;
   text-decoration: none;
+  background: transparent;
+  color: white;
+  padding-left: .5em;
 }
 
 /* Add a hover effect if you want */
@@ -139,12 +142,6 @@ video {
   opacity: 0.8;
 }
 
-/* Set a specific color for each brand */
-/* Instagram */
-.content .fa-instagram {
-  background: transparent;
-  color: white;
-}
 
 .content #myInfo {
   display: none;
@@ -152,6 +149,26 @@ video {
   overflow-y: auto;
   padding: 1rem;
   color: white;
+}
+
+.content #instructions {
+  display: none;
+  background: none;
+  overflow-y: auto;
+  padding: 1rem;
+  color: white;
+  font-size: 1rem;
+
+}
+
+.content a:link {
+  color: white;
+  background-color: transparent;
+}
+
+.content a:visited {
+  color: white;
+  background-color: transparent;
 }
 
 .content .logos {
@@ -210,7 +227,7 @@ video {
 }
 
 .content .fa-instagram {
-  font-size: calc(1.5em + 0.5vw);
+  font-size: 1em;
 }
 
 /* @media only screen and (min-width: 500) and (max-width: 800px)  {
