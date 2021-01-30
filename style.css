@@ -95,11 +95,64 @@ video {
   color: white;
 }
 
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  font-size: calc(0.5em + 0.5vw);
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+  top: 100%;
+  left: 50%;
+  margin-left: -60px;
+}
+
+
+
+@media (hover: none) {
+
+.topnav{
+  bottom:85%;
+}
+
+  .tooltip .tooltiptext {
+    top: 70%;
+    visibility: visible;
+    margin-left: -10px;
+    width: calc(100% / 6);
+}
+}
+
+@media (hover: none ) and (orientation: landscape) {
+  .tooltip .tooltiptext {
+    top: 10%;
+    left: 90%;
+    font-size: calc(0.2em + 0.5vw);
+}
+}
+
+
+
 @media (hover: hover) and (pointer: fine) {
   .topnav a:hover {
     background-color: white;
     color: black;
     opacity: 0.3;
+  }
+
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+
   }
 }
 
@@ -114,6 +167,8 @@ video {
   width: 80%;
   height: 70vh;
 }
+
+
 
 /* if backdrop support: very transparent and blurred */
 @supports ((-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))) {

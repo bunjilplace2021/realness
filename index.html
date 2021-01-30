@@ -100,22 +100,27 @@
   <!-- Top Navigation Menu -->
   <div class="topnav" id="top">
     <a href="javascript:void(0);" class="menu_text" id="menu_txt" onclick="">Realness</a>
-    <a href="javascript:void(0);" class="icon" onclick="infoInstructions()">
+    <a href="javascript:void(0);" class="icon" onclick="infoInstructions()" div class="tooltip">
       <i class="fa fa-bars" id="menuicon"></i>
     </a>
     <div id="myLinks">
-      <a href="javascript:void(0);" onclick="fullScreenMenu()">
+      <a href="javascript:void(0);" onclick="fullScreenMenu()" div class="tooltip">
         <i class="fa fa-expand" id="fullicons"></i>
+        <span class="tooltiptext">full screen mode</span>
       </a>
-      <a href="javascript:void(0);">
+      <a href="javascript:void(0);" div class="tooltip">
         <i class="fa fa-play" id="play"></i>
         <i class="fa fa-circle-o-notch fa-spin fa-fw disabled" style="display:none;" id="mute"></i>
+          <span class="tooltiptext">load sound</span>
       </a>
-      <a href="javascript:void(0);" onclick="cameratoggle()">
+      <a href="javascript:void(0);" onclick="cameratoggle()" div class="tooltip">
         <i class="fa fa-camera" id="icons"></i>
+          <span class="tooltiptext">view webcam</span>
       </a>
-      <a href="javascript:void(0);" onclick="didactic()">
+      <a href="javascript:void(0);" onclick="didactic()" div class="tooltip">
         <i class="fa fa-info-circle" id="icons"></i>
+        <span class="tooltiptext">about this work</span>
+
       </a>
       </a>
     </div>
@@ -140,26 +145,8 @@
   <div class="content">
     <div id="instructions">
 
-<!-- <div>Realness</div>
-<br>
-      <div> <a href="javascript:void(0);" onclick="fullScreenMenu()">
-          <i class="fa fa-expand" id="fullicons"></i>
-        </a>Full screen mode</div>
-      <div><a href="javascript:void(0);">
-          <i class="fa fa-play" id="icons"></i>
-        </a>Load Sound</div>
-      <div><a href="javascript:void(0);">
-          <i class="fa fa-volume-off" id="icons"></i>
-        </a>Unmute soundtrack</div>
 
-      <a href="javascript:void(0);" onclick="cameratoggle()">
-        <i class="fa fa-camera" id="icons"></i>
-      </a>
-      <div>View webcam and pixel selections.</div>
-      <div><a href="javascript:void(0);" onclick="didactic()">
-          <i class="fa fa-info-circle" id="icons"></i>
-        </a>Artwork info</div>
-<br> -->
+<br> 
 
     <p><i>Realness</i> is an interactive artwork that samples pixels and recorded
       audio from the webcam and requires access to function.</p>
