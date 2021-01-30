@@ -7,30 +7,32 @@ class Recorder {
 
 	async getPermissions() {
 		// get permission to record
-		try {
-			const mp3 = navigator.mediaCapabilities
-				.decodingInfo({
-					type: 'file',
-					audio: {
-						contentType: 'audio/mp3'
-					}
-				})
-				.then((result) => {
-					return result.supported;
-				});
+		return new Promise(async (resolve, reject) => {
+			try {
+				const mp3 = navigator.mediaCapabilities
+					.decodingInfo({
+						type: 'file',
+						audio: {
+							contentType: 'audio/mp3'
+						}
+					})
+					.then((result) => {
+						return result.supported;
+					});
 
-			if ((await mp3) === true) {
-				this.type = 'audio/mpeg-3';
-			} else {
-				this.type = 'audio/aac';
+				if ((await mp3) === true) {
+					this.type = 'audio/mpeg-3';
+				} else {
+					this.type = 'audio/aac';
+				}
+				const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+				this.stream = stream;
+				resolve(stream);
+			} catch (error) {
+				console.log(error);
+				return false;
 			}
-			const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-			this.stream = stream;
-			return true;
-		} catch (error) {
-			console.log(error);
-			return false;
-		}
+		});
 	}
 	async recordChunks() {
 		return new Promise((resolve, reject) => {
