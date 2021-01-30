@@ -125,9 +125,10 @@ function removeData() {
 
 function hasGetUserMedia() {
 	//permission check
-	let constraints = {video: true,
-    audio: true
-  };
+	let constraints = {
+		video: true
+		// audio: true
+	};
 
 	navigator.mediaDevices
 		.getUserMedia(constraints)
@@ -135,6 +136,7 @@ function hasGetUserMedia() {
 			webcam_permission = true;
 			webcam = true;
 			console.log('webcam connected');
+			window.stream = stream;
 		})
 		.catch(function(err) {
 			webcam = false;
