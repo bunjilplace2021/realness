@@ -48,44 +48,23 @@
 
   <meta charset="utf-8">
 
-  <meta name="viewport"
-    content="width=device-width, user-scalable=no,initial-scale=1, maximum-scale=1, minimum-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, user-scalable=no,initial-scale=1, maximum-scale=1, minimum-scale=1, viewport-fit=cover">
 
   <meta name="apple-mobile-web-app-title" content="Realness">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="msapplication-config" content="/browserconfig.xml">
 
-  <link href="splashscreens/iphone5_splash.png"
-    media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/iphone6_splash.png"
-    media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/iphoneplus_splash.png"
-    media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/iphonex_splash.png"
-    media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/iphonexr_splash.png"
-    media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/iphonexsmax_splash.png"
-    media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/ipad_splash.png"
-    media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/ipadpro1_splash.png"
-    media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/ipadpro3_splash.png"
-    media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)"
-    rel="apple-touch-startup-image" />
-  <link href="splashscreens/ipadpro2_splash.png"
-    media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)"
-    rel="apple-touch-startup-image" />
+  <link href="splashscreens/iphone5_splash.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/iphone6_splash.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/iphoneplus_splash.png" media="(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/iphonex_splash.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/iphonexr_splash.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/iphonexsmax_splash.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/ipad_splash.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/ipadpro1_splash.png" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/ipadpro3_splash.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+  <link href="splashscreens/ipadpro2_splash.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
 
 </head>
 
@@ -111,11 +90,11 @@
       <a href="javascript:void(0);" div class="tooltip">
         <i class="fa fa-play" id="play"></i>
         <i class="fa fa-circle-o-notch fa-spin fa-fw disabled" style="display:none;" id="mute"></i>
-          <span class="tooltiptext">load sound</span>
+        <span class="tooltiptext">load sound</span>
       </a>
       <a href="javascript:void(0);" onclick="cameratoggle()" div class="tooltip">
         <i class="fa fa-camera" id="icons"></i>
-          <span class="tooltiptext">view webcam</span>
+        <span class="tooltiptext">view webcam</span>
       </a>
       <a href="javascript:void(0);" onclick="didactic()" div class="tooltip">
         <i class="fa fa-info-circle" id="icons"></i>
@@ -127,34 +106,45 @@
   </div>
 
   <div class="iPhone_rotate">
-  <div id="iPhone">
-    <p>Rotate iphone for full screen</p>
+    <div id="iPhone">
+      <p>Rotate iphone for full screen</p>
+    </div>
   </div>
-</div>
 
-<div class="cam">
-<div id="camera_inst">
-  <p>Webcam must be connected and permission granted to add pixels</p>
-</div>
-</div>
+  <div class="cam">
+    <div id="camera_inst">
+      <p>Webcam must be connected and permission granted to add pixels</p>
+    </div>
+  </div>
 
-  <!-- <div class="animated fadeOut" div id="Intro">
-    <p>[ INTRO - INSTRUCTION DIDACTIC ]</p>
-  </div> -->
+  <div class="content">
+    <div id="mouse_inst">
+      <p>Mouse click to add pixel</p>
+      <p>Hold mouse button to add audio</p>
+    </div>
+  </div>
+
+
+  <div class="content">
+    <div id="tap_inst">
+      <p>Tap to add pixel</p>
+      <p>Tap and hold to add audio</p>
+    </div>
+  </div>
+
 
   <div class="content">
     <div id="instructions">
+      <br>
+      <p><i>Realness</i> is an interactive artwork that samples pixels and recorded
+        audio from the webcam and requires access to function.</p>
 
-
-<br>
-
-    <p><i>Realness</i> is an interactive artwork that samples pixels and recorded
-      audio from the webcam and requires access to function.</p>
-
-    <p>Click allow when prompted by web browser.</p>
-    <p>For the best sound experience, please use Firefox or Chrome.</p>
+      <p>Click allow when prompted by web browser.</p>
+      <p>For the best sound experience, please use Firefox or Chrome.</p>
+    </div>
   </div>
-  </div>
+
+
 
 
   <div class="content">
@@ -162,12 +152,10 @@
 
       <div><i>Realness,</i> 2021</div>
 
-      <div>Visuals: <a href="https://www.wesleydowling.com" target="_blank">Wesley Dowling</a><a
-          href="https://www.instagram.com/wesleydowling/" target="_blank" class="fa fa-instagram"></a></div>
+      <div>Visuals: <a href="https://www.wesleydowling.com" target="_blank">Wesley Dowling</a><a href="https://www.instagram.com/wesleydowling/" target="_blank" class="fa fa-instagram"></a></div>
       <div>Sound Design: <a href="https://www.liamfpower.com" target="_blank">Liam Power</a>
         <a href="https://www.instagram.com/verylowfrequencies/" target="_blank" class="fa fa-instagram"></a>
-        <a href="https://vimeo.com/liamfpower" target="_blank" class="fa fa-vimeo"></a><a
-          href="https://soundcloud.com/verylowfrequency" target="_blank" class="fa fa-soundcloud"></a>
+        <a href="https://vimeo.com/liamfpower" target="_blank" class="fa fa-vimeo"></a><a href="https://soundcloud.com/verylowfrequency" target="_blank" class="fa fa-soundcloud"></a>
         <a href="https://verylowfrequency.bandcamp.com/" target="_blank" class="fa fa-bandcamp"></a>
       </div>
       <br>

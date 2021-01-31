@@ -14,6 +14,7 @@ let backgroundcol;
 let webcam_permission = false;
 
 let amt, startColor, newColor;
+let rect;
 
 //load shader for camera module
 
@@ -34,6 +35,7 @@ function shaderSetup() {
 	pixelpg = createGraphics(cnv.width, cnv.height, WEBGL);
 	backgroundpg = createGraphics(cnv.width, cnv.height, WEBGL);
 	pippg = createGraphics(cnv.width, cnv.height, WEBGL);
+
 
 	colour = color(0, 0, 0);
 	oldcolour = color(0, 0, 0);
@@ -187,8 +189,8 @@ function shaderMousePressed() {
 
 	//do not upload pixel if location under menu element check
 
-	let rect = document.getElementById('top').getBoundingClientRect();
-//console.log(rect.height);
+	rect = document.getElementById('top').getBoundingClientRect();
+
 
 
 	if (mouseY <= rect.height) {
@@ -197,7 +199,6 @@ function shaderMousePressed() {
 		menu_loc = false;
 	}
 
-	//console.log(rect.height, menu_loc);
 
 	if (webcam && !menu_loc) {
 		test.push(data);

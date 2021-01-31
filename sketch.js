@@ -29,6 +29,7 @@ let mousecount = 0;
 let mouseIsReleased = false;
 
 let initload = true;
+let initinst = true;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
@@ -281,7 +282,40 @@ function infoInstructions() {
     document.getElementById("top").style.height = "auto";
     document.getElementById("top").style.paddingLeft = "1em";
     document.getElementById("menu_txt").style.display = "block";
+    mouseinst();
+
   }
+}
+
+
+function mouseinst(){
+
+if (!isMobile){
+
+if (initinst) {
+  document.getElementById("mouse_inst").style.display = "block";
+  setTimeout(function time() {
+    document.getElementById("mouse_inst").style.display = "none";
+    initinst = false;
+  }, 2000);
+} else {
+    document.getElementById("mouse_inst").style.display = "none";
+
+
+}
+}else {
+  if (initinst) {
+    document.getElementById("tap_inst").style.display = "block";
+    setTimeout(function time() {
+      document.getElementById("tap_inst").style.display = "none";
+      initinst = false;
+    }, 2000);
+  } else {
+      document.getElementById("tap_inst").style.display = "none";
+
+
+}
+}
 }
 
 function didactic() {
