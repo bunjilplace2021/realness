@@ -188,12 +188,16 @@ function shaderMousePressed() {
 	//do not upload pixel if location under menu element check
 
 	let rect = document.getElementById('top').getBoundingClientRect();
+//console.log(rect.height);
+
 
 	if (mouseY <= rect.height) {
 		menu_loc = true;
 	} else {
 		menu_loc = false;
 	}
+
+	//console.log(rect.height, menu_loc);
 
 	if (webcam && !menu_loc) {
 		test.push(data);
