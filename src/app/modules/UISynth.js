@@ -44,9 +44,7 @@ class UISynth {
       });
     } catch (error) {
       this.uiSynth.releaseAll();
-      // this.uiSynth.volume.value = -64;
     }
-    // console.log(this.uiSynth);
   }
 }
 
