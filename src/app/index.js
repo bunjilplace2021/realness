@@ -486,8 +486,7 @@ const startAudio = async () => {
       console.log(synth);
       if (!synth.isStopped) {
         // setup synth parameters
-        !isMobile &&
-          synth.grains.forEach((grain) => (grain.volume.value = 0.6));
+        !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
         synth.grainOutput.gain.value = 1 / numSources;
         synth.filter.type = "lowpass";
         synth.filter.frequency.value = 880 * (i + 1);
