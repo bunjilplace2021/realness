@@ -240,7 +240,7 @@ let radiuses = 0;
 window.addEventListener("radius_reached", () => {
   radiuses++;
 
-  if (radiuses % 5 === 0) {
+  if (radiuses % 20 === 0) {
     console.log("radius reached");
     reloadBuffers();
   }
@@ -339,7 +339,7 @@ const subOscillator = () => {
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
   subOsc.volume.value = -48;
-  subOsc.volume.targetRampTo(-24, 10);
+  subOsc.volume.targetRampTo(-28, 10);
   subOsc.filter.frequency.value = 60;
   subOsc.filter.gain.value = 10;
   noise.start("+1");
@@ -423,7 +423,7 @@ const startAudio = async () => {
         !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
         synth.grainOutput.gain.value = 1 / numSources;
         synth.filter.type = "lowpass";
-        synth.filter.frequency.value = 880 * (i + 1);
+        synth.filter.frequency.value = 220 * (i + 1);
         synth.setDetune((i + 1) * 220 - numSources * 440);
         synth.setPitchShift(-12 / (i + 1));
         // if lower frequency value, higher resonance for low-end drones
@@ -481,7 +481,8 @@ const pollValues = () => {
       synths.forEach((synth, i) => {
         synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
         let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 440, 880);
-        !isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
+        console.log("setting to filter frequency" + filterFreq);
+        !isMobile && synth.filter.frequency.rampTo(filterFreq, 5);
       });
       subOsc.filter.frequency.rampTo(
         mapValue(~~radius, 0, ~~maxradius, 50, 200),
