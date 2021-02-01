@@ -122,6 +122,7 @@ class Particle {
       }
 
   }
+}
 
   run(p) {
     this.update();
