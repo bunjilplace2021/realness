@@ -25,7 +25,6 @@ function firebasesetup() {
 
   var ref = database.ref("test3").limitToLast(array_limit);
   ref.on("child_added", gotData, errData);
-
   //feedRef = firebase.database().ref().child('feed').child(user_id).limitToLast(100);
 }
 
@@ -35,7 +34,7 @@ function gotData(data) {
 
   //   FIRE EVENT LISTENER
   if (!window.isMuted) {
-    window.debounce(pixelSoundEvent(~~test.mouseX_loc, ~~test.mouseY_loc), 33);
+    window.debounce(pixelSoundEvent(~~test.mouseX_loc, ~~test.mouseY_loc), 10);
   }
 
   ps.addParticle(

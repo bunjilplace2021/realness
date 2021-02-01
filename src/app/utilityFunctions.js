@@ -47,6 +47,16 @@ export function debounce(fn, delay) {
   };
 }
 
+export function once(func) {
+  let calls = 1;
+  return function () {
+    if (calls > 0) {
+      func.apply(null, arguments);
+      calls--;
+    }
+  };
+}
+
 export function throttle(fn, delay) {
   let scheduledId;
   return function throttled() {
@@ -59,6 +69,24 @@ export function throttle(fn, delay) {
       clearTimeout(scheduledId);
     }, delay);
   };
+}
+export async function safariFallback(url, ctx) {
+  return new Promise(async (resolve, reject) => {
+    resolve(url);
+
+    //   ctx.decodeAudioData = new webkitAudioContext().decodeAudioData;
+
+    //   ctx.rawContext._nativeContext.decodeAudioData(
+    //     arrayBuf,
+    //     function (buffer) {
+    //       resolve(buffer);
+    //     },
+    //     function (e) {
+    //       reject(e);
+    //     }
+    //   );
+    // });
+  });
 }
 
 //  map one range of values to another
@@ -86,7 +114,6 @@ export function resampleBuffer(input, target_rate) {
     if (!input) {
       reject("Input buffer is undefined");
     }
-    console.log(input);
     // if can set samplerate (eg.not on safari)
     let resampling_ratio;
 
@@ -95,9 +122,7 @@ export function resampleBuffer(input, target_rate) {
     } else {
       resampling_ratio = 44100 / target_rate;
     }
-
     let final_length = input.length * resampling_ratio;
-
     let off = new OfflineAudioContext(
       input.numberOfChannels,
       final_length,
@@ -105,51 +130,11 @@ export function resampleBuffer(input, target_rate) {
     );
     // NORMALIZE AND FILTER BUFFERS
     let source = off.createBufferSource();
-
-    let buffData = input.getChannelData(0);
-    let bufferMax = buffData[0];
-    for (var i = 0; i < buffData.length; i++) {
-      if (buffData[i] > bufferMax) {
-        bufferMax = buffData[i];
-      }
-    }
-    //  const bufferMax = Math.max.apply(Math, input.getChannelData(0));
-    //  calculate difference from 1
-    // subtract max volume value from 1, set gain to that value
-    // console.log("MAX: " + bufferMax);
     const gainNode = off.createGain();
-    const diff = Math.abs(1 - bufferMax);
-    if (bufferMax === 0) {
-      reject("silent audio file");
-    }
-    // VOLUME TEST
-    console.log("BUFFERMAX: ", bufferMax);
-    if (bufferMax < 0.02) {
-      // QUIET SOUND, need to bring it up in level
-      gainNode.gain.value = 5 + diff;
-    }
-    if (bufferMax < 0.2 && bufferMax > 0.02) {
-      // QUIET SOUND, need to bring it up in level
-      gainNode.gain.value = 4 + diff;
-    }
-    if (bufferMax > 0.2 && bufferMax < 0.5) {
-      // MEDIUM LEVEL SOUND, need to bump volume slightly
-      gainNode.gain.value = 1.7 + diff;
-    }
-    if (bufferMax > 0.5 && bufferMax < 0.7) {
-      gainNode.gain.value = 0.7 - diff;
-      // LOUD SOUND, need to bring it down in level
-    }
-    if (bufferMax > 0.7) {
-      gainNode.gain.value = 0.5 - diff;
-      // VERY LOUD SOUND, need to bring it down in level
-    }
-
-    // console.log("DIFF: " + diff);
-    // console.log("setting to volume" + gainNode.gain.value);
+    gainNode.gain.value = getIdealVolume(input);
+    console.log(gainNode.gain.value);
     source.buffer = input;
     source.connect(gainNode);
-    // filter.connect(gainNode);
     gainNode.connect(off.destination);
     source.start(0);
     try {
@@ -170,14 +155,61 @@ export function getNodes(obj) {
     }
   });
 }
+
+export function getIdealVolume(buffer) {
+  var decodedBuffer = buffer.getChannelData(0);
+  var sliceLen = Math.floor(buffer.sampleRate * 0.05);
+  var averages = [];
+  var sum = 0.0;
+  for (var i = 0; i < decodedBuffer.length; i++) {
+    sum += decodedBuffer[i] ** 2;
+    if (i % sliceLen === 0) {
+      sum = Math.sqrt(sum / sliceLen);
+      averages.push(sum);
+      sum = 0;
+    }
+  }
+  // Ascending sort of the averages array
+  averages.sort(function (a, b) {
+    return a - b;
+  });
+  // Take the average at the 95th percentile
+  var a = averages[Math.floor(averages.length * 0.95)];
+
+  var gain = 1.0 / a;
+  // Perform some clamping
+  gain = Math.max(gain, 0.02);
+  gain = Math.min(gain, 100.0);
+
+  return gain / 10.0;
+}
+export function safariPolyFill(safariAudioTrack) {
+  safariAudioTrack = new Audio();
+  // set to safari specific audio context
+  soundLog(soundtrackAudioCtx);
+  if (window.webkitAudioContext) {
+    setContext(new webkitAudioContext(audioOpts));
+  }
+  window.OfflineAudioContext = window.webkitOfflineAudioContext;
+  // add polyfill for Media Recorder
+  import("audio-recorder-polyfill").then((audioRecorder) => {
+    window.MediaRecorder = audioRecorder.default;
+  });
+  window.addEventListener("touchstart", () => {
+    safariAudioTrack.autoplay = true;
+    safariAudioTrack.muted = false;
+  });
+  soundLog("loaded MediaRecorder polyfill for safari");
+}
 export function randomChoice(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 export function soundLog(str) {
-  console.log(
-    `%cSound: ${str}`,
-    "color:#233E82; font-family:'Arial';color:white; font-weight: 500; background:black;"
-  );
+  window.logging &&
+    console.log(
+      `%cSound: ${str}`,
+      "color:#233E82; font-family:'Arial';color:white; font-weight: 500; background:black;"
+    );
 }
 
 export function checkFileVolume(buf) {
