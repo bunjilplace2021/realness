@@ -55,6 +55,7 @@ class GrainSynth {
           sampleRate: 11025,
         });
         this.grains[i].channelCount = 1;
+        this.grains[i].unsync();
       } else {
         this.grains[i] = new GrainPlayer(this.buffer);
       }
@@ -156,7 +157,7 @@ class GrainSynth {
   }
   setClockFrequency(val, time) {
     this.grains.forEach((grain) =>
-      grain._clock.frequency.targetRampTo(val, time)
+      grain._clock.frequency.targetRampTo(val, "+0.1")
     );
   }
 
