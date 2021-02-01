@@ -391,6 +391,13 @@ function fullScreenMenu() {
     let fs = fullscreen();
     fullscreen(!fs);
     fullicons.classList.toggle("fa-compress");
+    var x = document.getElementById("fullspantxt");
+
+   if (x.innerHTML === "fullscreen mode") {
+     x.innerHTML = "exit fullscreen";
+   } else {
+     x.innerHTML = "fullscreen mode";
+   }
     document.body.scrollTop = 0; // <-- pull the page back up to the top
     document.body.style.overflow = "hidden";
   } else {

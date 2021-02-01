@@ -77,7 +77,7 @@ video {
   visibility: visible;
 }
 
-#recordButton {
+/* #recordButton {
   text-align: center;
 }
 
@@ -93,7 +93,7 @@ video {
 #mute {
   transition: opacity 0.3s ease-out;
   color: white;
-}
+} */
 
 .tooltip {
   position: relative;
@@ -102,8 +102,8 @@ video {
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 120px;
-  font-size: calc(0.5em + 0.5vw);
+  width: calc(100% / 6);
+  font-size: calc(0.4em + 0.5vw);
   color: white;
   text-align: center;
   border-radius: 6px;
@@ -112,24 +112,22 @@ video {
   /* Position the tooltip */
   position: absolute;
   z-index: 1;
-  top: 100%;
-  left: 50%;
-  margin-left: -60px;
+  top: 12%;
+  left: 90%;
+  margin-left: -10px;
 }
 
 
 
 @media (hover: none) {
 
-.topnav{
-  bottom:87%;
-}
 
   .tooltip .tooltiptext {
-    top: 70%;
+    top: 25%;
+    left: 92%;
     visibility: visible;
     margin-left: -10px;
-    font-size: calc(0.3em + 0.5vw);
+    font-size: calc(0.2em + 0.5vw);
     width: calc(100% / 6);
 }
 }
@@ -142,13 +140,11 @@ video {
 }
 }
 
-
-
 @media (hover: hover) and (pointer: fine) {
   .topnav a:hover {
-    background-color: white;
-    color: black;
-    opacity: 0.3;
+    background-color: none;
+    color: white;
+    opacity: 1.0;
   }
 
   .tooltip:hover .tooltiptext {
