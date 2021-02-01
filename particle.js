@@ -99,11 +99,11 @@ class Particle {
   holdevent(p) {
 
 
-    if (window.recording && this.duration <= 30 && this.firstrun) {
+    if (window.recording) {
       this.recording = true;
     }
 
-    if (this.UUID == uuid && this.recording && this.active && this.recordcount == 0 && window.recordingLimitReached == false) {
+    if (this.UUID == uuid && this.recording && this.firstrun && this.active && this.recordcount == 0 && window.recordingLimitReached == false) {
 
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
