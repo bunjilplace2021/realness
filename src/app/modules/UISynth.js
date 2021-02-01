@@ -30,7 +30,6 @@ class UISynth {
     } catch (error) {
       this.uiSynth.volume.value = -64;
     }
-    // console.log(this.uiSynth);
   }
 }
 
