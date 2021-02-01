@@ -114,7 +114,6 @@ export function resampleBuffer(input, target_rate) {
     if (!input) {
       reject("Input buffer is undefined");
     }
-
     // if can set samplerate (eg.not on safari)
     let resampling_ratio;
 
@@ -131,49 +130,11 @@ export function resampleBuffer(input, target_rate) {
     );
     // NORMALIZE AND FILTER BUFFERS
     let source = off.createBufferSource();
-    let buffData = input.getChannelData(0);
-    let bufferMax = buffData[0];
-    for (var i = 0; i < buffData.length; i++) {
-      if (buffData[i] > bufferMax) {
-        bufferMax = buffData[i];
-      }
-    }
-    //  const bufferMax = Math.max.apply(Math, input.getChannelData(0));
-    //  calculate difference from 1
-    // subtract max volume value from 1, set gain to that value
-    // console.log("MAX: " + bufferMax);
     const gainNode = off.createGain();
-    const diff = Math.abs(0.5 - bufferMax);
-    if (bufferMax === 0) {
-      reject("silent audio file");
-    }
-    // VOLUME TEST
-    if (bufferMax < 0.02) {
-      // QUIET SOUND, need to bring it up in level
-      gainNode.gain.value = 4 + diff;
-    }
-    if (bufferMax < 0.2 && bufferMax > 0.02) {
-      // QUIET SOUND, need to bring it up in level
-      gainNode.gain.value = 2 + diff;
-    }
-    if (bufferMax > 0.2 && bufferMax < 0.5) {
-      // MEDIUM LEVEL SOUND, need to bump volume slightly
-      gainNode.gain.value = 1.7 + diff;
-    }
-    if (bufferMax > 0.5 && bufferMax < 0.7) {
-      gainNode.gain.value = 0.7 - diff;
-      // LOUD SOUND, need to bring it down in level
-    }
-    if (bufferMax > 0.7) {
-      gainNode.gain.value = 0.5 - diff;
-      // VERY LOUD SOUND, need to bring it down in level
-    }
-
-    // console.log("DIFF: " + diff);
-    // console.log("setting to volume" + gainNode.gain.value);
+    gainNode.gain.value = getIdealVolume(input);
+    console.log(gainNode.gain.value);
     source.buffer = input;
     source.connect(gainNode);
-    // filter.connect(gainNode);
     gainNode.connect(off.destination);
     source.start(0);
     try {
@@ -195,6 +156,33 @@ export function getNodes(obj) {
   });
 }
 
+export function getIdealVolume(buffer) {
+  var decodedBuffer = buffer.getChannelData(0);
+  var sliceLen = Math.floor(buffer.sampleRate * 0.05);
+  var averages = [];
+  var sum = 0.0;
+  for (var i = 0; i < decodedBuffer.length; i++) {
+    sum += decodedBuffer[i] ** 2;
+    if (i % sliceLen === 0) {
+      sum = Math.sqrt(sum / sliceLen);
+      averages.push(sum);
+      sum = 0;
+    }
+  }
+  // Ascending sort of the averages array
+  averages.sort(function (a, b) {
+    return a - b;
+  });
+  // Take the average at the 95th percentile
+  var a = averages[Math.floor(averages.length * 0.95)];
+
+  var gain = 1.0 / a;
+  // Perform some clamping
+  gain = Math.max(gain, 0.02);
+  gain = Math.min(gain, 100.0);
+
+  return gain / 10.0;
+}
 export function safariPolyFill(safariAudioTrack) {
   safariAudioTrack = new Audio();
   // set to safari specific audio context

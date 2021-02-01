@@ -15,6 +15,7 @@ import {
   setContext,
   start,
   debug,
+  Meter,
 } from "tone";
 
 // UTILITIES
@@ -310,7 +311,6 @@ window.addEventListener("down", async () => {
     }
   }
 });
-
 window.addEventListener("released", () => {
   if (!window.isMuted) {
     if (!window.recordingLimitReached) {
@@ -404,7 +404,7 @@ const loadSynths = async () => {
     resolve(true);
   });
 };
-
+window.meter = new Meter();
 // method to start audio
 const startAudio = async () => {
   if (!window.isMuted) {
@@ -444,6 +444,7 @@ const startAudio = async () => {
     !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
     runLoops();
     subOscLoop();
+    window.masterBus = masterBus;
   }
   if (soundtrackAudioCtx.state === "closed") {
     soundLog("audio context is closed by user gesture, restarting");
