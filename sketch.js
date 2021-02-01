@@ -29,6 +29,7 @@ let mousecount = 0;
 let mouseIsReleased = false;
 
 let initload = true;
+let initinst = true;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
@@ -281,7 +282,40 @@ function infoInstructions() {
     document.getElementById("top").style.height = "auto";
     document.getElementById("top").style.paddingLeft = "1em";
     document.getElementById("menu_txt").style.display = "block";
+    mouseinst();
+
   }
+}
+
+
+function mouseinst(){
+
+if (!isMobile){
+
+if (initinst) {
+  document.getElementById("mouse_inst").style.display = "block";
+  setTimeout(function time() {
+    document.getElementById("mouse_inst").style.display = "none";
+    initinst = false;
+  }, 2000);
+} else {
+    document.getElementById("mouse_inst").style.display = "none";
+
+
+}
+}else {
+  if (initinst) {
+    document.getElementById("tap_inst").style.display = "block";
+    setTimeout(function time() {
+      document.getElementById("tap_inst").style.display = "none";
+      initinst = false;
+    }, 2000);
+  } else {
+      document.getElementById("tap_inst").style.display = "none";
+
+
+}
+}
 }
 
 function didactic() {
@@ -327,6 +361,17 @@ function volumemute() {
 
 function cameratoggle() {
   if (!instload_toggle) {
+    webc.classList.toggle("fa-circle-o");
+
+     var x = document.getElementById("spantxt");
+
+    if (x.innerHTML === "view webcam") {
+      x.innerHTML = "view artwork";
+    } else {
+      x.innerHTML = "view webcam";
+    }
+
+
     if (webcam) {
       pixelShaderToggle = !pixelShaderToggle;
     } else {
@@ -346,6 +391,13 @@ function fullScreenMenu() {
     let fs = fullscreen();
     fullscreen(!fs);
     fullicons.classList.toggle("fa-compress");
+    var x = document.getElementById("fullspantxt");
+
+   if (x.innerHTML === "fullscreen mode") {
+     x.innerHTML = "exit fullscreen";
+   } else {
+     x.innerHTML = "fullscreen mode";
+   }
     document.body.scrollTop = 0; // <-- pull the page back up to the top
     document.body.style.overflow = "hidden";
   } else {
