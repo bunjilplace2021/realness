@@ -28,7 +28,6 @@ import {
   soundLog,
   randomChoice,
   checkFileVolume,
-  safariPolyFill,
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -44,9 +43,7 @@ let fallBack;
 window.safari =
   navigator.userAgent.includes("Safari") &&
   !navigator.userAgent.includes("Chrome");
-let safariAudioTrack;
 
-window.safari && safariPolyFill(safariAudioTrack);
 let isIphone = navigator.userAgent.includes("iPhone");
 let isMp3Supported = navigator.mediaCapabilities
   .decodingInfo({
@@ -77,7 +74,7 @@ const audioOpts = {
   latencyHint: "playback",
   updateInterval: 1,
   lookAhead: 1,
-  bufferSize: 4096,
+  bufferSize: 256,
   state: "suspended",
 };
 let soundtrackAudioCtx = new Context(audioOpts);
@@ -88,6 +85,28 @@ soundtrackAudioCtx.name = "Playback Context";
 /*
 SAFARI FALLBACK
  */
+
+const safariPolyFill = () => {
+  safariAudioTrack = new Audio();
+  // set to safari specific audio context
+
+  if (window.webkitAudioContext) {
+    setContext(new webkitAudioContext(audioOpts));
+  }
+  window.OfflineAudioContext = window.webkitOfflineAudioContext;
+  // add polyfill for Media Recorder
+  import("audio-recorder-polyfill").then((audioRecorder) => {
+    window.MediaRecorder = audioRecorder.default;
+  });
+  window.addEventListener("touchstart", () => {
+    safariAudioTrack.autoplay = true;
+    safariAudioTrack.muted = false;
+  });
+  soundLog("loaded MediaRecorder polyfill for safari");
+};
+
+let safariAudioTrack;
+window.safari && safariPolyFill(safariAudioTrack);
 
 const initSound = async () => {
   soundLog("attempting to start audio");
@@ -160,7 +179,7 @@ muteButton.onclick = async () => {
   //  if safari - load synths on unmute
   // keep track of number of clicks
   muteClicked++;
-  window.isMuted = !window.window.isMuted;
+  window.isMuted = !window.isMuted;
   if (window.safari || isIphone) {
     safariAudioTrack.muted = window.isMuted;
     soundtrackAudioCtx.muted = window.isMuted;
@@ -352,7 +371,7 @@ const loadSynths = async () => {
     const mp3Supported = await isMp3Supported;
     if (!mp3Supported) {
       numSources = 1;
-      numVoices = 1;
+      numVoices = 4;
     }
     soundLog(`mp3 is ${mp3Supported ? "" : "not "}supported in this browser`);
     for (let i = 0; i < numSources; i++) {
@@ -411,6 +430,9 @@ const startAudio = async () => {
   if (!window.isMuted) {
     await start();
     await soundtrackAudioCtx.resume();
+
+    // debug
+    window.soundtrackAudioCtx = soundtrackAudioCtx;
     masterBus = new MasterBus(soundtrackAudioCtx);
     masterBus.connectSource(u.master);
     synths.forEach(async (synth, i) => {
@@ -424,7 +446,8 @@ const startAudio = async () => {
         synth.grainOutput.gain.value = 1 / numSources;
         synth.filter.type = "lowpass";
         synth.filter.frequency.value = 220 * (i + 1);
-        synth.setDetune((i + 1) * 220 - numSources * 440);
+        synth.setDetune((i + 1) * 220 - numSources * 880);
+
         synth.setPitchShift(-12 / (i + 1));
         // if lower frequency value, higher resonance for low-end drones
         if (synth.filter.frequency.value < 500) {
@@ -446,7 +469,6 @@ const startAudio = async () => {
     !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
     runLoops();
     subOscLoop();
-    window.masterBus = masterBus;
   }
   if (soundtrackAudioCtx.state === "closed") {
     soundLog("audio context is closed by user gesture, restarting");
@@ -481,7 +503,7 @@ const pollValues = () => {
       synths.forEach((synth, i) => {
         synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
         let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 440, 880);
-        console.log("setting to filter frequency" + filterFreq);
+        // console.log("setting to filter frequency" + filterFreq);
         !isMobile && synth.filter.frequency.rampTo(filterFreq, 5);
       });
       subOsc.filter.frequency.rampTo(
