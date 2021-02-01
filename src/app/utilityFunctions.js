@@ -22,7 +22,7 @@ export async function aacDecode(url, ctx) {
           ctx._context._nativeContext,
           arrBuffer
         );
-        console.log(audioBuffer);
+        window.logging && console.log(audioBuffer);
         resolve(audioBuffer);
       });
     } catch (error) {
@@ -132,7 +132,7 @@ export function resampleBuffer(input, target_rate) {
     let source = off.createBufferSource();
     const gainNode = off.createGain();
     gainNode.gain.value = getIdealVolume(input);
-    console.log(gainNode.gain.value);
+    window.logging && console.log(gainNode.gain.value);
     source.buffer = input;
     source.connect(gainNode);
     gainNode.connect(off.destination);
@@ -178,15 +178,15 @@ export function getIdealVolume(buffer) {
 
   var gain = 1.0 / a;
   // Perform some clamping
-  gain = Math.max(gain, 0.02);
-  gain = Math.min(gain, 100.0);
+  //   gain = Math.max(gain, 0.02);
+  gain = Math.min(gain, 2000.0);
 
   return gain / 10.0;
 }
 export function safariPolyFill(safariAudioTrack) {
   safariAudioTrack = new Audio();
   // set to safari specific audio context
-  soundLog(soundtrackAudioCtx);
+
   if (window.webkitAudioContext) {
     setContext(new webkitAudioContext(audioOpts));
   }
@@ -214,7 +214,7 @@ export function soundLog(str) {
 
 export function checkFileVolume(buf) {
   if (buf.getChannelData) {
-    console.log(buf.getChannelData(0).length);
+    window.logging && console.log(buf.getChannelData(0).length);
     if (buf.getChannelData(0).length < 65536) {
       if (Math.max(...buf.getChannelData(0)) > 0) {
         return true;

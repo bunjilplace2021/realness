@@ -239,9 +239,10 @@ const reloadBuffers = async (customBuffer = null) => {
 let radiuses = 0;
 window.addEventListener("radius_reached", () => {
   radiuses++;
-  const debounced = debounce(reloadBuffers, 1000);
-  if (radiuses % 20 === 0) {
-    debounced();
+
+  if (radiuses % 5 === 0) {
+    console.log("radius reached");
+    reloadBuffers();
   }
 });
 
@@ -427,10 +428,11 @@ const startAudio = async () => {
         synth.setPitchShift(-12 / (i + 1));
         // if lower frequency value, higher resonance for low-end drones
         if (synth.filter.frequency.value < 500) {
-          synth.filter.Q.value = 2;
+          synth.filter.Q.value = 5;
         } else {
-          synth.filter.Q.value = 0.5;
+          synth.filter.Q.value = 2;
         }
+        synth.filter.gain.value = 10;
         // start the synths
         synth.randomInterpolate();
         synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
