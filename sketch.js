@@ -361,6 +361,18 @@ function volumemute() {
 
 function cameratoggle() {
   if (!instload_toggle) {
+    webc.classList.toggle("fa-circle-o");
+
+     var x = document.getElementById("spantxt");
+     console.log(x);
+
+    if (x.innerHTML === "view webcam") {
+      x.innerHTML = "view artwork";
+    } else {
+      x.innerHTML = "view webcam";
+    }
+
+
     if (webcam) {
       pixelShaderToggle = !pixelShaderToggle;
     } else {
