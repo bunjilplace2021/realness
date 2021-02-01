@@ -487,7 +487,7 @@ const startAudio = async () => {
       if (!synth.isStopped) {
         // setup synth parameters
         !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
-        synth.grainOutput.gain.value = 1 / numSources;
+        synth.output.gain.value = 1 / numSources;
         synth.filter.type = "lowpass";
         synth.filter.frequency.value = 880 * (i + 1);
         synth.setDetune((i + 1) * 220 - numSources * 440);
@@ -504,6 +504,7 @@ const startAudio = async () => {
         // connect the synth output to the master processing bus
         synth.output.disconnect(synth.dest);
         masterBus.connectSource(synth.output);
+
         //  if user clicks, randomize synth parameters and play a UI sound
       }
     });
@@ -511,13 +512,14 @@ const startAudio = async () => {
     masterBus.lowpassFilter(5000, 1);
     window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
     !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
-    // masterBus.dest.volume.value = 6;
+
     // masterBus.input.connect(window.meter);
     document.querySelector("body").addEventListener("click", () => {
       synths.forEach((synth) => {
         synth.randomInterpolate();
       });
     });
+    window.masterBus = masterBus;
     runLoops();
     subOscLoop();
   }
@@ -526,14 +528,13 @@ const startAudio = async () => {
     soundLog("audio context is closed by user gesture, restarting");
     await soundtrackAudioCtx.rawContext.resume();
   }
-  // main synth setup loop
 };
 
 // Loops to synchronize with cisual content
 const runLoops = () => {
   // // loop to poll paprticle system values
   try {
-    synths[0].transport.scheduleRepeat((time) => {
+    synths[0].transport.scheduleRepeat(() => {
       pollValues();
     }, 10);
   } catch (e) {
@@ -556,7 +557,7 @@ const pollValues = () => {
       let { radius, maxradius } = ps.particles[ps.particles.length - 1];
       synths.forEach((synth, i) => {
         synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
-        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 440, 880);
+        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 330, 880);
         !isMobile && synth.filter.frequency.rampTo(filterFreq, 10);
       });
       subOsc.filter.frequency.rampTo(

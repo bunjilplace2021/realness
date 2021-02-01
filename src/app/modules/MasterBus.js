@@ -4,6 +4,7 @@ class MasterBus {
   constructor(ctx) {
     this.input = new Gain(0.8);
     this.limiter = new Limiter(-12);
+
     this.effectsChain = [];
     this.ctx = ctx;
 
