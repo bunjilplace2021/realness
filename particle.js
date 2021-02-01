@@ -99,7 +99,7 @@ class Particle {
   holdevent(p) {
 
 
-    if (window.recording && this.duration <= 30 && this.firstrun) {
+    if (window.recording && this.duration < 51 && this.firstrun) {
       this.recording = true;
     }
 
@@ -120,12 +120,6 @@ class Particle {
       if (this.outerDiam >= 500) {
         this.recordcount = this.recordcount + 1;
       }
-
-    }
-
-
-
-
 
   }
 
