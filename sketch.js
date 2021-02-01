@@ -190,6 +190,13 @@ function particle_draw(p) {
     mousecount = mousecount + 1;
     if (mousecount === 30 && mousePressed) {
       window.dispatchEvent(window.down);
+if (window.recordingLimitReached){
+  document.getElementById("record_limit").style.display = "block";
+  setTimeout(function time() {
+    document.getElementById("record_limit").style.display = "none";
+    initinst = false;
+  }, 2000);
+}
     }
   }
 }

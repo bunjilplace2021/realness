@@ -278,6 +278,16 @@ video {
   color: white;
 }
 
+
+#record_limit {
+  display: none;
+  width: 100vw;
+  text-align: center;
+  background: none;
+  position: absolute;
+  color: white;
+}
+
 #mouse_inst {
   display: none;
   text-align: center;
