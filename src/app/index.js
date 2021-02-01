@@ -162,6 +162,10 @@ let numVoices = isMobile ? 2 : 3;
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
 const playButton = document.querySelector("#play");
+
+// AUDIO TOOLTIP
+const audioTooltip = document.querySelector("#audiotooltip");
+
 // const recordButton = document.querySelector("#recordButton");
 
 // SUBOSCILLATOR
@@ -418,16 +422,27 @@ const loadSynths = async () => {
     }
     window.synthsLoaded = true;
     muteButton.classList = [];
+    changeTooltipText();
+
     muteButton.classList.add("fa", "fa-volume-off");
     muteButton.disabled = false;
     soundLog("Voices loaded");
     resolve(true);
   });
 };
-window.meter = new Meter();
+
+const changeTooltipText = () => {
+  if (window.isMuted) {
+    audioTooltip.innerHTML = "unmute sound";
+  } else {
+    audioTooltip.innerHTML = "mute sound";
+  }
+};
+
 // method to start audio
 const startAudio = async () => {
   if (!window.isMuted) {
+    changeTooltipText();
     await start();
     await soundtrackAudioCtx.resume();
 
