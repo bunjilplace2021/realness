@@ -1,4 +1,4 @@
-import { FMSynth, Frequency, PolySynth, Gain } from "tone";
+import { FMSynth, Frequency, PolySynth, Gain, now } from "tone";
 
 // PRECOMPUTE RANDOM VALUES FOR PERFORMANCE
 class UISynth {
@@ -7,8 +7,9 @@ class UISynth {
       return Math.floor(Math.random() * 12);
     });
     this.ctx = ctx;
+
     this.uiSynth = new PolySynth({
-      polyphony: 1,
+      polyphony: 3,
       voice: FMSynth,
       maxPolyphony: 3,
     });
@@ -25,7 +26,6 @@ class UISynth {
     this.idx = 0;
     this.master = new Gain(0.1);
     this.uiSynth.connect(this.master);
-    this.uiSynth.unsync();
   }
   play(notes) {
     this.idx++;
@@ -38,8 +38,9 @@ class UISynth {
     try {
       notes.forEach((note) => {
         this.uiSynth.triggerAttackRelease(
-          Frequency(note).harmonize([0, 3, 7, 11, 13]),
-          0
+          Frequency(note).harmonize([0, 3, 7, 11, 13, 15, 17, 19, 21, 23]),
+          0,
+          now()
         );
       });
     } catch (error) {

@@ -26,9 +26,11 @@ import {
   soundLog,
   randomChoice,
   checkFileVolume,
+  getIdealVolume,
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
+import { attempt } from "lodash";
 
 // suspend auto generated audio context from tone import
 
@@ -46,7 +48,7 @@ let isIphone =
   navigator.userAgent.includes("iPhone") &&
   navigator.userAgent.includes("Safari");
 
-// isIphone = false;
+isIphone = false;
 let isMp3Supported = navigator.mediaCapabilities
   .decodingInfo({
     type: "file",
@@ -77,13 +79,13 @@ process.env.NODE_ENV === "development"
 const audioOpts = {
   latencyHint: "playback",
   updateInterval: 1,
-  lookAhead: 1,
+  // lookAhead: 1,
   bufferSize: 256,
   state: "suspended",
 };
 let soundtrackAudioCtx = new Context(audioOpts);
 let muteClicked = 0;
-let sampleRate = 11025;
+let sampleRate = 44100;
 soundtrackAudioCtx.name = "Playback Context";
 
 /*
@@ -155,14 +157,14 @@ window.synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx);
 let f = new FireBaseAudio(soundtrackAudioCtx);
 
-const recordLength = 1000;
+const recordLength = 500;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
 
 // number of different sources to use
 let numSources = isMobile ? 1 : 3;
 
 // number of voices per synth
-let numVoices = isMobile ? 2 : 3;
+let numVoices = isMobile ? 3 : 3;
 
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
@@ -244,20 +246,36 @@ const reloadBuffers = async (customBuffer = null) => {
         }
         synth.buffer.copyToChannel(newBuf, 0, 0);
       } else {
-        soundLog("can't reload buffers on this browser");
+        // MP3 is not supported, load aac files
+        const randomurl = await f.storageRef
+          .child(randomChoice(f.fileNames))
+          .getDownloadURL();
+
+        console.log("trying to load aac file from " + randomurl);
+
+        buf = await aacDecode(randomurl, soundtrackAudioCtx);
+        buf.idealGain = console.log("new buffer: " + buf);
+        synth.buffer = buf;
+        synth.grainOutput.gain.value = getIdealVolume(buf) / numVoices;
       }
       synth.randomInterpolate();
       soundLog("reloaded buffers");
     });
   } else {
-    if (customBuffer && checkFileVolume(customBuffer) > 0) {
+    if (customBuffer) {
       const resampled = await resampleBuffer(customBuffer, sampleRate);
+
       synths.forEach((synth) => {
-        synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
+        try {
+          synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
+        } catch (error) {
+          synth.buffer = resampled;
+        }
+
         synth.setLoopStart(0);
         synth.randomInterpolate();
         // null the buffer so that doesn't try to reload the user buffer on next loop
-        customBuffer = null;
+        // customBuffer = null;
       });
     }
   }
@@ -279,7 +297,12 @@ const UISound = () => {
   window.addEventListener("pixel_added", (e) => {
     const { pixelX, pixelY } = e.data;
     soundLog("pixel added");
-    !window.isMuted && u.play([pixelX, window.height - pixelY]);
+
+    let timeout;
+    timeout && clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      !window.isMuted && u.play([pixelX, window.height - pixelY]);
+    }, 33);
   });
 };
 
@@ -370,7 +393,7 @@ const subOscillator = () => {
   });
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
-  subOsc.volume.value = -48;
+  subOsc.volume.value = -64;
   subOsc.volume.targetRampTo(-28, 10);
   subOsc.filter.frequency.value = 60;
   subOsc.filter.gain.value = 10;
@@ -383,8 +406,9 @@ const loadSynths = async () => {
     await f.listAll();
     const mp3Supported = await isMp3Supported;
     if (!mp3Supported) {
-      numSources = 1;
-      numVoices = 4;
+      const aacFiles = await f.getAacFiles();
+
+      numVoices = 8;
     }
     soundLog(`mp3 is ${mp3Supported ? "" : "not "}supported in this browser`);
     for (let i = 0; i < numSources; i++) {
@@ -392,6 +416,7 @@ const loadSynths = async () => {
       let buf;
       let playBuf;
       let resampled;
+      let bufGain;
       if (mp3Supported) {
         buf = await fetchSample(
           await randomChoice(f.files.items).getDownloadURL(),
@@ -410,7 +435,15 @@ const loadSynths = async () => {
           playBuf = buf;
         }
       } else {
-        buf = await aacDecode(f.audioFile, soundtrackAudioCtx);
+        const randomurl = await f.storageRef
+          .child(randomChoice(f.fileNames))
+          .getDownloadURL();
+
+        console.log("trying to load aac file from " + randomurl);
+        buf = await aacDecode(randomurl, soundtrackAudioCtx);
+
+        buf.idealGain = getIdealVolume(buf) / numVoices;
+
         playBuf = buf;
       }
       if (playBuf) {
@@ -425,10 +458,13 @@ const loadSynths = async () => {
           resampled = playBuf;
         }
         synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
+
         synths.forEach((synth) => {
           synth.filter.frequency.value = 220;
           synth.filter.gain.value = 10;
-          synth.grainOutput.gain.value = 1 / numSources;
+          playBuf.idealGain
+            ? (synth.grainOutput.gain.value = playBuf.idealGain)
+            : null; // synth.grainOutput.gain.value = 1 / numSources;
         });
         window.synths = synths;
         soundLog("Loaded GrainSynth " + (i + 1));
@@ -567,7 +603,7 @@ const main = async () => {
   if (!isMp3Supported) {
     f.suffix = "aac";
     numSources = 1;
-    numVoices = 1;
+    numVoices = 3;
   }
 
   if (!isIphone)

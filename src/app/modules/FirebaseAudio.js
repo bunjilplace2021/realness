@@ -37,12 +37,35 @@ class FireBaseAudio {
 
   async listAll() {
     this.files = await this.storageRef.list();
+
+    if (this.suffix === "aac") {
+      this.getAacFiles();
+    }
+  }
+  async getAacFiles() {
+    return new Promise(async (resolve, reject) => {
+      this.filePromises = [];
+      this.fileNames = [];
+      this.files.items.forEach(async (file) => {
+        this.filePromises.push(file.getMetadata());
+      });
+      this.filesMetadata = await Promise.all(this.filePromises);
+
+      this.filesMetadata.filter((metaObject) => {
+        if (metaObject.contentType === "audio/aac") {
+          this.fileNames.push(metaObject.fullPath);
+        }
+      });
+      resolve(this.fileNames);
+    });
   }
   async getRandomSample() {
-    const ChosenFile = this.files.items[
-      ~~(Math.random() * this.files.items.length)
-    ];
-    this.audioFile = await ChosenFile.getDownloadURL();
+    if (!this.suffix === "aac") {
+      const ChosenFile = this.files.items[
+        ~~(Math.random() * this.files.items.length)
+      ];
+      this.audioFile = await ChosenFile.getDownloadURL();
+    }
   }
   async downloadSample(url) {
     return fetch(url, { cors: "opaque" })

@@ -11,23 +11,38 @@ export async function fetchSample(url, ctx, contentType = "audio/mpeg-3") {
 }
 
 export async function aacDecode(url, ctx) {
+  let response;
+  let arrBuffer;
+
   return new Promise(async (resolve, reject) => {
     try {
-      import("./samples/fallback.aac").then(async (file) => {
-        const response = await fetch(file.default, { mimeType: "audio/aac" });
-        const arrBuffer = await response.arrayBuffer();
-        // console.log(response.type);
-        // console.log(ctx._context._nativeContext);
-        const audioBuffer = await decodeAudioData(
+      response = await fetch(url, { mimeType: "audio/aac" });
+      arrBuffer = await response.arrayBuffer();
+    } catch (error) {
+      import(`./samples/fallback.aac`).then(async (file) => {
+        response = await fetch(file.default, { mimeType: "audio/aac" });
+        arrBuffer = await response.arrayBuffer();
+      });
+    }
+    let audioBuffer;
+    try {
+      audioBuffer = await decodeAudioData(
+        ctx._context._nativeContext,
+        arrBuffer
+      );
+    } catch (error) {
+      import(`./samples/fallback.aac`).then(async (file) => {
+        response = await fetch(file.default, { mimeType: "audio/aac" });
+        arrBuffer = await response.arrayBuffer();
+        audioBuffer = await decodeAudioData(
           ctx._context._nativeContext,
           arrBuffer
         );
-        window.logging && console.log(audioBuffer);
-        resolve(audioBuffer);
       });
-    } catch (error) {
-      reject(error);
     }
+
+    window.logging && console.log(audioBuffer);
+    resolve(audioBuffer);
   });
 }
 
