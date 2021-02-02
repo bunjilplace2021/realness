@@ -106,7 +106,7 @@ const safariPolyFill = () => {
 };
 
 let safariAudioTrack;
-window.safari && safariPolyFill(safariAudioTrack);
+window.safari && safariPolyFill();
 
 const initSound = async () => {
   soundLog("attempting to start audio");
@@ -281,7 +281,7 @@ const UISound = () => {
 const startRecording = async () => {
   return new Promise(async (resolve, reject) => {
     if (window.MediaRecorder && recordingAllowed) {
-      safariAudioTrack && safariAudioTrack.pause();
+      //   safariAudioTrack && safariAudioTrack.pause();
       try {
         soundLog("started user recording #" + recordings);
         // User is recording, send recording indicator to window object
@@ -294,7 +294,7 @@ const startRecording = async () => {
       }
     } else {
       window.recording = false;
-      safariAudioTrack.play();
+      //   safariAudioTrack.play();
       soundLog("media recording is not supported in this browser");
     }
   });
