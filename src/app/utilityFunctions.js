@@ -175,7 +175,7 @@ export function getIdealVolume(buffer) {
   });
   // Take the average at the 95th percentile
   var a = averages[Math.floor(averages.length * 0.95)];
-  console.log(a);
+
   var gain = 1.0 / a;
   // Perform some clamping
   //   gain = Math.max(gain, 0.02);

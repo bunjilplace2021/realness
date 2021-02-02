@@ -416,10 +416,25 @@ const loadSynths = async () => {
           resampled = playBuf;
         }
         synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
+        synths.forEach((synth) => {
+          synth.filter.frequency.value = 220;
+          synth.filter.gain.value = 10;
+          synth.grainOutput.gain.value = 1 / numSources;
+        });
         window.synths = synths;
         soundLog("Loaded GrainSynth " + (i + 1));
       }
     }
+
+    // debug
+    window.soundtrackAudioCtx = soundtrackAudioCtx;
+    masterBus = new MasterBus(soundtrackAudioCtx);
+    masterBus.connectSource(u.master);
+    subOscillator();
+    masterBus.lowpassFilter(5000, 1);
+    window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
+    !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
+
     window.synthsLoaded = true;
     muteButton.classList = [];
     changeTooltipText();
@@ -446,31 +461,15 @@ const startAudio = async () => {
     await start();
     await soundtrackAudioCtx.resume();
 
-    // debug
-    window.soundtrackAudioCtx = soundtrackAudioCtx;
-    masterBus = new MasterBus(soundtrackAudioCtx);
-    masterBus.connectSource(u.master);
     synths.forEach(async (synth, i) => {
       // wait for all of the individual grains to load
       await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
       // if the synth isn't already playing...
-      soundLog(synth);
+      window.logging && soundLog(synth);
       if (!synth.isStopped) {
         // setup synth parameters
-        !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
-        synth.grainOutput.gain.value = 1 / numSources;
-        synth.filter.type = "lowpass";
-        synth.filter.frequency.value = 220 * (i + 1);
-        synth.setDetune((i + 1) * 220 - numSources * 880);
+        // !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
 
-        synth.setPitchShift(-12 / (i + 1));
-        // if lower frequency value, higher resonance for low-end drones
-        if (synth.filter.frequency.value < 500) {
-          synth.filter.Q.value = 5;
-        } else {
-          synth.filter.Q.value = 2;
-        }
-        synth.filter.gain.value = 10;
         // start the synths
         synth.randomInterpolate();
         synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
@@ -478,10 +477,7 @@ const startAudio = async () => {
         masterBus.connectSource(synth.output);
       }
     });
-    subOscillator();
-    masterBus.lowpassFilter(5000, 1);
-    window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
-    !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
+
     runLoops();
     subOscLoop();
   }

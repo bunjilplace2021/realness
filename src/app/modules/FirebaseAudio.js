@@ -39,7 +39,6 @@ class FireBaseAudio {
     this.files = await this.storageRef.list();
   }
   async getRandomSample() {
-    // await this.listAll();
     const ChosenFile = this.files.items[
       ~~(Math.random() * this.files.items.length)
     ];
@@ -54,7 +53,7 @@ class FireBaseAudio {
 
   async uploadSample(blob) {
     // upload audio to firebase storage
-    console.log(blob);
+
     this.uploadTask = this.audioRef.put(blob, { contentType: blob.type });
     this.uploadTask.on(
       "state_changed",
@@ -71,7 +70,7 @@ class FireBaseAudio {
         this.uploadTask.snapshot.ref
           .getDownloadURL()
           .then(function (downloadURL) {
-            console.log("File available at", downloadURL);
+            window.logging && console.log("File available at", downloadURL);
           });
       }
     );
