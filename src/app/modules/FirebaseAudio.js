@@ -36,7 +36,7 @@ class FireBaseAudio {
   }
 
   async listAll() {
-    this.files = await this.storageRef.listAll();
+    this.files = await this.storageRef.list();
   }
   async getRandomSample() {
     // await this.listAll();

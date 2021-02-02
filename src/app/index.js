@@ -379,7 +379,7 @@ const loadSynths = async () => {
     }
     soundLog(`mp3 is ${mp3Supported ? "" : "not "}supported in this browser`);
     for (let i = 0; i < numSources; i++) {
-      await f.getRandomSample();
+      //   await f.getRandomSample();
       let buf;
       let playBuf;
       let resampled;
