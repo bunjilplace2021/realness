@@ -14,8 +14,6 @@ import {
   Noise,
   setContext,
   start,
-  debug,
-  Meter,
 } from "tone";
 
 // UTILITIES
@@ -48,6 +46,7 @@ let isIphone =
   navigator.userAgent.includes("iPhone") &&
   navigator.userAgent.includes("Safari");
 
+// isIphone = false;
 let isMp3Supported = navigator.mediaCapabilities
   .decodingInfo({
     type: "file",

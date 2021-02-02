@@ -14,7 +14,7 @@ import {
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
-import { forEach } from "async";
+
 // TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
 // TODO: ADD PRESETS LOADED FROM JSON
 class GrainSynth {
