@@ -281,7 +281,7 @@ video {
 
 #record_limit {
   display: none;
-  width: 100vw;
+  width: 100%;
   text-align: center;
   background: none;
   position: absolute;
