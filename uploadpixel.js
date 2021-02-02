@@ -3,7 +3,6 @@ let backgroundShader;
 let pipShader;
 let cam;
 let pixelpg;
-let backgroundpg;
 let pippg;
 let colour, oldcolour;
 let lerp_amount = 0;
@@ -21,7 +20,6 @@ let rect;
 function shaderPreload() {
 	// load the shader
 	pixelShader = loadShader('shader/vertex.vert', 'shader/aspect.frag');
-	backgroundShader = loadShader('shader/vertex.vert', 'shader/background.frag');
 	pipShader = loadShader('shader/vertex.vert', 'shader/pip.frag');
 }
 
@@ -33,7 +31,6 @@ function shaderSetup() {
 	cam.elt.setAttribute('playsinline', '');
 
 	pixelpg = createGraphics(cnv.width, cnv.height, WEBGL);
-	backgroundpg = createGraphics(cnv.width, cnv.height, WEBGL);
 	pippg = createGraphics(cnv.width, cnv.height, WEBGL);
 
 
@@ -79,7 +76,7 @@ function shaderDraw() {
 }
 
 function pipShaderDraw() {
-	backgroundpg.shader(backgroundShader);
+//	backgroundpg.shader(backgroundShader);
 	pippg.shader(pipShader);
 
 	let mx = map(mouseX, 0, width, 0, 1);
@@ -103,12 +100,8 @@ function pipShaderDraw() {
 
 	// rect gives us some geometry on the screen
 
-	backgroundpg.rect(0, 0, width, height);
 	pippg.rect(0, 0, width, height);
 
-	if (pixelShaderToggle) {
-		image(backgroundpg, 0, 0);
-	}
 }
 
 function removeData() {
@@ -207,6 +200,5 @@ function shaderMousePressed() {
 
 function shaderWindowResized(w, h) {
 	pixelpg.resizeCanvas(w, h);
-	backgroundpg.resizeCanvas(w, h);
 	pippg.resizeCanvas(w, h);
 }

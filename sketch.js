@@ -167,7 +167,10 @@ function particle_draw(p) {
     p.background(0);
     p.blendMode(ADD);
   } else {
-    p.clear();
+    p.blendMode(BLEND);
+    p.background(0);
+    p.blendMode(BLEND);
+  //  p.clear();
   }
 
   ps.run(p);
