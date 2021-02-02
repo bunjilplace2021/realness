@@ -100,7 +100,7 @@ class Particle {
 
 
     if (window.recording && this.duration < 51 && this.firstrun) {
-      this.recording = true;
+      this.recording = false;
     }
 
     if (this.UUID == uuid && this.recording && this.active && this.recordcount == 0 && window.recordingLimitReached == false) {
