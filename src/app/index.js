@@ -44,7 +44,10 @@ window.safari =
   navigator.userAgent.includes("Safari") &&
   !navigator.userAgent.includes("Chrome");
 
-let isIphone = navigator.userAgent.includes("iPhone");
+let isIphone =
+  navigator.userAgent.includes("iPhone") &&
+  navigator.userAgent.includes("Safari");
+
 let isMp3Supported = navigator.mediaCapabilities
   .decodingInfo({
     type: "file",
@@ -57,6 +60,8 @@ let isMp3Supported = navigator.mediaCapabilities
 // RECORDINGS
 let recordingAllowed = false;
 let recordLimit = isMobile ? 1 : 3;
+
+isIphone ? (recordLimit = 0) : null;
 let recordings = 0;
 let recordedBuffer = null;
 window.recordingLimitReached = false;
@@ -123,8 +128,9 @@ const loadFallback = async () => {
     import(/* webpackChunkName:"fallback" */ "./samples/fallback.mp3").then(
       (file) => {
         fallBack = file.default;
-        safariAudioTrack.load();
         safariAudioTrack.src = fallBack;
+        safariAudioTrack.load();
+
         safariAudioTrack.loop = true;
         safariAudioTrack.addEventListener("loadedmetadata", () => {
           muteButton.classList = "";
@@ -286,7 +292,10 @@ const startRecording = async () => {
         soundLog("started user recording #" + recordings);
         // User is recording, send recording indicator to window object
         window.recording = true;
-        await r.recordChunks();
+        if (!isIphone) {
+          await r.recordChunks();
+        }
+
         resolve(true);
       } catch (error) {
         soundLog(error);
@@ -295,12 +304,13 @@ const startRecording = async () => {
     } else {
       window.recording = false;
       //   safariAudioTrack.play();
+      reject(false);
       soundLog("media recording is not supported in this browser");
     }
   });
 };
 const stopRecording = async () => {
-  if (r.recording && recordingAllowed) {
+  if (r.recording && recordingAllowed && !isIphone) {
     const recordedBlob = await r.stopRecording();
     try {
       recordedBuffer = await r.loadToBuffer(recordedBlob);
@@ -312,7 +322,7 @@ const stopRecording = async () => {
     safariAudioTrack && safariAudioTrack.play();
     soundLog("stopped user recording #" + recordings);
     window.recording = false;
-    safariAudioTrack ? (safariAudioTrack.muted = false) : null;
+    // safariAudioTrack ? (safariAudioTrack.muted = false) : null;
   } else {
     window.recording = false;
   }
@@ -456,30 +466,31 @@ const changeTooltipText = () => {
 
 // method to start audio
 const startAudio = async () => {
+  changeTooltipText();
   if (!window.isMuted) {
-    changeTooltipText();
     await start();
     await soundtrackAudioCtx.resume();
+    if (!isIphone) {
+      synths.forEach(async (synth, i) => {
+        // wait for all of the individual grains to load
+        await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
+        // if the synth isn't already playing...
+        window.logging && soundLog(synth);
+        if (!synth.isStopped) {
+          // setup synth parameters
+          // !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
 
-    synths.forEach(async (synth, i) => {
-      // wait for all of the individual grains to load
-      await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
-      // if the synth isn't already playing...
-      window.logging && soundLog(synth);
-      if (!synth.isStopped) {
-        // setup synth parameters
-        // !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
+          // start the synths
+          synth.randomInterpolate();
+          synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
+          synth.output.disconnect(synth.dest);
+          masterBus.connectSource(synth.output);
+        }
+      });
 
-        // start the synths
-        synth.randomInterpolate();
-        synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
-        synth.output.disconnect(synth.dest);
-        masterBus.connectSource(synth.output);
-      }
-    });
-
-    runLoops();
-    subOscLoop();
+      runLoops();
+      subOscLoop();
+    }
   }
   if (soundtrackAudioCtx.state === "closed") {
     soundLog("audio context is closed by user gesture, restarting");

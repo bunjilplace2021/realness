@@ -170,7 +170,14 @@
         audio from the webcam and requires access to function.</p>
 
       <p>Click allow when prompted by web browser.</p>
-      <p>For the best sound experience, please use Firefox or Chrome.</p>
+      <p class="safariwarning"></p>
+
+      <!-- SHOWS WARNING FOR OUTDATED WEB AUDIO IMPLEMENTATION ON SAFARI IOS -->
+      <script>
+        if (window.safari) {
+          document.querySelector(".safariwarning").innerHTML = "For the best sound experience, please use Firefox or Chrome."
+        }
+      </script>
     </div>
   </div>
 
