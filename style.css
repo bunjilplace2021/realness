@@ -127,7 +127,7 @@ video {
     left: 92%;
     visibility: visible;
     margin-left: -10px;
-    font-size: calc(0.2em + 0.5vw);
+    font-size: calc(0.25em + 0.5vw);
     width: calc(100% / 6);
 }
 }
