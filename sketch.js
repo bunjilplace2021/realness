@@ -260,8 +260,15 @@ function windowResized() {
 function infoInstructions() {
   instruction_toggle = !instruction_toggle;
 
-  menuicon.classList.toggle("fa-window-close");
+  if (instload_toggle){
+  document.getElementById("menu_txt").style.display = "block";
+  myLinks.style.display = "none";
+}else{
   myLinks.style.display = "block";
+}
+
+  menuicon.classList.toggle("fa-window-close");
+
 
   document.getElementById("top").style.backgroundColor =
     "rgba(127, 127, 127, 0.2)";
