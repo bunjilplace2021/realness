@@ -7,6 +7,9 @@ varying vec2 vTexCoord;
 
 uniform vec2 u_mouse;
 uniform vec2 u_resolution;
+uniform vec2 u_devicecamres;
+uniform float u_lerp;
+uniform float u_safari;
 uniform vec2 u_pip;
 uniform vec2 u_pip_mouse;
 
@@ -58,6 +61,25 @@ d = length(pow(_st, vec2(4.0)));
   return 1.0 - smoothstep(_size,_size+0.03,d);
 }
 
+vec2 aspect(vec2 _uv){
+
+  float aspect_ratio_ratio = u_resolution.x / u_resolution.y / (u_devicecamres.x / u_devicecamres.y);
+
+vec2 st = gl_FragCoord.xy;
+
+      if (aspect_ratio_ratio < 1.0) {
+          _uv = (st / u_resolution.xy - 0.5) * vec2(aspect_ratio_ratio, 1.0) + 0.5;
+      } else {
+          _uv = (st / u_resolution.xy - 0.5) / vec2(1.0, aspect_ratio_ratio) + 0.5;
+      }
+
+    _uv.y = (1.0 -_uv.y) * step(u_safari,0.9) + _uv.y * step(0.9,u_safari);
+
+return _uv;
+}
+
+
+
 
 void main() {
 
@@ -68,18 +90,20 @@ vec2 mousepip = gl_FragCoord.xy - (u_resolution.xy) * vec2(u_pip_mouse.x,1.0 - u
 vec2 pip_pos = u_pip;
 
  vec2 st = uv;
- st = 1.0 - st;
+ vec2 st2 = uv;
 
-
-  uv -= vec2(0.5);
-    // rotate the space
-    uv = rotate2d(0.25*PI ) * uv;
-    // move it back to the original place
-  uv += vec2(0.5);
+st.x = 1.0 - st.x;
 
   st -= pip_pos;
 st = scale( vec2(4.0) ) * st;
 st += pip_pos;
+
+st2 = 1.0 - st2;
+
+  st2 -= pip_pos;
+st2 = scale( vec2(4.0) ) * st2;
+st2 += pip_pos;
+
 
   vec3 pix = u_color/255.0;
 
@@ -92,10 +116,8 @@ st += pip_pos;
   vec4 mousecol2 = vec4(1.0);
 
   vec4 pip = texture2D(tex1,st).rgba;
-  //float b = box(st,vec2(res.x*0.5, res.y)*2.2, 0.01);
 
-
-  float b = roundBox(st,0.4);
+  float b = roundBox(st2,0.4);
 
  vec4 bg = vec4(1.0,1.0,1.0,0.0);
 
@@ -103,13 +125,12 @@ st += pip_pos;
 
 vec4 pip2 = mix(pip,mousecol,1.0 - mousecirc2);
 
-
- vec4 outc = mix(colout,pip2,b);
+vec4 outc = mix(colout,pip2,b);
 
 
 
 
 //vec3 colfinal = mix(vec3(0.0),colout,u_lerp2);
 
-  gl_FragColor = vec4(outc);
+  gl_FragColor = vec4(pip);
 }

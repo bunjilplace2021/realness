@@ -95,7 +95,20 @@ function pipShaderDraw() {
 	pipShader.setUniform('u_mouse', [mx, my]);
 	pipShader.setUniform('u_pip', [pip_x, pip_y]);
 	pipShader.setUniform('u_pip_mouse', [pip_mx, pip_my]);
-	pipShader.setUniform('tex1', pixelpg);
+	pipShader.setUniform('tex1', cam);
+	pipShader.setUniform('u_lerp', 1); //map(lerp_amount, 0, 50, 0, 1)
+	pipShader.setUniform('u_safari', isSafari ? 1 : 0);
+	// lets just send the cam to our shader as a uniform
+	if (!isMobile) {
+		//check camera and device orientation on mobile
+		pipShader.setUniform('u_devicecamres', [cam.width, cam.height]);
+	} else {
+		if (height > width) {
+			pipShader.setUniform('u_devicecamres', [cam.width, cam.height]);
+		} else {
+			pipShader.setUniform('u_devicecamres', [cam.height, cam.width]);
+		}
+	}
 	pipShader.setUniform('u_color', [backgroundcol.levels[0], backgroundcol.levels[1], backgroundcol.levels[2]]);
 
 	// rect gives us some geometry on the screen
