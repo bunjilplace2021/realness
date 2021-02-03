@@ -52,7 +52,7 @@ class GrainSynth {
       if (window.safari) {
         this.grains[i] = new GrainPlayer({
           url: this.buffer,
-          sampleRate: 11025,
+          sampleRate: 8000,
         });
         this.grains[i].channelCount = 1;
         this.grains[i].unsync();
@@ -268,7 +268,7 @@ class GrainSynth {
         this.grains[0].buffer.duration
       ),
     };
-    this.setClockFrequency(Math.random() * 1, 10);
+    this.setClockFrequency(Math.random() * 0.5, 10);
     //set values to random values
     // TODO: Interpolate between current and random values
     this.setCurrentValues(randomValues);

@@ -37,10 +37,6 @@ class FireBaseAudio {
 
   async listAll() {
     this.files = await this.storageRef.list();
-
-    if (this.suffix === "aac") {
-      this.getAacFiles();
-    }
   }
   async getAacFiles() {
     return new Promise(async (resolve, reject) => {

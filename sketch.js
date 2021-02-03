@@ -170,7 +170,7 @@ function particle_draw(p) {
     p.blendMode(BLEND);
     p.background(0);
     p.blendMode(BLEND);
-  //  p.clear();
+    //  p.clear();
   }
 
   ps.run(p);
@@ -193,13 +193,13 @@ function particle_draw(p) {
     mousecount = mousecount + 1;
     if (mousecount === 30 && mousePressed) {
       window.dispatchEvent(window.down);
-if (window.recordingLimitReached){
-  document.getElementById("record_limit").style.display = "block";
-  setTimeout(function time() {
-    document.getElementById("record_limit").style.display = "none";
-    initinst = false;
-  }, 2000);
-}
+      if (window.recordingLimitReached) {
+        document.getElementById("record_limit").style.display = "block";
+        setTimeout(function time() {
+          document.getElementById("record_limit").style.display = "none";
+          initinst = false;
+        }, 2000);
+      }
     }
   }
 }
@@ -293,39 +293,31 @@ function infoInstructions() {
     document.getElementById("top").style.paddingLeft = "1em";
     document.getElementById("menu_txt").style.display = "block";
     mouseinst();
-
   }
 }
 
-
-function mouseinst(){
-
-if (!isMobile){
-
-if (initinst) {
-  document.getElementById("mouse_inst").style.display = "block";
-  setTimeout(function time() {
-    document.getElementById("mouse_inst").style.display = "none";
-    initinst = false;
-  }, 2000);
-} else {
-    document.getElementById("mouse_inst").style.display = "none";
-
-
-}
-}else {
-  if (initinst) {
-    document.getElementById("tap_inst").style.display = "block";
-    setTimeout(function time() {
-      document.getElementById("tap_inst").style.display = "none";
-      initinst = false;
-    }, 2000);
+function mouseinst() {
+  if (!isMobile) {
+    if (initinst) {
+      document.getElementById("mouse_inst").style.display = "block";
+      setTimeout(function time() {
+        document.getElementById("mouse_inst").style.display = "none";
+        initinst = false;
+      }, 2000);
+    } else {
+      document.getElementById("mouse_inst").style.display = "none";
+    }
   } else {
+    if (initinst) {
+      document.getElementById("tap_inst").style.display = "block";
+      setTimeout(function time() {
+        document.getElementById("tap_inst").style.display = "none";
+        initinst = false;
+      }, 2000);
+    } else {
       document.getElementById("tap_inst").style.display = "none";
-
-
-}
-}
+    }
+  }
 }
 
 function didactic() {
@@ -373,14 +365,13 @@ function cameratoggle() {
   if (!instload_toggle) {
     webc.classList.toggle("fa-circle-o");
 
-     var x = document.getElementById("spantxt");
+    var x = document.getElementById("spantxt");
 
     if (x.innerHTML === "view webcam") {
       x.innerHTML = "view artwork";
     } else {
       x.innerHTML = "view webcam";
     }
-
 
     if (webcam) {
       pixelShaderToggle = !pixelShaderToggle;
@@ -403,11 +394,11 @@ function fullScreenMenu() {
     fullicons.classList.toggle("fa-compress");
     var x = document.getElementById("fullspantxt");
 
-   if (x.innerHTML === "fullscreen mode") {
-     x.innerHTML = "exit fullscreen";
-   } else {
-     x.innerHTML = "fullscreen mode";
-   }
+    if (x.innerHTML === "fullscreen mode") {
+      x.innerHTML = "exit fullscreen";
+    } else {
+      x.innerHTML = "fullscreen mode";
+    }
     document.body.scrollTop = 0; // <-- pull the page back up to the top
     document.body.style.overflow = "hidden";
   } else {

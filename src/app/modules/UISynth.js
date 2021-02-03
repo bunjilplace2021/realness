@@ -1,4 +1,4 @@
-import { FMSynth, Frequency, PolySynth, Gain, now } from "tone";
+import { FMSynth, Frequency, PolySynth, Gain, now, AMSynth } from "tone";
 
 // PRECOMPUTE RANDOM VALUES FOR PERFORMANCE
 class UISynth {
@@ -10,14 +10,13 @@ class UISynth {
 
     this.uiSynth = new PolySynth({
       polyphony: 3,
-      voice: FMSynth,
+      voice: AMSynth,
       maxPolyphony: 3,
     });
     this.uiSynth.set({
       envelope: {
         attack: 0,
         decay: 0.1,
-
         release: 0.5,
       },
       harmonicity: 2,

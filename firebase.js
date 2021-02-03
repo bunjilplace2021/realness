@@ -33,9 +33,6 @@ function gotData(data) {
   var keys = Object.keys(test);
 
   //   FIRE EVENT LISTENER
-  if (!window.isMuted) {
-    window.debounce(pixelSoundEvent(~~test.mouseX_loc, ~~test.mouseY_loc), 10);
-  }
 
   ps.addParticle(
     test.mouseX_loc,
@@ -47,6 +44,9 @@ function gotData(data) {
     test.touchTime,
     test.uuid
   );
+  if (!window.isMuted) {
+    window.debounce(pixelSoundEvent(test.mouseX_loc, test.mouseY_loc), 100);
+  }
 }
 
 function errData(err) {

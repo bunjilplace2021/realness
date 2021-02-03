@@ -14,6 +14,8 @@ import {
   Noise,
   setContext,
   start,
+  AMOscillator,
+  Oscillator,
 } from "tone";
 
 // UTILITIES
@@ -30,7 +32,6 @@ import {
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
-import { attempt } from "lodash";
 
 // suspend auto generated audio context from tone import
 
@@ -79,13 +80,16 @@ process.env.NODE_ENV === "development"
 const audioOpts = {
   latencyHint: "playback",
   updateInterval: 1,
-  // lookAhead: 1,
-  bufferSize: 256,
+  lookAhead: 0.5,
+  bufferSize: 512,
   state: "suspended",
 };
+
 let soundtrackAudioCtx = new Context(audioOpts);
+soundtrackAudioCtx.clockSource = "worker";
 let muteClicked = 0;
 let sampleRate = 44100;
+let aacFiles = [];
 soundtrackAudioCtx.name = "Playback Context";
 
 /*
@@ -122,6 +126,7 @@ const initSound = async () => {
   soundLog("Audio context is: " + soundtrackAudioCtx.rawContext.state);
   soundLog("Asking for microphone permissions");
   await r.getPermissions();
+  window.canvas.getContext("2d").imageSmoothingEnabled = false;
 };
 
 const loadFallback = async () => {
@@ -219,63 +224,27 @@ const reloadBuffers = async (customBuffer = null) => {
   const mp3Supported = await isMp3Supported;
   // fetch new samples from database and load them into existing buffers
   if (!customBuffer) {
-    synths.forEach(async (synth) => {
-      await f.getRandomSample();
-      let buf;
-      let newBuf;
-      if (mp3Supported) {
-        let playBuf;
-        buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-        soundLog(buf);
-        if (checkFileVolume(buf) > 0) {
-          playBuf = buf;
-          soundLog("clip is not silent, continuing");
-        } else {
-          await f.getRandomSample();
-          buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-          playBuf = buf;
-        }
-        try {
-          const resampled = await resampleBuffer(playBuf, sampleRate);
-          //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
-          newBuf = removeZeroValues(resampled.getChannelData(0));
-          // newBuf = resampled.getChannelData(0);
-        } catch (e) {
-          soundLog("reverting to original buffer");
-          newBuf = buf.getChannelData(0);
-        }
-        synth.buffer.copyToChannel(newBuf, 0, 0);
-      } else {
-        // MP3 is not supported, load aac files
-        const randomurl = await f.storageRef
-          .child(randomChoice(f.fileNames))
-          .getDownloadURL();
-
-        console.log("trying to load aac file from " + randomurl);
-
-        buf = await aacDecode(randomurl, soundtrackAudioCtx);
-        buf.idealGain = console.log("new buffer: " + buf);
-        synth.buffer = buf;
-        synth.grainOutput.gain.value = getIdealVolume(buf) / numVoices;
-      }
+    let returnedBuffers = await getBuffers(mp3Supported);
+    synths.forEach(async (synth, i) => {
+      synth.grainOutput.gain.value = returnedBuffers[i].idealGain / numSources;
+      synth.buffer.copyToChannel(returnedBuffers[i].getChannelData(0), 0, 0);
       synth.randomInterpolate();
-      soundLog("reloaded buffers");
+      returnedBuffers = [];
     });
   } else {
     if (customBuffer) {
-      const resampled = await resampleBuffer(customBuffer, sampleRate);
-
+      console.log("CUSTOM BUFFER!");
+      console.log(customBuffer);
+      customBuffer.idealGain = getIdealVolume(customBuffer);
       synths.forEach((synth) => {
         try {
-          synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
+          synth.grainOutput.gain.value = customBuffer.idealGain / numSources;
+          synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
         } catch (error) {
-          synth.buffer = resampled;
+          console.log("error loading user buffer, continuing");
         }
-
         synth.setLoopStart(0);
         synth.randomInterpolate();
-        // null the buffer so that doesn't try to reload the user buffer on next loop
-        // customBuffer = null;
       });
     }
   }
@@ -285,11 +254,12 @@ const reloadBuffers = async (customBuffer = null) => {
 let radiuses = 0;
 window.addEventListener("radius_reached", () => {
   radiuses++;
+  let timeout;
 
-  if (radiuses % 20 === 0) {
-    console.log("radius reached");
+  timeout = setTimeout(() => {
     reloadBuffers();
-  }
+  }, 1000);
+  timeout && clearTimeout(timeout);
 });
 
 // method to play UI sounds
@@ -297,11 +267,8 @@ const UISound = () => {
   window.addEventListener("pixel_added", (e) => {
     const { pixelX, pixelY } = e.data;
     soundLog("pixel added");
-
-    let timeout;
-    timeout && clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      !window.isMuted && u.play([pixelX, window.height - pixelY]);
+    setTimeout(() => {
+      !window.isMuted && u.play([~~pixelX, window.height - ~~pixelY]);
     }, 33);
   });
 };
@@ -380,12 +347,14 @@ window.addEventListener("released", () => {
 });
 // SETUP subOscillator
 const subOscillator = () => {
-  subOsc = new FMOscillator({
+  subOsc = new AMOscillator({
     frequency: 40,
     harmonicity: 0.5,
     detune: 0,
   });
-  subOsc.filter = new Filter();
+  subOsc.filter = new Filter({
+    frequency: 80,
+  });
   subOsc.connect(subOsc.filter);
   const noise = new Noise({
     type: "pink",
@@ -395,95 +364,85 @@ const subOscillator = () => {
   masterBus.connectSource(subOsc.filter);
   subOsc.volume.value = -64;
   subOsc.volume.targetRampTo(-28, 10);
-  subOsc.filter.frequency.value = 60;
+
   subOsc.filter.gain.value = 10;
-  noise.start("+1");
-  subOsc.start("+1");
+  noise.start("+2");
+  subOsc.start("+2");
 };
+
+const getBuffers = async (mp3Supported) => {
+  soundLog(`mp3 is ${mp3Supported ? "" : "not "}supported in this browser`);
+  if (f.files == undefined) {
+    await f.listAll();
+  }
+
+  return new Promise(async (resolve, reject) => {
+    let bufPromises = [];
+    let urls = [];
+    if (mp3Supported) {
+      urls = await Promise.all(
+        Array.from({ length: numSources }, () =>
+          randomChoice(f.files.items).getDownloadURL()
+        )
+      );
+      urls.forEach((url) => {
+        bufPromises.push(fetchSample(url, soundtrackAudioCtx));
+      });
+    } else {
+      if (f.fileNames === undefined) {
+        await f.getAacFiles();
+      }
+
+      let urlPromises = Array.from({ length: numSources }, () => {
+        let url = randomChoice(f.fileNames);
+        return f.storageRef.child(url).getDownloadURL();
+      });
+      urls = await Promise.all(urlPromises);
+      urls.forEach((url) =>
+        bufPromises.push(aacDecode(url, soundtrackAudioCtx))
+      );
+    }
+
+    let buffers = await Promise.all(bufPromises);
+    buffers.forEach((buffer) => (buffer.idealGain = getIdealVolume(buffer)));
+    resolve(buffers);
+  });
+};
+// ! TODO refactor & add checks
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
   return new Promise(async (resolve, reject) => {
-    await f.listAll();
     const mp3Supported = await isMp3Supported;
-    if (!mp3Supported) {
-      const aacFiles = await f.getAacFiles();
+    let returnedBuffers = await getBuffers(mp3Supported);
+    console.log(returnedBuffers);
 
-      numVoices = 8;
-    }
-    soundLog(`mp3 is ${mp3Supported ? "" : "not "}supported in this browser`);
     for (let i = 0; i < numSources; i++) {
-      //   await f.getRandomSample();
-      let buf;
-      let playBuf;
-      let resampled;
-      let bufGain;
-      if (mp3Supported) {
-        buf = await fetchSample(
-          await randomChoice(f.files.items).getDownloadURL(),
-          soundtrackAudioCtx
-        );
-        if (buf && checkFileVolume(buf) > 0) {
-          playBuf = buf;
-          soundLog("clip is not silent, continuing");
-        } else {
-          soundLog("clip is silent: reloading");
-          buf = await fetchSample(
-            await randomChoice(f.files.items).getDownloadURL(),
-            soundtrackAudioCtx
-          );
-          soundLog(buf);
-          playBuf = buf;
-        }
-      } else {
-        const randomurl = await f.storageRef
-          .child(randomChoice(f.fileNames))
-          .getDownloadURL();
+      synths.push(
+        new GrainSynth(returnedBuffers[i], soundtrackAudioCtx, numVoices)
+      );
+      synths.forEach((synth) => {
+        synth.filter.frequency.value = 220;
+        synth.filter.gain.value = 10;
+        returnedBuffers[i].idealGain
+          ? (synth.grainOutput.gain.value =
+              returnedBuffers[i].idealGain / numSources)
+          : null; // synth.grainOutput.gain.value = 1 / numSources;
+      });
 
-        console.log("trying to load aac file from " + randomurl);
-        buf = await aacDecode(randomurl, soundtrackAudioCtx);
-
-        buf.idealGain = getIdealVolume(buf) / numVoices;
-
-        playBuf = buf;
-      }
-      if (playBuf) {
-        if (window.OfflineAudioContext) {
-          try {
-            resampled = await resampleBuffer(playBuf, sampleRate);
-            resampled = removeZeroValues(resampled);
-          } catch (e) {
-            resampled = playBuf;
-          }
-        } else {
-          resampled = playBuf;
-        }
-        synths.push(new GrainSynth(resampled, soundtrackAudioCtx, numVoices));
-
-        synths.forEach((synth) => {
-          synth.filter.frequency.value = 220;
-          synth.filter.gain.value = 10;
-          playBuf.idealGain
-            ? (synth.grainOutput.gain.value = playBuf.idealGain)
-            : null; // synth.grainOutput.gain.value = 1 / numSources;
-        });
-        window.synths = synths;
-        soundLog("Loaded GrainSynth " + (i + 1));
-      }
+      soundLog("Loaded GrainSynth " + (i + 1));
     }
 
     // debug
-    window.soundtrackAudioCtx = soundtrackAudioCtx;
     masterBus = new MasterBus(soundtrackAudioCtx);
     masterBus.connectSource(u.master);
     subOscillator();
     masterBus.lowpassFilter(5000, 1);
     window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
+    // !window.isMp3 && masterBus.delay(100, 0.9);
     !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
-
     window.synthsLoaded = true;
     muteButton.classList = [];
     changeTooltipText();
-
     muteButton.classList.add("fa", "fa-volume-off");
     muteButton.disabled = false;
     soundLog("Voices loaded");
@@ -605,10 +564,9 @@ const main = async () => {
     numSources = 1;
     numVoices = 3;
   }
-
   if (!isIphone)
     try {
-      window.isMp3 = isMp3Supported;
+      window.isMp3 = await isMp3Supported;
       await soundtrackAudioCtx.rawContext.resume();
       await loadSynths();
       UISound();
