@@ -9,7 +9,7 @@ class FireBaseAudio {
   // get total number of database entries
   // loadrandom
   // read into Blob/AudioUrl
-  constructor(ctx) {
+  constructor(ctx, fileType = "audio/mpeg-3") {
     this.firebaseConfig = {
       // Your web app's Firebase configuration
       // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -23,24 +23,51 @@ class FireBaseAudio {
       measurementId: "G-QLSEEEE02P",
     };
     // Initialize Firebase
+    if (fileType === "audio/mpeg-3") {
+      this.suffix = "mp3";
+    } else {
+      this.suffix = "aac";
+    }
     firebase.initializeApp(this.firebaseConfig);
     this.audioCtx = ctx;
     this.storage = firebase.storage();
     this.storageRef = this.storage.ref();
-    this.audioRef = this.storageRef.child(`audio-${uuidv4()}.mp3`);
+    this.audioRef = this.storageRef.child(`audio-${uuidv4()}.${this.suffix}`);
   }
 
   async listAll() {
-    this.files = await this.storageRef.listAll();
+    this.files = await this.storageRef.list();
+
+    if (this.suffix === "aac") {
+      this.getAacFiles();
+    }
   }
-  async getSample() {
-    // await this.listAll();
-    const ChosenFile = this.files.items[
-      ~~(Math.random() * this.files.items.length)
-    ];
-    this.audioFile = await ChosenFile.getDownloadURL();
+  async getAacFiles() {
+    return new Promise(async (resolve, reject) => {
+      this.filePromises = [];
+      this.fileNames = [];
+      this.files.items.forEach(async (file) => {
+        this.filePromises.push(file.getMetadata());
+      });
+      this.filesMetadata = await Promise.all(this.filePromises);
+
+      this.filesMetadata.filter((metaObject) => {
+        if (metaObject.contentType === "audio/aac") {
+          this.fileNames.push(metaObject.fullPath);
+        }
+      });
+      resolve(this.fileNames);
+    });
   }
-  async fetchSample(url) {
+  async getRandomSample() {
+    if (!this.suffix === "aac") {
+      const ChosenFile = this.files.items[
+        ~~(Math.random() * this.files.items.length)
+      ];
+      this.audioFile = await ChosenFile.getDownloadURL();
+    }
+  }
+  async downloadSample(url) {
     return fetch(url, { cors: "opaque" })
       .then((response) => response.arrayBuffer())
       .then((arrayBuffer) => this.audioCtx.decodeAudioData(arrayBuffer))
@@ -49,7 +76,8 @@ class FireBaseAudio {
 
   async uploadSample(blob) {
     // upload audio to firebase storage
-    this.uploadTask = this.audioRef.put(blob);
+
+    this.uploadTask = this.audioRef.put(blob, { contentType: blob.type });
     this.uploadTask.on(
       "state_changed",
       (snapshot) => {
@@ -65,7 +93,7 @@ class FireBaseAudio {
         this.uploadTask.snapshot.ref
           .getDownloadURL()
           .then(function (downloadURL) {
-            console.log("File available at", downloadURL);
+            window.logging && console.log("File available at", downloadURL);
           });
       }
     );

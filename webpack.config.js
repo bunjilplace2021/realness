@@ -4,7 +4,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
-  mode: "development",
+  mode: process.env.NODE_ENV,
+  devtool: false,
   entry: __dirname + "/src/app/index.js", // webpack entry point. Module to start building dependency graph
   output: {
     path: path.resolve(__dirname, "sound/"),
@@ -12,7 +13,7 @@ module.exports = {
   },
   devServer: {
     before: (app, server) => {
-      server._watch(path.join(__dirname, "."));
+      server._watch(path.join(__dirname, "./src"));
     },
     publicPath: "/sound",
     contentBase: path.resolve(__dirname, "."),
@@ -21,6 +22,10 @@ module.exports = {
     port: 3000,
     hot: true,
     stats: "errors-only",
+    watchOptions: {
+      poll: false,
+      ignored: ["node_modules"],
+    },
   },
 
   plugins: [
@@ -40,7 +45,7 @@ module.exports = {
         loader: "babel-loader",
       },
       {
-        test: /\.(mp3)$/,
+        test: /\.(mp3|aac)$/,
 
         loader: "file-loader",
       },
@@ -67,7 +72,11 @@ module.exports = {
   },
 
   optimization: {
-    minimizer: [new TerserPlugin()],
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+      }),
+    ],
 
     splitChunks: {
       cacheGroups: {

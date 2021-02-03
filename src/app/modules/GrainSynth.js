@@ -14,14 +14,13 @@ import {
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
-import { forEach } from "async";
+
 // TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
 // TODO: ADD PRESETS LOADED FROM JSON
 class GrainSynth {
   constructor(buffer, ctx, voices = 2) {
     // workaround to suspend audiocontext without warnings
     getContext().rawContext.suspend();
-    getContext().isOffline = true;
 
     this.grains = [];
     this.presets = [];
@@ -40,26 +39,26 @@ class GrainSynth {
     this.grainOutput.name = "Grain Output";
     this.filter = new Filter(10000, "lowpass", -24, 4);
     this.compressor = new Compressor({
-      ratio: 12,
-      threshold: -30,
+      ratio: 20,
+      threshold: -24,
       release: 1,
       attack: 0.003,
     });
     this.pitchShifter = new PitchShift({
       pitch: -12,
-      channelCount: 1,
+      // channelCount: 1,
     });
     for (let i = 0; i < this.numVoices; i++) {
       if (window.safari) {
         this.grains[i] = new GrainPlayer({
           url: this.buffer,
+          sampleRate: 11025,
         });
+        this.grains[i].channelCount = 1;
+        this.grains[i].unsync();
       } else {
         this.grains[i] = new GrainPlayer(this.buffer);
       }
-
-      // this.grains[i].buffer.toMono();
-      this.grains[i].channelCount = 1;
     }
 
     this.setupMaster();
@@ -93,8 +92,16 @@ class GrainSynth {
     this.output.gain.setValueAtTime(0.7 / this.numVoices, now());
     this.pitchShifter.windowSize = 1;
     this.filter.connect(this.compressor);
-    this.compressor.connect(this.pitchShifter);
-    this.pitchShifter.connect(this.output);
+
+    if (window.isMp3) {
+      this.compressor.connect(this.pitchShifter);
+      this.pitchShifter.connect(this.output);
+    } else {
+      this.pitchShifter.dispose();
+      this.compressor.dispose();
+      this.filter.connect(this.output);
+    }
+
     this.output.connect(this.dest);
 
     // higher windowsize sounds better!
@@ -150,7 +157,7 @@ class GrainSynth {
   }
   setClockFrequency(val, time) {
     this.grains.forEach((grain) =>
-      grain._clock.frequency.targetRampTo(val, time)
+      grain._clock.frequency.targetRampTo(val, "+0.1")
     );
   }
 
@@ -175,37 +182,7 @@ class GrainSynth {
     this.volumeLFO.connect(this.output.gain);
     this.volumeLFO.start();
   }
-  async reverb(reverbSwitch) {
-    if (reverbSwitch) {
-      this.masterReverb = new Reverb({
-        preDelay: 0.1,
-        decay: 4,
-        wet: 1,
-      });
-      //   console.log(this.masterEffect);
-      await this.masterReverb.generate();
-      this.output.chain(this.masterReverb, this.dest);
-    } else {
-      this.masterReverb && this.masterReverb.disconnect();
-    }
-  }
-  interpolateBetween(from, to, step) {
-    //  check if from is greater than to and create array to ramp down to that value by step
-    // from = 1, to = 3
-    // from < to
-    const interpolationArray = [];
-    console.log(from, to);
-    if (from < to) {
-      const interpolationArray = [];
-      for (let i = from; i < to; i += step) {
-        interpolationArray.push(i);
-      }
-    } else {
-      for (let i = from; i > to; i = i - step) {
-        interpolationArray.push(i);
-      }
-    }
-  }
+
   // RANDOMIZATION
   randomStarts() {
     this.grains.forEach((grain) => {
@@ -268,10 +245,6 @@ class GrainSynth {
     return Array.from({ length }, () => this.randRange(min, max));
   }
 
-  lowpassFilter(frequency, resonance) {
-    this.chainEffect(this.filter);
-  }
-
   feedbackCombFilter() {
     this.combFilter = new LowpassCombFilter(0.5, 0.9, 1000);
     this.chainEffect(this.combFilter);
@@ -286,7 +259,7 @@ class GrainSynth {
     // generate random values
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
-      overlap: this.randArrayFromRange(numGrains, 0.9, 1),
+      overlap: this.randArrayFromRange(numGrains, 0.01, 1),
       grainSize: this.randArrayFromRange(numGrains, 0.001, 0.05),
       playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
       loopEnd: this.randArrayFromRange(
@@ -295,7 +268,7 @@ class GrainSynth {
         this.grains[0].buffer.duration
       ),
     };
-    this.setClockFrequency(Math.random() * 5, 10);
+    this.setClockFrequency(Math.random() * 1, 10);
     //set values to random values
     // TODO: Interpolate between current and random values
     this.setCurrentValues(randomValues);

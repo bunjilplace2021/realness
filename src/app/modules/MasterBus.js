@@ -3,13 +3,17 @@ import { Reverb, Delay, Gain, Filter, Chorus, Limiter } from "tone";
 class MasterBus {
   constructor(ctx) {
     this.input = new Gain(0.8);
-    this.limiter = new Limiter(0);
+    this.limiter = new Limiter(-12);
+
     this.effectsChain = [];
     this.ctx = ctx;
 
-    this.output = new Gain(0.8);
+    this.output = new Gain(1);
     this.dest = this.ctx.destination;
-    this.chainEffect(this.limiter);
+
+    if (window.isMp3) {
+      this.chainEffect(this.limiter);
+    }
   }
   test() {
     var oscillator = this.ctx.createOscillator();
@@ -74,7 +78,7 @@ class MasterBus {
         decay,
         wet,
       });
-      // await this.masterReverb.generate();
+      await this.masterReverb.generate();
       this.chainEffect(this.masterReverb);
     } else {
       this.masterReverb && this.removeEffect(this.masterReverb);

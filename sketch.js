@@ -4,6 +4,7 @@ var isAndroid = false;
 var pixelShaderToggle = false;
 var instruction_toggle = false;
 var didactic_toggle = false;
+var instload_toggle = true;
 
 let hideicon = false;
 
@@ -22,9 +23,21 @@ let array_limit = 20;
 let particlepg;
 
 let isSafari = false;
+let isiPhone = false;
+
+let mousecount = 0;
+let mouseIsReleased = false;
+
+let initload = true;
+let initinst = true;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
+window.radiusLimit = new Event("radius_reached");
+window.down = new Event("down");
+window.released = new Event("released");
+// set minimum record length for users
+window.minimumRecordLength = 200;
 
 function centerCanvas() {
   var cnv_x = (windowWidth - width) / 2;
@@ -57,18 +70,8 @@ function preload() {
   shaderPreload();
 }
 
-function detectWebcam(callback) {
-  //check if webcam device exists and/or permission granted by device label
-  let md = navigator.mediaDevices;
-  if (!md || !md.enumerateDevices) return callback(false);
-  md.enumerateDevices().then((devices) => {
-    callback(devices.some((device) => "" != device.label));
-  });
-}
-
 function checkIfWebKit() {
   var ua = navigator.userAgent.toLowerCase();
-
   var isWebKit = false;
 
   if (
@@ -91,6 +94,12 @@ function checkIfWebKit() {
   }
 
   return isWebKit;
+}
+
+function checkIfiPhone() {
+  isiPhone = !!navigator.platform.match(/iPhone/);
+  console.log(isiPhone);
+  return isiPhone;
 }
 
 function setup() {
@@ -127,10 +136,13 @@ function setup() {
   shaderSetup();
 
   ps = new ParticleSystem(createVector(width / 2, height / 2), img);
+  init_instructions();
 }
 
 function draw() {
-  particle_draw(particlepg);
+  if (!instload_toggle) {
+    particle_draw(particlepg);
+  }
 }
 
 function shaderToggle() {
@@ -155,18 +167,10 @@ function particle_draw(p) {
     p.background(0);
     p.blendMode(ADD);
   } else {
-    p.clear();
-  }
-
-  if (!isMobile) {
-    push();
-    noCursor();
-
-    fill(255, 100);
-    noStroke();
-    ellipseMode(CENTER);
-    ellipse(mouseX, mouseY, 40);
-    pop();
+    p.blendMode(BLEND);
+    p.background(0);
+    p.blendMode(BLEND);
+  //  p.clear();
   }
 
   ps.run(p);
@@ -175,17 +179,49 @@ function particle_draw(p) {
 
   shaderDraw();
 
+  if (pixelShaderToggle) {
+    pipShaderDraw();
+  }
+
   image(particlepg, 0, 0);
 
   if (pixelShaderToggle) {
-    //  image(backgroundpg, 0, 0);
     image(pippg, 0, 0);
+  }
+
+  if (mouseIsPressed) {
+    mousecount = mousecount + 1;
+    if (mousecount === 30 && mousePressed) {
+      window.dispatchEvent(window.down);
+if (window.recordingLimitReached){
+  document.getElementById("record_limit").style.display = "block";
+  setTimeout(function time() {
+    document.getElementById("record_limit").style.display = "none";
+    initinst = false;
+  }, 2000);
+}
+    }
   }
 }
 
 function mousePressed() {
+  // dispatchevent to sound sketch
+
   //sample and upload pixel to firebase
   shaderMousePressed();
+  mouseIsReleased = false;
+  initload = false;
+}
+
+function mouseReleased() {
+  // dispatch event to sound sketch
+  let timeout;
+  timeout && clearTimeout(timeout);
+
+  window.dispatchEvent(window.released);
+
+  mousecount = 0;
+  mouseIsReleased = true;
 }
 
 function keyPressed() {
@@ -224,10 +260,16 @@ function windowResized() {
 function infoInstructions() {
   instruction_toggle = !instruction_toggle;
 
-  menuicon.classList.toggle("fa-window-close");
+  if (instload_toggle){
+  document.getElementById("menu_txt").style.display = "block";
+  myLinks.style.display = "none";
+}else{
   myLinks.style.display = "block";
+}
 
-  // if (pixelShaderToggle) {
+  menuicon.classList.toggle("fa-window-close");
+
+
   document.getElementById("top").style.backgroundColor =
     "rgba(127, 127, 127, 0.2)";
   document.getElementById("top").style.webkitBackdropFilter = "blur(30px)";
@@ -247,35 +289,86 @@ function infoInstructions() {
     myLinks.style.background = "none";
     myInfo.style.overflowY = "hidden";
     didactic_toggle = false;
+    instload_toggle = false;
+    instructions.style.display = "none";
+    document.getElementById("top").style.height = "auto";
+    instructions.style.overflowY = "hidden";
     document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.0)";
     document.getElementById("top").style.webkitBackdropFilter = "blur(0px)";
     document.getElementById("top").style.backdropFilter = "blur(0px)";
     document.getElementById("top").style.height = "auto";
     document.getElementById("top").style.paddingLeft = "1em";
     document.getElementById("menu_txt").style.display = "block";
+    mouseinst();
+
   }
+}
+
+
+function mouseinst(){
+
+if (!isMobile){
+
+if (initinst) {
+  document.getElementById("mouse_inst").style.display = "block";
+  setTimeout(function time() {
+    document.getElementById("mouse_inst").style.display = "none";
+    initinst = false;
+  }, 2000);
+} else {
+    document.getElementById("mouse_inst").style.display = "none";
+
+
+}
+}else {
+  if (initinst) {
+    document.getElementById("tap_inst").style.display = "block";
+    setTimeout(function time() {
+      document.getElementById("tap_inst").style.display = "none";
+      initinst = false;
+    }, 2000);
+  } else {
+      document.getElementById("tap_inst").style.display = "none";
+
+
+}
+}
 }
 
 function didactic() {
   didactic_toggle = !didactic_toggle;
+  instload_toggle = false;
+
   myInfo.style.display = "block";
   myInfo.style.overflowY = "scroll";
-  //myInfo.style.background = "rgba(127, 127, 127, 0.2)";
+
+  instructions.style.display = "none";
+  document.getElementById("top").style.height = "auto";
+  instructions.style.overflowY = "hidden";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
     document.getElementById("top").style.height = "100%";
-    //  myInfo.style.background = "rgba(127, 127, 127, 0.2)";
-    //  document.getElementById("myInfo").style.webkitBackdropFilter = "blur(30px)";
-    //  document.getElementById("myInfo").style.backdropFilter = "blur(30px)";
-    //  myInfo.style.overflowY = "scroll";
   } else {
     myInfo.style.display = "none";
     document.getElementById("top").style.height = "auto";
-    //  myInfo.style.background = "none";
     myInfo.style.overflowY = "hidden";
-    //  document.getElementById("myInfo").style.webkitBackdropFilter = "blur(none)";
-    //  document.getElementById("myInfo").style.backdropFilter = "blur(none)";
+  }
+}
+
+function init_instructions() {
+  infoInstructions();
+
+  instructions.style.display = "block";
+  instructions.style.overflowY = "scroll";
+
+  if (instload_toggle) {
+    instructions.style.display = "block";
+    document.getElementById("top").style.height = "100%";
+  } else {
+    instructions.style.display = "none";
+    document.getElementById("top").style.height = "auto";
+    instructions.style.overflowY = "hidden";
   }
 }
 
@@ -284,14 +377,52 @@ function volumemute() {
 }
 
 function cameratoggle() {
-  pixelShaderToggle = !pixelShaderToggle;
+  if (!instload_toggle) {
+    webc.classList.toggle("fa-circle-o");
+
+     var x = document.getElementById("spantxt");
+
+    if (x.innerHTML === "view webcam") {
+      x.innerHTML = "view artwork";
+    } else {
+      x.innerHTML = "view webcam";
+    }
+
+
+    if (webcam) {
+      pixelShaderToggle = !pixelShaderToggle;
+    } else {
+      document.getElementById("camera_inst").style.display = "block";
+      setTimeout(function time() {
+        document.getElementById("camera_inst").style.display = "none";
+      }, 2000);
+    }
+  }
   //icons.classList.toggle("select");
 }
 
 function fullScreenMenu() {
-  let fs = fullscreen();
-  fullscreen(!fs);
-  fullicons.classList.toggle("fa-compress");
-  document.body.scrollTop = 0; // <-- pull the page back up to the top
-  document.body.style.overflow = "hidden";
+  checkIfiPhone();
+
+  if (!isiPhone) {
+    let fs = fullscreen();
+    fullscreen(!fs);
+    fullicons.classList.toggle("fa-compress");
+    var x = document.getElementById("fullspantxt");
+
+   if (x.innerHTML === "fullscreen mode") {
+     x.innerHTML = "exit fullscreen";
+   } else {
+     x.innerHTML = "fullscreen mode";
+   }
+    document.body.scrollTop = 0; // <-- pull the page back up to the top
+    document.body.style.overflow = "hidden";
+  } else {
+    if (width < height) {
+      document.getElementById("iPhone").style.display = "block";
+      setTimeout(function time() {
+        document.getElementById("iPhone").style.display = "none";
+      }, 2000);
+    }
+  }
 }

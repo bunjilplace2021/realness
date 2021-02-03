@@ -1,3 +1,11 @@
+//  DEBOUNCE UI SOUNDS FOR PERFORMANCE
+function pixelSoundEvent(pixelX, pixelY) {
+  window.pixelAddEvent.data = {
+    pixelX,
+    pixelY,
+  };
+  window.dispatchEvent(window.pixelAddEvent);
+}
 function firebasesetup() {
   var firebaseConfig = {
     apiKey: "AIzaSyAbb8-7skMg99nzAlvUaqR6vfQvD7q_7Vs",
@@ -17,19 +25,22 @@ function firebasesetup() {
 
   var ref = database.ref("test3").limitToLast(array_limit);
   ref.on("child_added", gotData, errData);
-
   //feedRef = firebase.database().ref().child('feed').child(user_id).limitToLast(100);
 }
 
 function gotData(data) {
-  window.dispatchEvent(window.pixelAddEvent);
   var test = data.val();
   var keys = Object.keys(test);
+
+  //   FIRE EVENT LISTENER
+  if (!window.isMuted) {
+    window.debounce(pixelSoundEvent(~~test.mouseX_loc, ~~test.mouseY_loc), 10);
+  }
 
   ps.addParticle(
     test.mouseX_loc,
     test.mouseY_loc,
-    0,
+    test.rand,
     test.colour_loc,
     test.deviceWidth,
     test.deviceHeight,
