@@ -1,5 +1,11 @@
 let particlecount;
-
+function pixelSoundEvent(pixelX, pixelY) {
+  window.pixelAddEvent.data = {
+    pixelX,
+    pixelY,
+  };
+  window.dispatchEvent(window.pixelAddEvent, false);
+}
 class ParticleSystem {
   constructor(position, img_) {
     this.origin = position.copy();
@@ -14,6 +20,11 @@ class ParticleSystem {
       particlecount = this.particles.length;
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
+      //  DEBOUNCE UI SOUNDS FOR PERFORMANCE
+
+      if (!window.isMuted) {
+        pixelSoundEvent(this.origin.x, this.origin.y);
+      }
     }
   }
 

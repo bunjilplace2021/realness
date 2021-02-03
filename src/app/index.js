@@ -9,29 +9,32 @@ import UISynth from "./modules/UISynth";
 import {
   getContext,
   Context,
-  FMOscillator,
   Filter,
   Noise,
   setContext,
   start,
   AMOscillator,
-  Oscillator,
 } from "tone";
 
+import {
+  changeMuteButton,
+  changeTooltipText,
+  changetoUnmute,
+} from "./UIFunctions";
 // UTILITIES
 import {
+  checkMP3,
   debounce,
   aacDecode,
   fetchSample,
   mapValue,
-  resampleBuffer,
   soundLog,
   randomChoice,
-  checkFileVolume,
   getIdealVolume,
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
+import { result } from "lodash";
 
 // suspend auto generated audio context from tone import
 
@@ -40,22 +43,12 @@ window.debounce = debounce;
 
 // CHECK USER DEVICE/BROWSER
 const isMobile = window.innerWidth < 600;
-let fallBack;
-window.safari =
-  navigator.userAgent.includes("Safari") &&
-  !navigator.userAgent.includes("Chrome");
-
-let isIphone =
-  navigator.userAgent.includes("iPhone") &&
-  navigator.userAgent.includes("Safari");
-
-isIphone = false;
 let isMp3Supported = navigator.mediaCapabilities
   .decodingInfo({
     type: "file",
     audio: { contentType: "audio/mp3" },
   })
-  .then(function (result) {
+  .then((result) => {
     return result.supported;
   });
 
@@ -63,7 +56,6 @@ let isMp3Supported = navigator.mediaCapabilities
 let recordingAllowed = false;
 let recordLimit = isMobile ? 1 : 3;
 
-isIphone ? (recordLimit = 0) : null;
 let recordings = 0;
 let recordedBuffer = null;
 window.recordingLimitReached = false;
@@ -76,47 +68,19 @@ process.env.NODE_ENV === "development"
   : (window.logging = false);
 
 // create own audio context
-
 const audioOpts = {
   latencyHint: "playback",
   updateInterval: 1,
   lookAhead: 0.5,
-  bufferSize: 512,
+  bufferSize: 1024,
   state: "suspended",
 };
 
 let soundtrackAudioCtx = new Context(audioOpts);
 soundtrackAudioCtx.clockSource = "worker";
 let muteClicked = 0;
-let sampleRate = 44100;
-let aacFiles = [];
+
 soundtrackAudioCtx.name = "Playback Context";
-
-/*
-SAFARI FALLBACK
- */
-
-const safariPolyFill = () => {
-  safariAudioTrack = new Audio();
-  // set to safari specific audio context
-
-  if (window.webkitAudioContext) {
-    setContext(new webkitAudioContext(audioOpts));
-  }
-  window.OfflineAudioContext = window.webkitOfflineAudioContext;
-  // add polyfill for Media Recorder
-  import("audio-recorder-polyfill").then((audioRecorder) => {
-    window.MediaRecorder = audioRecorder.default;
-  });
-  window.addEventListener("touchstart", () => {
-    safariAudioTrack.autoplay = true;
-    safariAudioTrack.muted = false;
-  });
-  soundLog("loaded MediaRecorder polyfill for safari");
-};
-
-let safariAudioTrack;
-window.safari && safariPolyFill();
 
 const initSound = async () => {
   soundLog("attempting to start audio");
@@ -127,31 +91,6 @@ const initSound = async () => {
   soundLog("Asking for microphone permissions");
   await r.getPermissions();
   window.canvas.getContext("2d").imageSmoothingEnabled = false;
-};
-
-const loadFallback = async () => {
-  if (typeof fallBack == "undefined") {
-    import(/* webpackChunkName:"fallback" */ "./samples/fallback.mp3").then(
-      (file) => {
-        fallBack = file.default;
-        safariAudioTrack.src = fallBack;
-        safariAudioTrack.load();
-
-        safariAudioTrack.loop = true;
-        safariAudioTrack.addEventListener("loadedmetadata", () => {
-          muteButton.classList = "";
-          muteButton.classList.add("fa-volume-off");
-          safariAudioTrack.muted = false;
-          muteButton.classList.add("fa", "fa-volume-off");
-          UISound();
-          window.synthsLoaded = true;
-        });
-        safariAudioTrack.addEventListener("onended", () => {
-          safariAudioTrack.currentTime = 0;
-        });
-      }
-    );
-  }
 };
 
 /* GLOBAL VARIABLES */
@@ -188,24 +127,12 @@ playButton.addEventListener("click", () => {
   initSound();
   playButton.style.display = "none";
   muteButton.style.display = "inline-block";
-  // attempt to autostart audio, otherwise show unmute button
 });
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = async () => {
-  //  if safari - load synths on unmute
-  // keep track of number of clicks
   muteClicked++;
   window.isMuted = !window.isMuted;
-  if (window.safari || isIphone) {
-    safariAudioTrack.muted = window.isMuted;
-    soundtrackAudioCtx.muted = window.isMuted;
-    if (muteClicked === 1) {
-      u.master.toDestination();
-      soundtrackAudioCtx.resume();
-      safariAudioTrack.play();
-    }
-  }
-  changeMuteButton(window.isMuted);
+  changeMuteButton(window.isMuted, muteButton);
   //  if synths are loaded, start audio and change DOM element
   if (window.synthsLoaded) {
     if (!window.isMuted) {
@@ -220,42 +147,11 @@ muteButton.onclick = async () => {
   }
 };
 
-const reloadBuffers = async (customBuffer = null) => {
-  const mp3Supported = await isMp3Supported;
-  // fetch new samples from database and load them into existing buffers
-  if (!customBuffer) {
-    let returnedBuffers = await getBuffers(mp3Supported);
-    synths.forEach(async (synth, i) => {
-      synth.grainOutput.gain.value = returnedBuffers[i].idealGain / numSources;
-      synth.buffer.copyToChannel(returnedBuffers[i].getChannelData(0), 0, 0);
-      synth.randomInterpolate();
-      returnedBuffers = [];
-    });
-  } else {
-    if (customBuffer) {
-      console.log("CUSTOM BUFFER!");
-      console.log(customBuffer);
-      customBuffer.idealGain = getIdealVolume(customBuffer);
-      synths.forEach((synth) => {
-        try {
-          synth.grainOutput.gain.value = customBuffer.idealGain / numSources;
-          synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
-        } catch (error) {
-          console.log("error loading user buffer, continuing");
-        }
-        synth.setLoopStart(0);
-        synth.randomInterpolate();
-      });
-    }
-  }
-};
-
 // RADIUS LIMIT LISTENER
 let radiuses = 0;
 window.addEventListener("radius_reached", () => {
   radiuses++;
   let timeout;
-
   timeout = setTimeout(() => {
     reloadBuffers();
   }, 1000);
@@ -265,6 +161,7 @@ window.addEventListener("radius_reached", () => {
 // method to play UI sounds
 const UISound = () => {
   window.addEventListener("pixel_added", (e) => {
+    e.preventDefault();
     const { pixelX, pixelY } = e.data;
     soundLog("pixel added");
     setTimeout(() => {
@@ -273,18 +170,43 @@ const UISound = () => {
   });
 };
 
+//  MAIN FUNCTIONS
+
+const reloadBuffers = async (customBuffer = null) => {
+  // fetch new samples from database and load them into existing buffers
+  if (!customBuffer) {
+    let returnedBuffers = await getBuffers(window.isMp3);
+    synths.forEach(async (synth, i) => {
+      synth.grainOutput.gain.value = returnedBuffers[i].idealGain / numSources;
+      synth.buffer.copyToChannel(returnedBuffers[i].getChannelData(0), 0, 0);
+      synth.randomInterpolate();
+      returnedBuffers = [];
+    });
+  } else {
+    console.log("CUSTOM BUFFER!");
+    console.log(customBuffer);
+    customBuffer.idealGain = getIdealVolume(customBuffer);
+    synths.forEach((synth) => {
+      try {
+        synth.grainOutput.gain.value = customBuffer.idealGain / numSources;
+        synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
+      } catch (error) {
+        console.log("error loading user buffer, continuing");
+      }
+      synth.play();
+      synth.setLoopStart(0);
+      synth.randomInterpolate();
+    });
+  }
+};
+
 const startRecording = async () => {
   return new Promise(async (resolve, reject) => {
-    if (window.MediaRecorder && recordingAllowed) {
-      //   safariAudioTrack && safariAudioTrack.pause();
+    if (window.MediaRecorder && recordingAllowed && !window.isMuted) {
       try {
         soundLog("started user recording #" + recordings);
-        // User is recording, send recording indicator to window object
         window.recording = true;
-        if (!isIphone) {
-          await r.recordChunks();
-        }
-
+        await r.recordChunks();
         resolve(true);
       } catch (error) {
         soundLog(error);
@@ -292,14 +214,13 @@ const startRecording = async () => {
       }
     } else {
       window.recording = false;
-      //   safariAudioTrack.play();
       reject(false);
       soundLog("media recording is not supported in this browser");
     }
   });
 };
 const stopRecording = async () => {
-  if (r.recording && recordingAllowed && !isIphone) {
+  if (r.recording && recordingAllowed) {
     const recordedBlob = await r.stopRecording();
     try {
       recordedBuffer = await r.loadToBuffer(recordedBlob);
@@ -308,10 +229,8 @@ const stopRecording = async () => {
     }
     reloadBuffers(recordedBuffer);
     f.uploadSample(r.audioBlob);
-    safariAudioTrack && safariAudioTrack.play();
     soundLog("stopped user recording #" + recordings);
     window.recording = false;
-    // safariAudioTrack ? (safariAudioTrack.muted = false) : null;
   } else {
     window.recording = false;
   }
@@ -350,7 +269,6 @@ const subOscillator = () => {
   subOsc = new AMOscillator({
     frequency: 40,
     harmonicity: 0.5,
-    detune: 0,
   });
   subOsc.filter = new Filter({
     frequency: 80,
@@ -364,7 +282,6 @@ const subOscillator = () => {
   masterBus.connectSource(subOsc.filter);
   subOsc.volume.value = -64;
   subOsc.volume.targetRampTo(-28, 10);
-
   subOsc.filter.gain.value = 10;
   noise.start("+2");
   subOsc.start("+2");
@@ -375,7 +292,6 @@ const getBuffers = async (mp3Supported) => {
   if (f.files == undefined) {
     await f.listAll();
   }
-
   return new Promise(async (resolve, reject) => {
     let bufPromises = [];
     let urls = [];
@@ -392,7 +308,6 @@ const getBuffers = async (mp3Supported) => {
       if (f.fileNames === undefined) {
         await f.getAacFiles();
       }
-
       let urlPromises = Array.from({ length: numSources }, () => {
         let url = randomChoice(f.fileNames);
         return f.storageRef.child(url).getDownloadURL();
@@ -402,7 +317,6 @@ const getBuffers = async (mp3Supported) => {
         bufPromises.push(aacDecode(url, soundtrackAudioCtx))
       );
     }
-
     let buffers = await Promise.all(bufPromises);
     buffers.forEach((buffer) => (buffer.idealGain = getIdealVolume(buffer)));
     resolve(buffers);
@@ -411,11 +325,8 @@ const getBuffers = async (mp3Supported) => {
 // ! TODO refactor & add checks
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
-  return new Promise(async (resolve, reject) => {
-    const mp3Supported = await isMp3Supported;
-    let returnedBuffers = await getBuffers(mp3Supported);
-    console.log(returnedBuffers);
-
+  return new Promise(async (resolve, _) => {
+    let returnedBuffers = await getBuffers(window.isMp3);
     for (let i = 0; i < numSources; i++) {
       synths.push(
         new GrainSynth(returnedBuffers[i], soundtrackAudioCtx, numVoices)
@@ -426,65 +337,54 @@ const loadSynths = async () => {
         returnedBuffers[i].idealGain
           ? (synth.grainOutput.gain.value =
               returnedBuffers[i].idealGain / numSources)
-          : null; // synth.grainOutput.gain.value = 1 / numSources;
+          : null;
       });
-
       soundLog("Loaded GrainSynth " + (i + 1));
     }
-
-    // debug
-    masterBus = new MasterBus(soundtrackAudioCtx);
-    masterBus.connectSource(u.master);
+    setupMasterBus();
     subOscillator();
-    masterBus.lowpassFilter(5000, 1);
-    window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
-    // !window.isMp3 && masterBus.delay(100, 0.9);
-    !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
-    window.synthsLoaded = true;
-    muteButton.classList = [];
-    changeTooltipText();
-    muteButton.classList.add("fa", "fa-volume-off");
-    muteButton.disabled = false;
-    soundLog("Voices loaded");
     resolve(true);
   });
 };
 
-const changeTooltipText = () => {
-  if (window.isMuted) {
-    audioTooltip.innerHTML = "unmute sound";
-  } else {
-    audioTooltip.innerHTML = "mute sound";
-  }
+const setupMasterBus = () => {
+  masterBus = new MasterBus(soundtrackAudioCtx);
+  masterBus.connectSource(u.master);
+  masterBus.lowpassFilter(5000, 1);
+  window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
+  !window.isMp3 && masterBus.delay(300, 0.9);
+  !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
+  window.synthsLoaded = true;
+  muteButton.classList = [];
+  changeTooltipText(audioTooltip);
+  changetoUnmute(muteButton);
+  soundLog("Voices loaded");
 };
 
 // method to start audio
 const startAudio = async () => {
-  changeTooltipText();
+  changeTooltipText(audioTooltip);
   if (!window.isMuted) {
     await start();
     await soundtrackAudioCtx.resume();
-    if (!isIphone) {
-      synths.forEach(async (synth, i) => {
-        // wait for all of the individual grains to load
-        await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
-        // if the synth isn't already playing...
-        window.logging && soundLog(synth);
-        if (!synth.isStopped) {
-          // setup synth parameters
-          // !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
 
-          // start the synths
-          synth.randomInterpolate();
-          synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
-          synth.output.disconnect(synth.dest);
-          masterBus.connectSource(synth.output);
-        }
-      });
-
-      runLoops();
-      subOscLoop();
-    }
+    synths.forEach(async (synth, i) => {
+      // wait for all of the individual grains to load
+      await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
+      // if the synth isn't already playing...
+      window.logging && soundLog(synth);
+      if (!synth.isStopped) {
+        // setup synth parameters
+        // !isMobile && synth.grains.forEach((grain) => (grain.volume.value = 1));
+        // start the synths
+        synth.randomInterpolate();
+        synth.play(soundtrackAudioCtx.currentTime + i * 0.05);
+        synth.output.disconnect(synth.dest);
+        masterBus.connectSource(synth.output);
+      }
+    });
+    runLoops();
+    subOscLoop();
   }
   if (soundtrackAudioCtx.state === "closed") {
     soundLog("audio context is closed by user gesture, restarting");
@@ -543,39 +443,19 @@ const restartAudio = () => {
   soundtrackAudioCtx.rawContext.resume();
 };
 
-// Change UI
-const changeMuteButton = (muted) => {
-  if (!muted) {
-    muteButton.classList.remove("fa-volume-off");
-    muteButton.classList.add("fa-volume-up");
-  } else {
-    muteButton.classList.add("fa-volume-off");
-    muteButton.classList.remove("fa-volume-up");
-  }
-};
-
 //  MAIN ///
 // load synths!
 
 const main = async () => {
-  isMp3Supported = await isMp3Supported;
-  if (!isMp3Supported) {
+  window.isMp3 = await isMp3Supported;
+  if (!window.isMp3) {
     f.suffix = "aac";
     numSources = 1;
     numVoices = 3;
   }
-  if (!isIphone)
-    try {
-      window.isMp3 = await isMp3Supported;
-      await soundtrackAudioCtx.rawContext.resume();
-      await loadSynths();
-      UISound();
-    } catch (error) {
-      loadFallback();
-    }
-  else {
-    loadFallback();
-  }
+  await soundtrackAudioCtx.rawContext.resume();
+  await loadSynths();
+  UISound();
 };
 
 // run main loop

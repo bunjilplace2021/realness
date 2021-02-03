@@ -190,6 +190,19 @@ function particle_draw(p) {
   }
 
   if (mouseIsPressed) {
+    if (mousecount === 1) {
+      function pixelSoundEvent(pixelX, pixelY) {
+        window.pixelAddEvent.data = {
+          pixelX,
+          pixelY,
+        };
+        window.dispatchEvent(window.pixelAddEvent, false);
+      }
+
+      if (!window.isMuted) {
+        pixelSoundEvent(this.origin.x, this.origin.y);
+      }
+    }
     mousecount = mousecount + 1;
     if (mousecount === 30 && mousePressed) {
       window.dispatchEvent(window.down);

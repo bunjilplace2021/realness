@@ -4,7 +4,7 @@ function pixelSoundEvent(pixelX, pixelY) {
     pixelX,
     pixelY,
   };
-  window.dispatchEvent(window.pixelAddEvent);
+  window.dispatchEvent(window.pixelAddEvent, false);
 }
 function firebasesetup() {
   var firebaseConfig = {
@@ -45,7 +45,7 @@ function gotData(data) {
     test.uuid
   );
   if (!window.isMuted) {
-    window.debounce(pixelSoundEvent(test.mouseX_loc, test.mouseY_loc), 100);
+    pixelSoundEvent(test.mouseX_loc, test.mouseY_loc);
   }
 }
 

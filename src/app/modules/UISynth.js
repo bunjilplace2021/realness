@@ -20,26 +20,21 @@ class UISynth {
         release: 0.5,
       },
       harmonicity: 2,
-      volume: 2,
+      volume: 1,
     });
     this.idx = 0;
     this.master = new Gain(0.1);
     this.uiSynth.connect(this.master);
   }
   play(notes) {
+    this.notes = notes.slice(0, this.uiSynth.maxPolyphony);
     this.idx++;
     this.uiSynth.set({
       harmonicity: this.randomValues[this.idx % this.randomValues.length],
     });
-
     try {
-      notes.forEach((note) => {
-        this.uiSynth.triggerAttackRelease(
-          Frequency(note).harmonize([0, 3, 7, 11, 13, 15, 17, 19, 21, 23]),
-          0,
-          now()
-        );
-      });
+      this.uiSynth.triggerAttackRelease(this.notes, now());
+      this.uiSynth.releaseAll();
     } catch (error) {
       this.uiSynth.releaseAll();
     }
