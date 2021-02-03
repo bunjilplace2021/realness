@@ -41,7 +41,7 @@ class Recorder {
       this.recording = true;
 
       this.mediaRecorder = new MediaRecorder(this.stream);
-      console.log(this.mediaRecorder);
+
       this.mediaRecorder.start();
       this.audioChunks = [];
       this.mediaRecorder.addEventListener("dataavailable", (event) => {

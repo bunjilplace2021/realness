@@ -31,9 +31,7 @@ class UISynth {
     this.uiSynth.set({
       harmonicity: this.randomValues[this.idx % this.randomValues.length],
     });
-    // this.uiSynth.set({
-    //   modulationIndex: this.randomValues[this.idx % this.randomValues.length],
-    // });
+
     try {
       notes.forEach((note) => {
         this.uiSynth.triggerAttackRelease(
