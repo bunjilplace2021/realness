@@ -4,7 +4,7 @@ import { FMSynth, Frequency, PolySynth, Gain, now, AMSynth } from "tone";
 class UISynth {
   constructor(ctx) {
     this.randomValues = [...Array(20)].map(() => {
-      return Math.floor(Math.random() * 12);
+      return Math.floor(Math.random() * 6);
     });
     this.ctx = ctx;
 
@@ -31,9 +31,9 @@ class UISynth {
     this.uiSynth.set({
       harmonicity: this.randomValues[this.idx % this.randomValues.length],
     });
-    this.uiSynth.set({
-      modulationIndex: this.randomValues[this.idx % this.randomValues.length],
-    });
+    // this.uiSynth.set({
+    //   modulationIndex: this.randomValues[this.idx % this.randomValues.length],
+    // });
     try {
       notes.forEach((note) => {
         this.uiSynth.triggerAttackRelease(
