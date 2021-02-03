@@ -271,7 +271,6 @@ const reloadBuffers = async (customBuffer = null) => {
         } catch (error) {
           synth.buffer = resampled;
         }
-
         synth.setLoopStart(0);
         synth.randomInterpolate();
         // null the buffer so that doesn't try to reload the user buffer on next loop
@@ -360,7 +359,7 @@ window.addEventListener("down", async () => {
     if (recordings > recordLimit) {
       window.recordingLimitReached = true;
     }
-    if (!window.recordingLimitReached) {
+    if (!window.recordingLimitReached && recordingAllowed) {
       startRecording();
     } else {
       soundLog("user recording limit reached");
