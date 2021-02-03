@@ -90,7 +90,6 @@ const initSound = async () => {
   soundLog("Audio context is: " + soundtrackAudioCtx.rawContext.state);
   soundLog("Asking for microphone permissions");
   await r.getPermissions();
-  window.canvas.getContext("2d").imageSmoothingEnabled = false;
 };
 
 /* GLOBAL VARIABLES */
@@ -100,7 +99,6 @@ let synths = [];
 window.synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx);
 let f = new FireBaseAudio(soundtrackAudioCtx);
-
 const recordLength = 500;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
 
@@ -113,11 +111,8 @@ let numVoices = isMobile ? 3 : 3;
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
 const playButton = document.querySelector("#play");
-
 // AUDIO TOOLTIP
 const audioTooltip = document.querySelector("#audiotooltip");
-
-// const recordButton = document.querySelector("#recordButton");
 
 // SUBOSCILLATOR
 let subOsc;
@@ -183,15 +178,15 @@ const reloadBuffers = async (customBuffer = null) => {
       returnedBuffers = [];
     });
   } else {
-    console.log("CUSTOM BUFFER!");
-    console.log(customBuffer);
+    soundLog("CUSTOM BUFFER!");
+    soundLog(customBuffer);
     customBuffer.idealGain = getIdealVolume(customBuffer);
     synths.forEach((synth) => {
       try {
         synth.grainOutput.gain.value = customBuffer.idealGain / numSources;
         synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
       } catch (error) {
-        console.log("error loading user buffer, continuing");
+        soundLog("error loading user buffer, continuing");
       }
       synth.play();
       synth.setLoopStart(0);
@@ -419,7 +414,6 @@ const pollValues = () => {
       synths.forEach((synth, i) => {
         synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
         let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 440, 880);
-        // console.log("setting to filter frequency" + filterFreq);
         !isMobile && synth.filter.frequency.rampTo(filterFreq, 5);
       });
       subOsc.filter.frequency.rampTo(

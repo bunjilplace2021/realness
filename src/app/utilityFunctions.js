@@ -4,7 +4,7 @@ export async function fetchSample(url, ctx, contentType = "audio/mpeg-3") {
   return fetch(url)
     .then((response) => response.arrayBuffer())
     .then((arrayBuffer) => ctx.decodeAudioData(arrayBuffer))
-    .catch((error) => console.log(error));
+    .catch((error) => soundLog(error));
 }
 
 export async function aacDecode(url, ctx) {
@@ -37,7 +37,7 @@ export async function aacDecode(url, ctx) {
       });
     }
 
-    window.logging && console.log(audioBuffer);
+    soundLog(audioBuffer);
     resolve(audioBuffer);
   });
 }
@@ -158,7 +158,7 @@ export function soundLog(str) {
 
 export function checkFileVolume(buf) {
   if (buf.getChannelData) {
-    window.logging && console.log(buf.getChannelData(0).length);
+    window.logging && soundLog(buf.getChannelData(0).length);
     if (buf.getChannelData(0).length < 65536) {
       if (Math.max(...buf.getChannelData(0)) > 0) {
         return true;

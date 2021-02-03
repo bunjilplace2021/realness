@@ -1,3 +1,5 @@
+import { soundLog } from "../utilityFunctions";
+
 class Recorder {
   constructor(length = 800, ctx) {
     this.length = length;
@@ -31,7 +33,7 @@ class Recorder {
         this.stream = stream;
         resolve(stream);
       } catch (error) {
-        console.log(error);
+        soundLog(error);
         return false;
       }
     });
@@ -55,7 +57,7 @@ class Recorder {
       this.recording = false;
       this.mediaRecorder.addEventListener("stop", () => {
         this.audioBlob = new Blob(this.audioChunks, { type: this.type });
-        console.log(this.audioBlob);
+        soundLog(this.audioBlob);
         this.audioUrl = URL.createObjectURL(this.audioBlob);
         resolve(this.audioBlob);
       });
