@@ -16,11 +16,12 @@ class UISynth {
     this.uiSynth.set({
       envelope: {
         attack: 0,
-        decay: 0.1,
-        release: 0.5,
+        decay: 0.5,
+        sustain: 0,
+        release: 0.7,
       },
       harmonicity: 2,
-      volume: 1,
+      volume: 1.5,
     });
     this.idx = 0;
     this.master = new Gain(0.1);

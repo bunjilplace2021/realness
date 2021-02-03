@@ -146,11 +146,11 @@ muteButton.onclick = async () => {
 let radiuses = 0;
 window.addEventListener("radius_reached", () => {
   radiuses++;
-  let timeout;
-  timeout = setTimeout(() => {
-    reloadBuffers();
-  }, 1000);
-  timeout && clearTimeout(timeout);
+  if (radiuses & (20 == 0)) {
+    setTimeout(() => {
+      reloadBuffers();
+    }, 1000);
+  }
 });
 
 // method to play UI sounds
@@ -317,7 +317,7 @@ const getBuffers = async (mp3Supported) => {
     resolve(buffers);
   });
 };
-// ! TODO refactor & add checks
+
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
   return new Promise(async (resolve, _) => {
@@ -362,7 +362,6 @@ const startAudio = async () => {
   if (!window.isMuted) {
     await start();
     await soundtrackAudioCtx.resume();
-
     synths.forEach(async (synth, i) => {
       // wait for all of the individual grains to load
       await synth.isGrainLoaded(synth.grains[synth.grains.length - 1]);
