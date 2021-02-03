@@ -350,7 +350,7 @@ const stopRecording = async () => {
 };
 
 window.addEventListener("down", async () => {
-  if (!recordingAllowed) {
+  if (!recordingAllowed && !window.isMuted) {
     recordingAllowed = await r.getPermissions();
     soundLog(`user has ${recordingAllowed ? "" : "not"} allowed recording.`);
   }
