@@ -39,7 +39,9 @@ class Recorder {
   async recordChunks() {
     return new Promise((resolve, reject) => {
       this.recording = true;
+
       this.mediaRecorder = new MediaRecorder(this.stream);
+      console.log(this.mediaRecorder);
       this.mediaRecorder.start();
       this.audioChunks = [];
       this.mediaRecorder.addEventListener("dataavailable", (event) => {
@@ -53,10 +55,10 @@ class Recorder {
     return new Promise((resolve, reject) => {
       this.mediaRecorder.stop();
       this.recording = false;
-      // console.log("stopped recorder");
 
       this.mediaRecorder.addEventListener("stop", () => {
         this.audioBlob = new Blob(this.audioChunks, { type: this.type });
+        console.log(this.audioBlob);
         this.audioUrl = URL.createObjectURL(this.audioBlob);
         resolve(this.audioBlob);
       });
