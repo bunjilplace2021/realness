@@ -245,15 +245,19 @@ function keyPressed() {
 }
 
 function windowResized() {
+
+let w = document.documentElement.clientWidth;
+let h = document.documentElement.clientHeight;
+
   if (!isMobile) {
     resizeCanvas(windowWidth, windowHeight);
     particlepg.resizeCanvas(windowWidth, windowHeight);
     shaderWindowResized(windowWidth, windowHeight);
   } else {
     let innerh = iosInnerHeight();
-    resizeCanvas(windowWidth, innerh);
-    particlepg.resizeCanvas(windowWidth, innerh);
-    shaderWindowResized(windowWidth, innerh);
+    resizeCanvas(w, h);
+    particlepg.resizeCanvas(w, h);
+    shaderWindowResized(w, h);
   }
 }
 
