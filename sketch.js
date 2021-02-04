@@ -255,9 +255,9 @@ let h = document.documentElement.clientHeight;
     shaderWindowResized(windowWidth, windowHeight);
   } else {
     let innerh = iosInnerHeight();
-    resizeCanvas(w, h);
-    particlepg.resizeCanvas(w, h);
-    shaderWindowResized(w, h);
+    resizeCanvas(w, innerh);
+    particlepg.resizeCanvas(w, innerh);
+    shaderWindowResized(w, innerh);
   }
 }
 
