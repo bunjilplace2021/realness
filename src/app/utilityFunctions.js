@@ -1,3 +1,4 @@
+import { reject } from "lodash";
 import { decodeAudioData } from "standardized-audio-context";
 
 export async function fetchSample(url, ctx, contentType = "audio/mpeg-3") {
@@ -100,33 +101,44 @@ export function isBetween(x, min, max) {
 }
 
 export function getIdealVolume(buffer) {
-  // TODO: ADD GETCHANNELDATA CHECK
-  const decodedBuffer = buffer.getChannelData(0);
-  const sliceLen = Math.floor(buffer.sampleRate * 0.05);
-  let averages = [];
-  let sum = 0.0;
-  for (var i = 0; i < decodedBuffer.length; i++) {
-    sum += decodedBuffer[i] ** 2;
-    if (i % sliceLen === 0) {
-      sum = Math.sqrt(sum / sliceLen);
-      averages.push(sum);
-      sum = 0;
+  return new Promise((resolve, reject) => {
+    // TODO: ADD GETCHANNELDATA CHECK
+    if (!buffer.getChannelData) {
+      soundLog("buffer is invalid. Skipping");
+      reject(false);
     }
-  }
-  // Ascending sort of the averages array
-  averages.sort((a, b) => a - b);
-  // Take the average at the 95th percentile
-  let a = averages[Math.floor(averages.length * 0.95)];
-  let gain = 1.0 / a;
-  // clamping
-  //   gain = Math.max(gain, 0.02);
-  // Turn down super loud sounds
-  if (gain <= 10.0) {
-    gain = gain / 2;
-  }
-  gain = Math.min(gain, 1500.0);
+    const decodedBuffer = buffer.getChannelData(0);
+    const sliceLen = Math.floor(buffer.sampleRate * 0.05);
+    let averages = [];
+    let sum = 0.0;
+    for (var i = 0; i < decodedBuffer.length; i++) {
+      sum += decodedBuffer[i] ** 2;
+      if (i % sliceLen === 0) {
+        sum = Math.sqrt(sum / sliceLen);
+        averages.push(sum);
+        sum = 0;
+      }
+    }
+    // Ascending sort of the averages array
+    averages.sort((a, b) => a - b);
+    // Take the average at the 95th percentile
+    let a = averages[Math.floor(averages.length * 0.95)];
+    let gain = 1.0 / a;
+    // clamping
+    //   gain = Math.max(gain, 0.02);
+    // Turn down super loud sounds
+    if (gain <= 15.0) {
+      gain = gain / 2;
+    }
+    if (gain <= 1.0) {
+      gain = gain / 4;
+    }
+    gain = Math.min(gain, 5000.0);
 
-  return gain / 10.0;
+    soundLog(`Adjusted gain x ${gain / 10}`);
+
+    resolve(gain / 10.0);
+  });
 }
 export function safariPolyFill(safariAudioTrack) {
   safariAudioTrack = new Audio();

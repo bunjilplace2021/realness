@@ -36,7 +36,6 @@ class Particle {
     this.recordcount = 0.0;
     this.initload = initload;
     this.outerDiam = 0;
-
   }
 
   colour() {
@@ -97,14 +96,17 @@ class Particle {
   }
 
   holdevent(p) {
-
-
     if (window.recording && this.duration < 51 && this.firstrun) {
       this.recording = true;
     }
 
-    if (this.UUID == uuid && this.recording && this.active && this.recordcount == 0 && window.recordingLimitReached == false) {
-
+    if (
+      this.UUID == uuid &&
+      this.recording &&
+      this.active &&
+      this.recordcount == 0 &&
+      window.recordingLimitReached == false
+    ) {
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
         if (this.diam > 0) {
@@ -120,9 +122,8 @@ class Particle {
       if (this.outerDiam >= 500) {
         this.recordcount = this.recordcount + 1;
       }
-
+    }
   }
-}
 
   run(p) {
     this.update();
@@ -217,10 +218,6 @@ class Particle {
       this.intersect = 0.0;
       this.initload = false;
       initload = false; //global flag
-
-      // dispatch radiusLimit event
-      window.dispatchEvent(window.radiusLimit);
-
     }
   }
 
@@ -258,6 +255,12 @@ class Particle {
 
   isDead() {
     if (!this.alive && !this.active) {
+      console.log("pixel is dead");
+      // setTimeout makes it async
+      setTimeout(() => {
+        window.dispatchEvent(window.radiusLimit);
+      });
+
       return true;
     } else {
       return false;

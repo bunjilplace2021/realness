@@ -46,6 +46,7 @@ class Recorder {
       this.audioChunks = [];
       this.mediaRecorder.addEventListener("dataavailable", (event) => {
         this.audioChunks.push(event.data);
+
         resolve(true);
       });
     });

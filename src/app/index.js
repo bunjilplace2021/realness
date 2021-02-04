@@ -77,6 +77,8 @@ const audioOpts = {
 };
 
 let soundtrackAudioCtx = new Context(audioOpts);
+const sampleRate = soundtrackAudioCtx.sampleRate;
+
 soundtrackAudioCtx.clockSource = "worker";
 let muteClicked = 0;
 
@@ -96,17 +98,23 @@ const initSound = async () => {
 setContext(soundtrackAudioCtx);
 let masterBus;
 let synths = [];
-window.synthsLoaded = false;
-const u = new UISynth(soundtrackAudioCtx);
-let f = new FireBaseAudio(soundtrackAudioCtx);
-const recordLength = 500;
-let r = new Recorder(recordLength, soundtrackAudioCtx);
-
 // number of different sources to use
+
 let numSources = isMobile ? 1 : 3;
 
 // number of voices per synth
 let numVoices = isMobile ? 3 : 3;
+if (navigator.deviceMemory) {
+  soundLog(navigator.deviceMemory);
+  numSources = navigator.deviceMemory / 4;
+  numVoices = navigator.deviceMemory / 2;
+}
+
+window.synthsLoaded = false;
+const u = new UISynth(soundtrackAudioCtx, numVoices);
+let f = new FireBaseAudio(soundtrackAudioCtx);
+const recordLength = 500;
+let r = new Recorder(recordLength, soundtrackAudioCtx);
 
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
@@ -144,12 +152,13 @@ muteButton.onclick = async () => {
 
 // RADIUS LIMIT LISTENER
 let radiuses = 0;
-window.addEventListener("radius_reached", () => {
+window.addEventListener("radius_reached", async () => {
   radiuses++;
-  if (radiuses & (20 == 0)) {
-    setTimeout(() => {
-      reloadBuffers();
-    }, 1000);
+  if (radiuses % 5 === 0) {
+    soundLog("5 pixels have died... reloading buffers");
+    if (!window.loadingBuffers) {
+      await reloadBuffers();
+    }
   }
 });
 
@@ -157,44 +166,61 @@ window.addEventListener("radius_reached", () => {
 const UISound = () => {
   window.addEventListener("pixel_added", (e) => {
     e.preventDefault();
-    const { pixelX, pixelY } = e.data;
     soundLog("pixel added");
-    setTimeout(() => {
-      !window.isMuted && u.play([~~pixelX, window.height - ~~pixelY]);
-    }, 33);
+    !window.isMuted &&
+      !u.isPlaying &&
+      u.play([~~e.data.pixelX, window.height - ~~e.data.pixelY]);
   });
 };
 
 //  MAIN FUNCTIONS
 
 const reloadBuffers = async (customBuffer = null) => {
-  // fetch new samples from database and load them into existing buffers
-  if (!customBuffer) {
-    let returnedBuffers = await getBuffers(window.isMp3);
-    synths.forEach(async (synth, i) => {
-      synth.grainOutput.gain.value = returnedBuffers[i].idealGain / numSources;
-      synth.buffer.copyToChannel(returnedBuffers[i].getChannelData(0), 0, 0);
-      synth.randomInterpolate();
-      returnedBuffers = [];
-    });
-  } else {
-    soundLog("CUSTOM BUFFER!");
-    soundLog(customBuffer);
-    customBuffer.idealGain = getIdealVolume(customBuffer);
-    synths.forEach((synth) => {
-      try {
-        synth.grainOutput.gain.value = customBuffer.idealGain / numSources;
-        synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
-      } catch (error) {
-        soundLog("error loading user buffer, continuing");
-      }
-      synth.play();
-      synth.setLoopStart(0);
-      synth.randomInterpolate();
-    });
-  }
+  return new Promise(async (resolve, reject) => {
+    window.loadingBuffers = true;
+    // fetch new samples from database and load them into existing buffers
+    if (!customBuffer) {
+      let returnedBuffers = await getBuffers(window.isMp3);
+      returnedBuffers.forEach(async (buf, i) => {
+        synths[i].grainOutput.gain.value = buf.idealGain / numSources;
+        synths[i].buffer.copyToChannel(
+          returnedBuffers[i].getChannelData(0),
+          0,
+          0
+        );
+        synths[i].randomInterpolate();
+        returnedBuffers = [];
+        resolve(true);
+      });
+    } else {
+      soundLog("CUSTOM BUFFER!");
+      console.log(customBuffer);
+      customBuffer.idealGain = await getIdealVolume(customBuffer);
+      synths.forEach((synth) => {
+        try {
+          synth.grainOutput.gain.value = customBuffer.idealGain / numVoices;
+          try {
+            // synth.buffer = customBuffer;
+            synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
+          } catch (error) {
+            synth.buffer = customBuffer;
+          }
+        } catch (error) {
+          soundLog("error loading user buffer, continuing");
+        }
+        !synth.isPlaying && synth.play();
+        synth.setLoopStart(0);
+        synth.randomInterpolate();
+      });
+      window.loadingBuffers = false;
+      customBuffer = null;
+      resolve(true);
+    }
+  });
 };
 
+// debug
+window.reloadBuffers = reloadBuffers;
 const startRecording = async () => {
   return new Promise(async (resolve, reject) => {
     if (window.MediaRecorder && recordingAllowed && !window.isMuted) {
@@ -222,10 +248,14 @@ const stopRecording = async () => {
     } catch (error) {
       soundLog(error);
     }
-    reloadBuffers(recordedBuffer);
+    await reloadBuffers(recordedBuffer);
     f.uploadSample(r.audioBlob);
     soundLog("stopped user recording #" + recordings);
     window.recording = false;
+    console.log(soundtrackAudioCtx.state);
+    if (soundtrackAudioCtx.state === "suspended") {
+      await initSound();
+    }
   } else {
     window.recording = false;
   }
@@ -266,7 +296,7 @@ const subOscillator = () => {
     harmonicity: 0.5,
   });
   subOsc.filter = new Filter({
-    frequency: 80,
+    frequency: 20,
   });
   subOsc.connect(subOsc.filter);
   const noise = new Noise({
@@ -312,9 +342,17 @@ const getBuffers = async (mp3Supported) => {
         bufPromises.push(aacDecode(url, soundtrackAudioCtx))
       );
     }
-    let buffers = await Promise.all(bufPromises);
-    buffers.forEach((buffer) => (buffer.idealGain = getIdealVolume(buffer)));
-    resolve(buffers);
+    let buffers;
+    try {
+      buffers = await Promise.all(bufPromises);
+      buffers.forEach(
+        async (buffer) => (buffer.idealGain = await getIdealVolume(buffer))
+      );
+      resolve(buffers);
+    } catch (error) {
+      soundLog("invalid audio file, trying again");
+      getBuffers();
+    }
   });
 };
 
@@ -354,6 +392,8 @@ const setupMasterBus = () => {
   changeTooltipText(audioTooltip);
   changetoUnmute(muteButton);
   soundLog("Voices loaded");
+  // DEBUG SOUND LEVEL
+  // masterBus.meter(masterBus.dest);
 };
 
 // method to start audio

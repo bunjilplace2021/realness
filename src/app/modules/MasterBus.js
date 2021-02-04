@@ -1,15 +1,17 @@
-import { Reverb, Delay, Gain, Filter, Chorus, Limiter } from "tone";
+import { Reverb, Delay, Gain, Filter, Chorus, Limiter, Meter } from "tone";
+import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
-    this.input = new Gain(0.8);
-    this.limiter = new Limiter(-12);
+    this.input = new Gain(1);
+    this.limiter = new Limiter(-6);
 
     this.effectsChain = [];
     this.ctx = ctx;
 
     this.output = new Gain(1);
     this.dest = this.ctx.destination;
+    this.dest.volume.value = 6;
 
     if (window.isMp3) {
       this.chainEffect(this.limiter);
@@ -70,6 +72,14 @@ class MasterBus {
   delay(time = 100, fbk = 0.5) {
     this.masterDelay = new Delay(time, fbk);
     this.chainEffect(this.masterDelay);
+  }
+  meter(node) {
+    this.meter = new Meter({ smoothing: 0.8 });
+    node.connect(this.meter);
+    window.meterLoop = setInterval(() => {
+      window.masterLevel = this.meter.getValue();
+      // window.logging && soundLog(window.masterLevel);
+    }, 300);
   }
   async reverb(reverbSwitch, preDelay = 0.3, decay = 4, wet = 1) {
     if (reverbSwitch) {

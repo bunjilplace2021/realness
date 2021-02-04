@@ -143,12 +143,23 @@ function draw() {
   if (!instload_toggle) {
     particle_draw(particlepg);
   }
+
+  window.logging &&
+    showDebugText(window.masterLevel && window.masterLevel.toFixed(1));
 }
 
 function shaderToggle() {
   pixelShaderToggle = !pixelShaderToggle;
 }
 
+function showDebugText(str) {
+  push();
+  noStroke();
+  fill(255);
+  textSize(20);
+  text(str, 100, 100);
+  pop();
+}
 function guid() {
   //someone else's function
   //https://slavik.meltser.info/the-efficient-way-to-create-guid-uuid-in-javascript-with-explanation/
@@ -196,7 +207,9 @@ function particle_draw(p) {
           pixelX,
           pixelY,
         };
-        window.dispatchEvent(window.pixelAddEvent, false);
+        setTimeout(() => {
+          window.dispatchEvent(window.pixelAddEvent, false);
+        });
       }
 
       if (!window.isMuted) {

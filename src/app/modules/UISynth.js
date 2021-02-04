@@ -2,16 +2,16 @@ import { FMSynth, Frequency, PolySynth, Gain, now, AMSynth } from "tone";
 
 // PRECOMPUTE RANDOM VALUES FOR PERFORMANCE
 class UISynth {
-  constructor(ctx) {
+  constructor(ctx, polyphony = 3) {
     this.randomValues = [...Array(20)].map(() => {
       return Math.floor(Math.random() * 6);
     });
     this.ctx = ctx;
-
+    this.isPlaying = false;
     this.uiSynth = new PolySynth({
-      polyphony: 3,
+      polyphony,
       voice: AMSynth,
-      maxPolyphony: 3,
+      maxPolyphony: polyphony,
     });
     this.uiSynth.set({
       envelope: {
@@ -21,13 +21,14 @@ class UISynth {
         release: 0.7,
       },
       harmonicity: 2,
-      volume: 1.5,
+      volume: 2,
     });
     this.idx = 0;
     this.master = new Gain(0.1);
     this.uiSynth.connect(this.master);
   }
   play(notes) {
+    this.isPlaying = true;
     this.notes = notes.slice(0, this.uiSynth.maxPolyphony);
     this.idx++;
     this.uiSynth.set({
@@ -36,8 +37,10 @@ class UISynth {
     try {
       this.uiSynth.triggerAttackRelease(this.notes, now());
       this.uiSynth.releaseAll();
+      this.isPlaying = false;
     } catch (error) {
       this.uiSynth.releaseAll();
+      this.isPlaying = false;
     }
   }
 }
