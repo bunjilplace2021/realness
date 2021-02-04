@@ -221,6 +221,18 @@ function mouseReleased() {
   mouseIsReleased = true;
 }
 
+function touchStarted(){
+  return false;
+}
+
+function touchMoved(){
+  return false;
+}
+
+function touchEnded(){
+  return false;
+}
+
 function keyPressed() {
   //Hide hamburger
 
