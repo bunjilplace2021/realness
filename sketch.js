@@ -256,10 +256,17 @@ function windowResized() {
 
 
     var isWKWebView = false ;
-    if( navigator.platform.substr(0,2) === 'iP' ) {    // iOS detected
-        if( window.webkit && window.webkit.messageHandlers ) {
-            isWKWebView = true ;
-        }
+    if (navigator.platform.substr(0,2) === 'iP'){
+      //iOS (iPhone, iPod or iPad)
+      var lte9 = /constructor/i.test(window.HTMLElement);
+      var nav = window.navigator, ua = nav.userAgent, idb = !!window.indexedDB;
+      if (ua.indexOf('Safari') !== -1 && ua.indexOf('Version') !== -1 && !nav.standalone){
+        //Safari (WKWebView/Nitro since 6+)
+      } else if ((!idb && lte9) || !window.statusbar.visible) {
+        isWKWebView = true;
+      } else if ((window.webkit && window.webkit.messageHandlers) || !lte9 || idb){
+        isWKWebView = true;
+      }
     }
 
     if(isWKWebView){
