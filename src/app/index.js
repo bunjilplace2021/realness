@@ -9,11 +9,11 @@ import UISynth from "./modules/UISynth";
 import {
   getContext,
   Context,
-  Filter,
   Noise,
   setContext,
   start,
   AMOscillator,
+  BiquadFilter,
 } from "tone";
 
 import {
@@ -24,7 +24,6 @@ import {
 } from "./UIFunctions";
 // UTILITIES
 import {
-  checkMP3,
   debounce,
   aacDecode,
   fetchSample,
@@ -70,7 +69,8 @@ process.env.NODE_ENV === "development"
 
 // create own audio context
 const audioOpts = {
-  latencyHint: "playback",
+  sampleRate: 22050,
+  latencyHint: "balanced",
   updateInterval: 1,
   lookAhead: 0.5,
   bufferSize: 4096,
@@ -78,7 +78,6 @@ const audioOpts = {
 };
 
 let soundtrackAudioCtx = new Context(audioOpts);
-const sampleRate = soundtrackAudioCtx.sampleRate;
 
 soundtrackAudioCtx.clockSource = "worker";
 let muteClicked = 0;
@@ -298,7 +297,7 @@ const subOscillator = () => {
     frequency: 40,
     harmonicity: 0.5,
   });
-  subOsc.filter = new Filter({
+  subOsc.filter = new BiquadFilter({
     frequency: 20,
   });
   subOsc.connect(subOsc.filter);
@@ -398,6 +397,7 @@ const setupMasterBus = () => {
 
   soundLog("Voices loaded");
   // DEBUG SOUND LEVEL
+  window.dest = masterBus.dest;
   // masterBus.meter(masterBus.dest);
 };
 

@@ -1,4 +1,12 @@
-import { Reverb, Delay, Gain, Filter, Chorus, Limiter, Meter } from "tone";
+import {
+  Reverb,
+  Delay,
+  Gain,
+  BiquadFilter,
+  Chorus,
+  Limiter,
+  Meter,
+} from "tone";
 import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
@@ -66,7 +74,7 @@ class MasterBus {
   }
 
   lowpassFilter(frequency, resonance) {
-    this.filter = new Filter(frequency, "lowpass", -24, resonance);
+    this.filter = new BiquadFilter(frequency, "lowpass", resonance);
     this.chainEffect(this.filter);
   }
   delay(time = 100, fbk = 0.5) {
@@ -78,7 +86,6 @@ class MasterBus {
     node.connect(this.meter);
     window.meterLoop = setInterval(() => {
       window.masterLevel = this.meter.getValue();
-      // window.logging && soundLog(window.masterLevel);
     }, 300);
   }
   async reverb(reverbSwitch, preDelay = 0.3, decay = 4, wet = 1) {

@@ -7,10 +7,9 @@ import {
   PitchShift,
   Loop,
   LFO,
-  LowpassCombFilter,
-  Filter,
   Compressor,
   getContext,
+  BiquadFilter,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -33,7 +32,7 @@ class GrainSynth {
     //  make nodes
     this.grainOutput = new Gain(1);
     this.grainOutput.name = "Grain Output";
-    this.filter = new Filter(10000, "lowpass", -24, 4);
+    this.filter = new BiquadFilter(10000, "lowpass");
     this.compressor = new Compressor({
       ratio: 20,
       threshold: -24,
