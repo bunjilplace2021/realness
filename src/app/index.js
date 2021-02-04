@@ -20,6 +20,7 @@ import {
   changeMuteButton,
   changeTooltipText,
   changetoUnmute,
+  hidePlayButton,
 } from "./UIFunctions";
 // UTILITIES
 import {
@@ -72,7 +73,7 @@ const audioOpts = {
   latencyHint: "playback",
   updateInterval: 1,
   lookAhead: 0.5,
-  bufferSize: 1024,
+  bufferSize: 4096,
   state: "suspended",
 };
 
@@ -91,7 +92,7 @@ const initSound = async () => {
   window.isSoundStarted = true;
   soundLog("Audio context is: " + soundtrackAudioCtx.rawContext.state);
   soundLog("Asking for microphone permissions");
-  await r.getPermissions();
+  !r.stream && (await r.getPermissions());
 };
 
 /* GLOBAL VARIABLES */
@@ -105,7 +106,6 @@ let numSources = isMobile ? 1 : 3;
 // number of voices per synth
 let numVoices = isMobile ? 3 : 3;
 if (navigator.deviceMemory) {
-  soundLog(navigator.deviceMemory);
   numSources = navigator.deviceMemory / 4;
   numVoices = navigator.deviceMemory / 2;
 }
@@ -128,8 +128,7 @@ let subOsc;
 /* EVENT LISTENERS */
 playButton.addEventListener("click", () => {
   initSound();
-  playButton.style.display = "none";
-  muteButton.style.display = "inline-block";
+  hidePlayButton(playButton, muteButton);
 });
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = async () => {
@@ -181,17 +180,21 @@ const reloadBuffers = async (customBuffer = null) => {
     // fetch new samples from database and load them into existing buffers
     if (!customBuffer) {
       let returnedBuffers = await getBuffers(window.isMp3);
-      returnedBuffers.forEach(async (buf, i) => {
-        synths[i].grainOutput.gain.value = buf.idealGain / numSources;
-        synths[i].buffer.copyToChannel(
-          returnedBuffers[i].getChannelData(0),
-          0,
-          0
-        );
-        synths[i].randomInterpolate();
-        returnedBuffers = [];
-        resolve(true);
-      });
+      try {
+        returnedBuffers.forEach(async (buf, i) => {
+          synths[i].grainOutput.gain.value = buf.idealGain / numSources;
+          synths[i].buffer.copyToChannel(
+            returnedBuffers[i].getChannelData(0),
+            0,
+            0
+          );
+          synths[i].randomInterpolate();
+          returnedBuffers = [];
+          resolve(true);
+        });
+      } catch (err) {
+        reloadBuffers();
+      }
     } else {
       soundLog("CUSTOM BUFFER!");
       console.log(customBuffer);
@@ -376,6 +379,9 @@ const loadSynths = async () => {
     }
     setupMasterBus();
     subOscillator();
+    hidePlayButton(playButton, muteButton);
+    changetoUnmute(muteButton);
+    changeTooltipText(audioTooltip);
     resolve(true);
   });
 };
@@ -389,8 +395,7 @@ const setupMasterBus = () => {
   !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
   window.synthsLoaded = true;
   muteButton.classList = [];
-  changeTooltipText(audioTooltip);
-  changetoUnmute(muteButton);
+
   soundLog("Voices loaded");
   // DEBUG SOUND LEVEL
   // masterBus.meter(masterBus.dest);
@@ -398,6 +403,10 @@ const setupMasterBus = () => {
 
 // method to start audio
 const startAudio = async () => {
+  if (!r.stream) {
+    await r.getPermissions();
+    recordingAllowed == true;
+  }
   changeTooltipText(audioTooltip);
   if (!window.isMuted) {
     await start();
@@ -488,7 +497,16 @@ const main = async () => {
   }
   await soundtrackAudioCtx.rawContext.resume();
   await loadSynths();
+
   UISound();
+  const canvases = document.querySelectorAll("canvas");
+  canvases.forEach((canvas) => {
+    if (canvas.style.display === "none") {
+      console.log(canvas);
+      canvas.parentNode.removeChild(canvas);
+    }
+  });
+  console.dir(document.querySelector("canvas"));
 };
 
 // run main loop

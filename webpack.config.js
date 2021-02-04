@@ -2,7 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
-
+const isProduction = process.env.NODE_ENV === "production" ? true : false;
 module.exports = {
   mode: process.env.NODE_ENV,
   devtool: false,

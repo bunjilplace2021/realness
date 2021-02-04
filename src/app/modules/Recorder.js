@@ -30,11 +30,27 @@ class Recorder {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
+
         this.stream = stream;
+
         resolve(stream);
       } catch (error) {
         soundLog(error);
         return false;
+      }
+    });
+  }
+  stopStream() {
+    this.stream.getTracks().forEach((track) => {
+      if (track.readyState == "live" && track.kind === "audio") {
+        track.stop();
+      }
+    });
+  }
+  startStream() {
+    this.stream.getTracks().forEach((track) => {
+      if (track.readyState == "live" && track.kind === "audio") {
+        track.start();
       }
     });
   }

@@ -2,7 +2,10 @@ export function changetoUnmute(elt) {
   elt.classList.add("fa", "fa-volume-off");
   elt.disabled = false;
 }
-
+export function hidePlayButton(play, mute) {
+  play.style.display = "none";
+  mute.style.display = "inline-block";
+}
 export function changeTooltipText(elt) {
   if (window.isMuted) {
     elt.innerHTML = "unmute sound";
