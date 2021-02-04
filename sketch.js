@@ -254,7 +254,15 @@ function windowResized() {
     shaderWindowResized(windowWidth, windowHeight);
   } else {
 
-    if (windowWidth == windowHeight) {
+
+    var isWKWebView = false ;
+    if( navigator.platform.substr(0,2) === 'iP' ) {    // iOS detected
+        if( window.webkit && window.webkit.messageHandlers ) {
+            isWKWebView = true ;
+        }
+    }
+
+    if(isWKWebView){
       let w = document.documentElement.clientWidth;
       let h = document.documentElement.clientHeight;
       resizeCanvas(w, h);
