@@ -6,13 +6,14 @@ import {
   Chorus,
   Limiter,
   Meter,
+  Volume,
 } from "tone";
 import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
-    this.input = new Gain(1);
-    this.limiter = new Limiter(-6);
+    this.input = new Volume(0);
+    this.limiter = new Limiter(-18);
 
     this.effectsChain = [];
     this.ctx = ctx;

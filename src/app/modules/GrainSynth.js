@@ -10,6 +10,7 @@ import {
   Compressor,
   getContext,
   BiquadFilter,
+  Meter,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -34,8 +35,8 @@ class GrainSynth {
     this.grainOutput.name = "Grain Output";
     this.filter = new BiquadFilter(10000, "lowpass");
     this.compressor = new Compressor({
-      ratio: 20,
-      threshold: -24,
+      ratio: 8,
+      threshold: -30,
       release: 1,
       attack: 0.003,
     });
@@ -48,7 +49,11 @@ class GrainSynth {
     this.setupMaster();
     // evenly ditribute volumes to master
   }
-
+  reloadBuffers() {
+    this.grains.forEach((grain) => {
+      grain.buffer._buffer.copyToChannel(this.buffer.getChannelData(0), 0, 0);
+    });
+  }
   getNodes() {
     Object.entries(this).forEach((entry) => {
       const node = entry[1];
@@ -117,7 +122,7 @@ class GrainSynth {
     this.grains.forEach((grain) => grain.dispose());
   }
 
-  setClockFrequency(val, time) {
+  setClockFrequency(val) {
     this.grains.forEach((grain) =>
       grain._clock.frequency.targetRampTo(val, "+0.1")
     );
@@ -158,8 +163,9 @@ class GrainSynth {
       grain.detune = valuesObject.detune[i];
       grain.overlap = valuesObject.overlap[i];
       grain.grainSize = valuesObject.grainSize[i];
-      // grain.loopStart = valuesObject.loopStart[i];
+
       grain.loopEnd = valuesObject.loopEnd[i];
+      grain.loopStart = valuesObject.loopStart[i];
       grain.playbackRate = valuesObject.playbackRate[i];
       grain.reverse = Math.random() < 0.2;
     });
@@ -170,22 +176,33 @@ class GrainSynth {
 
   randomInterpolate() {
     const numGrains = this.grains.length;
+
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
       overlap: this.randArrayFromRange(numGrains, 0.01, 1),
       grainSize: this.randArrayFromRange(numGrains, 0.001, 0.05),
       playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
-      loopEnd: this.randArrayFromRange(
-        numGrains,
-        0,
-        this.grains[0].buffer.duration
-      ),
+      loopEnd: this.randArrayFromRange(numGrains, 0, this.buffer.duration),
     };
-    this.setClockFrequency(Math.random() * 0.5, 10);
+
+    randomValues.loopStart = this.randArrayFromRange(
+      numGrains,
+      0,
+      ...randomValues.loopEnd
+    );
+    this.setClockFrequency(Math.random() * 0.5);
+
     //set values to random values
     this.setCurrentValues(randomValues);
   }
+  outputMeter() {
+    this.outputMeter = new Meter();
 
+    this.output.connect(this.outputMeter);
+  }
+  getMeterValue() {
+    return this.outputMeter.getValue();
+  }
   //  SETTERS & Getters
   setPitchShift(val) {
     this.pitchShifter.pitch = Number(val);

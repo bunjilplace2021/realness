@@ -24,7 +24,6 @@
   "dependencies": {
     "audio-recorder-polyfill": "^0.4.1",
     "firebase": "^8.0.2",
-    "lodash": "^4.17.20",
     "tone": "^14.7.58"
   },
   "devDependencies": {

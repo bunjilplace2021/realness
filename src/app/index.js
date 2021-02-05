@@ -24,6 +24,7 @@ import {
 } from "./UIFunctions";
 // UTILITIES
 import {
+  probeLevel,
   debounce,
   aacDecode,
   fetchSample,
@@ -34,12 +35,12 @@ import {
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
-import { result } from "lodash";
 
 // suspend auto generated audio context from tone import
 
 getContext().rawContext.suspend();
 window.debounce = debounce;
+window.probeLevel = probeLevel;
 
 // CHECK USER DEVICE/BROWSER
 const isMobile = window.innerWidth < 600;
@@ -179,19 +180,35 @@ const reloadBuffers = async (customBuffer = null) => {
     // fetch new samples from database and load them into existing buffers
     if (!customBuffer) {
       let returnedBuffers = await getBuffers(window.isMp3);
+
       try {
+        console.log("reloading buffers");
+        console.log(returnedBuffers);
         returnedBuffers.forEach(async (buf, i) => {
-          synths[i].grainOutput.gain.value = buf.idealGain / numSources;
-          synths[i].buffer.copyToChannel(
-            returnedBuffers[i].getChannelData(0),
-            0,
-            0
-          );
+          try {
+            console.log("changing buffers");
+            synths[i].grainOutput.gain.setValueAtTime(
+              buf.idealGain / numSources,
+              soundtrackAudioCtx.currentTime
+            );
+
+            synths[i].buffer.copyToChannel(
+              returnedBuffers[i].getChannelData(0),
+              0,
+              0
+            );
+          } catch (error) {
+            console.log("buffercopy failed... reverting to original buffer");
+          }
+
+          synths[i].reloadBuffers();
+          synths[i].randomStarts();
           synths[i].randomInterpolate();
-          returnedBuffers = [];
-          resolve(true);
         });
+        window.loadingBuffers = false;
+        resolve(true);
       } catch (err) {
+        console.log("error resolving buffers");
         reloadBuffers();
       }
     } else {
@@ -200,16 +217,18 @@ const reloadBuffers = async (customBuffer = null) => {
       customBuffer.idealGain = await getIdealVolume(customBuffer);
       synths.forEach((synth) => {
         try {
-          synth.grainOutput.gain.value = customBuffer.idealGain / numVoices;
+          synth.grainOutput.gain.value = customBuffer.idealGain;
           try {
             // synth.buffer = customBuffer;
             synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
+            synth.reloadBuffers();
           } catch (error) {
             synth.buffer = customBuffer;
           }
         } catch (error) {
           soundLog("error loading user buffer, continuing");
         }
+        synth.reloadBuffers();
         !synth.isPlaying && synth.play();
         synth.setLoopStart(0);
         synth.randomInterpolate();
@@ -347,6 +366,7 @@ const getBuffers = async (mp3Supported) => {
     let buffers;
     try {
       buffers = await Promise.all(bufPromises);
+
       buffers.forEach(
         async (buffer) => (buffer.idealGain = await getIdealVolume(buffer))
       );
@@ -368,10 +388,9 @@ const loadSynths = async () => {
       );
       synths.forEach((synth) => {
         synth.filter.frequency.value = 220;
-        synth.filter.gain.value = 10;
+        // synth.filter.gain.value = 10;
         returnedBuffers[i].idealGain
-          ? (synth.grainOutput.gain.value =
-              returnedBuffers[i].idealGain / numSources)
+          ? (synth.grainOutput.gain.value = returnedBuffers[i].idealGain)
           : null;
       });
       soundLog("Loaded GrainSynth " + (i + 1));
@@ -497,16 +516,16 @@ const main = async () => {
   }
   await soundtrackAudioCtx.rawContext.resume();
   await loadSynths();
+  window.synths = synths;
 
+  window.masterBus = masterBus;
   UISound();
   const canvases = document.querySelectorAll("canvas");
   canvases.forEach((canvas) => {
     if (canvas.style.display === "none") {
-      console.log(canvas);
       canvas.parentNode.removeChild(canvas);
     }
   });
-  console.dir(document.querySelector("canvas"));
 };
 
 // run main loop
