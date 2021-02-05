@@ -20,11 +20,8 @@ class MasterBus {
 
     this.output = new Gain(1);
     this.dest = this.ctx.destination;
-    this.dest.volume.value = 6;
 
-    if (window.isMp3) {
-      this.chainEffect(this.limiter);
-    }
+    this.chainEffect(this.limiter);
   }
   test() {
     var oscillator = this.ctx.createOscillator();

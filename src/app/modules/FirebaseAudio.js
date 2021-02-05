@@ -45,6 +45,7 @@ class FireBaseAudio {
       this.files.items.forEach(async (file) => {
         this.filePromises.push(file.getMetadata());
       });
+
       this.filesMetadata = await Promise.all(this.filePromises);
 
       this.filesMetadata.filter((metaObject) => {
@@ -52,6 +53,9 @@ class FireBaseAudio {
           this.fileNames.push(metaObject.fullPath);
         }
       });
+      console.log(`Found ${this.fileNames.length} files`);
+      this.fileNames.slice(0, 10);
+      console.log(this.fileNames);
       resolve(this.fileNames);
     });
   }

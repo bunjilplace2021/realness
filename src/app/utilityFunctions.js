@@ -142,9 +142,12 @@ export function getIdealVolume(buffer) {
       // Take the average at the 95th percentile
       let a = averages[Math.floor(averages.length * 0.95)];
       let gain = 1.0 / a;
+      let diff = 1.0 - a;
       // clamping
       //   gain = Math.max(gain, 0.02);
       // Turn down super loud sounds
+      console.log("INITIAL GAIN:" + gain / 10);
+      console.log("Difference:" + diff);
       if (gain <= 1.0) {
         gain = gain / 25;
       }
@@ -158,7 +161,7 @@ export function getIdealVolume(buffer) {
         gain = gain / 1.5;
       }
 
-      gain = Math.min(gain, 9000.0);
+      gain = Math.min(gain, 7000.0);
 
       soundLog(`Adjusted gain x ${gain / 10}`);
 
