@@ -31,6 +31,8 @@ let mouseIsReleased = false;
 let initload = true;
 let initinst = true;
 
+var isWKWebView = false ;
+
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
 window.radiusLimit = new Event("radius_reached");
@@ -244,6 +246,27 @@ function keyPressed() {
   }
 }
 
+
+function checkIfWKWebView() {
+
+  //Detect WKWebKit for Chrome on iOS and PWA apps
+
+
+    if (navigator.platform.substr(0,2) === 'iP'){
+      //iOS (iPhone, iPod or iPad)
+      var lte9 = /constructor/i.test(window.HTMLElement);
+      var nav = window.navigator, ua = nav.userAgent, idb = !!window.indexedDB;
+      if (ua.indexOf('Safari') !== -1 && ua.indexOf('Version') !== -1 && !nav.standalone){
+        //Safari (WKWebView/Nitro since 6+)
+      } else if ((!idb && lte9) || !window.statusbar.visible) {
+        isWKWebView = true;
+      } else if ((window.webkit && window.webkit.messageHandlers) || !lte9 || idb){
+        isWKWebView = true;
+      }
+    }
+}
+
+
 function windowResized() {
   if (!isMobile) {
   resizeCanvas(windowWidth, windowHeight);
@@ -251,22 +274,7 @@ function windowResized() {
   shaderWindowResized(windowWidth, windowHeight);
 } else {
 
-
-//Detect WKWebKit for Chrome on iOS and PWA apps
-
-  var isWKWebView = false ;
-  if (navigator.platform.substr(0,2) === 'iP'){
-    //iOS (iPhone, iPod or iPad)
-    var lte9 = /constructor/i.test(window.HTMLElement);
-    var nav = window.navigator, ua = nav.userAgent, idb = !!window.indexedDB;
-    if (ua.indexOf('Safari') !== -1 && ua.indexOf('Version') !== -1 && !nav.standalone){
-      //Safari (WKWebView/Nitro since 6+)
-    } else if ((!idb && lte9) || !window.statusbar.visible) {
-      isWKWebView = true;
-    } else if ((window.webkit && window.webkit.messageHandlers) || !lte9 || idb){
-      isWKWebView = true;
-    }
-  }
+  checkIfWKWebView();
 
 //Fix for slow update of window.width on resize (WKWebKit)
 
