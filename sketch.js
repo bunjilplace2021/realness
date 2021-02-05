@@ -241,8 +241,6 @@ function mousePressed() {
 
 function mouseReleased() {
   // dispatch event to sound sketch
-  let timeout;
-  timeout && clearTimeout(timeout);
 
   window.dispatchEvent(window.released);
 
@@ -286,15 +284,8 @@ function windowResized() {
 function infoInstructions() {
   instruction_toggle = !instruction_toggle;
 
-  if (instload_toggle){
-  document.getElementById("menu_txt").style.display = "block";
-  myLinks.style.display = "none";
-}else{
-  myLinks.style.display = "block";
-}
-
   menuicon.classList.toggle("fa-window-close");
-
+  myLinks.style.display = "block";
 
   document.getElementById("top").style.backgroundColor =
     "rgba(127, 127, 127, 0.2)";

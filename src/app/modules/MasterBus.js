@@ -21,7 +21,7 @@ class MasterBus {
 
     this.output = new Gain(1);
     this.dest = this.ctx.destination;
-
+    window.isMobile ? (this.dest.volume.value = 6) : null;
     this.chainEffect(this.limiter);
   }
   test() {

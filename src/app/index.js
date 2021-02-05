@@ -432,8 +432,6 @@ const setupMasterBus = () => {
 
   soundLog("Voices loaded");
   // DEBUG SOUND LEVEL
-  window.dest = masterBus.dest;
-  // masterBus.meter(masterBus.dest);
 };
 
 // method to start audio
@@ -536,7 +534,7 @@ const main = async () => {
   window.ctx = soundtrackAudioCtx;
   window.sourceCount =
     soundtrackAudioCtx.rawContext._nativeAudioContext.activeSourceCount;
-  window.masterBus = masterBus;
+
   UISound();
   const canvases = document.querySelectorAll("canvas");
   canvases.forEach((canvas) => {
