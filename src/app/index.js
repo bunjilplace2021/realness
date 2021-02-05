@@ -216,68 +216,71 @@ muteButton.onclick = async () => {
 };
 
 const reloadBuffers = async (customBuffer = null) => {
-  const mp3Supported = await isMp3Supported;
-  // fetch new samples from database and load them into existing buffers
-  if (!customBuffer) {
-    synths.forEach(async (synth) => {
-      await f.getRandomSample();
-      let buf;
-      let newBuf;
-      if (mp3Supported) {
-        let playBuf;
-        buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-        soundLog(buf);
-        if (checkFileVolume(buf) > 0) {
-          playBuf = buf;
-          soundLog("clip is not silent, continuing");
-        } else {
-          await f.getRandomSample();
+  return new Promise(async (resolve, reject) => {
+    // fetch new samples from database and load them into existing buffers
+    console.log("Mp3 supported: " + window.isMp3);
+    if (!customBuffer) {
+      synths.forEach(async (synth) => {
+        await f.getRandomSample();
+        let buf;
+        let newBuf;
+        if (window.isMp3) {
+          console.log(f.audioFile);
+          let playBuf;
           buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
-          playBuf = buf;
-        }
-        try {
-          const resampled = await resampleBuffer(playBuf, sampleRate);
-          //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
-          newBuf = removeZeroValues(resampled.getChannelData(0));
-          // newBuf = resampled.getChannelData(0);
-        } catch (e) {
-          soundLog("reverting to original buffer");
-          newBuf = buf.getChannelData(0);
-        }
-        synth.buffer.copyToChannel(newBuf, 0, 0);
-      } else {
-        // MP3 is not supported, load aac files
-        const randomurl = await f.storageRef
-          .child(randomChoice(f.fileNames))
-          .getDownloadURL();
+          console.log(buf);
+          if (checkFileVolume(buf) > 0) {
+            playBuf = buf;
+            soundLog("clip is not silent, continuing");
+          } else {
+            await f.getRandomSample();
+            buf = await fetchSample(f.audioFile, soundtrackAudioCtx);
+            playBuf = buf;
+          }
+          try {
+            const resampled = await resampleBuffer(playBuf, sampleRate);
+            //  REMOVE SILENCE FROM SAMPLES BEFORE LOADING TO BUFFER -- ISSUE #9
+            newBuf = removeZeroValues(resampled.getChannelData(0));
+            // newBuf = resampled.getChannelData(0);
+          } catch (e) {
+            soundLog("reverting to original buffer");
+            newBuf = buf.getChannelData(0);
+          }
+          synth.buffer.copyToChannel(newBuf, 0, 0);
+        } else {
+          // MP3 is not supported, load aac files
+          const randomurl = await f.storageRef
+            .child(randomChoice(f.fileNames))
+            .getDownloadURL();
 
-        console.log("trying to load aac file from " + randomurl);
+          console.log("trying to load aac file from " + randomurl);
 
-        buf = await aacDecode(randomurl, soundtrackAudioCtx);
-        buf.idealGain = console.log("new buffer: " + buf);
-        synth.buffer = buf;
-        synth.grainOutput.gain.value = getIdealVolume(buf) / numVoices;
-      }
-      synth.randomInterpolate();
-      soundLog("reloaded buffers");
-    });
-  } else {
-    if (customBuffer) {
-      const resampled = await resampleBuffer(customBuffer, sampleRate);
-
-      synths.forEach((synth) => {
-        try {
-          synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
-        } catch (error) {
-          synth.buffer = resampled;
+          buf = await aacDecode(randomurl, soundtrackAudioCtx);
+          buf.idealGain = console.log("new buffer: " + buf);
+          synth.buffer = buf;
+          synth.grainOutput.gain.value = getIdealVolume(buf) / numVoices;
         }
-        synth.setLoopStart(0);
         synth.randomInterpolate();
-        // null the buffer so that doesn't try to reload the user buffer on next loop
-        // customBuffer = null;
+        soundLog("reloaded buffers");
       });
+    } else {
+      if (customBuffer) {
+        const resampled = await resampleBuffer(customBuffer, sampleRate);
+
+        synths.forEach((synth) => {
+          try {
+            synth.buffer.copyToChannel(resampled.getChannelData(0), 0, 0);
+          } catch (error) {
+            synth.buffer = resampled;
+          }
+          synth.setLoopStart(0);
+          synth.randomInterpolate();
+          // null the buffer so that doesn't try to reload the user buffer on next loop
+          // customBuffer = null;
+        });
+      }
     }
-  }
+  });
 };
 
 // RADIUS LIMIT LISTENER
@@ -610,6 +613,7 @@ const main = async () => {
       window.isMp3 = isMp3Supported;
       await soundtrackAudioCtx.rawContext.resume();
       await loadSynths();
+      window.reloadBuffers = reloadBuffers;
       UISound();
     } catch (error) {
       loadFallback();
