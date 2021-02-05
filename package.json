@@ -24,7 +24,7 @@
   "dependencies": {
     "audio-recorder-polyfill": "^0.4.1",
     "firebase": "^8.0.2",
-    "tone": "^14.7.58"
+    "tone": "^14.8.9"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",

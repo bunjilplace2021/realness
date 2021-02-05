@@ -11,6 +11,9 @@ class Recorder {
     // get permission to record
     return new Promise(async (resolve, reject) => {
       try {
+        let streamTimeout = setTimeout(() => {
+          reject("permissions timed out");
+        }, 5000);
         const mp3 = navigator.mediaCapabilities
           .decodingInfo({
             type: "file",
@@ -27,12 +30,13 @@ class Recorder {
         } else {
           this.type = "audio/aac";
         }
+        console.log(this.type);
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
 
         this.stream = stream;
-
+        clearTimeout(streamTimeout);
         resolve(stream);
       } catch (error) {
         soundLog(error);
@@ -62,7 +66,6 @@ class Recorder {
       this.audioChunks = [];
       this.mediaRecorder.addEventListener("dataavailable", (event) => {
         this.audioChunks.push(event.data);
-
         resolve(true);
       });
     });

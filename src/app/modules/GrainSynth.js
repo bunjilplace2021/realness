@@ -20,7 +20,7 @@ import regeneratorRuntime from "regenerator-runtime";
 class GrainSynth {
   constructor(buffer, ctx, voices = 2) {
     // workaround to suspend audiocontext without warnings
-    getContext().rawContext.suspend();
+    // getContext().rawContext.suspend();
 
     this.grains = [];
     this.isStopped = false;
@@ -167,7 +167,7 @@ class GrainSynth {
       grain.loopEnd = valuesObject.loopEnd[i];
       grain.loopStart = valuesObject.loopStart[i];
       grain.playbackRate = valuesObject.playbackRate[i];
-      grain.reverse = Math.random() < 0.2;
+      grain.reverse = Math.random() < 0.5;
     });
   }
   randArrayFromRange(length, min, max) {
@@ -175,13 +175,14 @@ class GrainSynth {
   }
 
   randomInterpolate() {
+    console.log(this.grains[0]);
     const numGrains = this.grains.length;
 
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
-      overlap: this.randArrayFromRange(numGrains, 0.01, 1),
-      grainSize: this.randArrayFromRange(numGrains, 0.001, 0.05),
-      playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.05),
+      overlap: this.randArrayFromRange(numGrains, 0.01, 0.05),
+      grainSize: this.randArrayFromRange(numGrains, 0.001, 0.5),
+      playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.1),
       loopEnd: this.randArrayFromRange(numGrains, 0, this.buffer.duration),
     };
 

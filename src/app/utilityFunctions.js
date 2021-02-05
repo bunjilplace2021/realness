@@ -82,7 +82,7 @@ export function probeLevel(node, time = 10) {
       clearInterval(metering);
       seconds = 0;
     }
-  }, 1000);
+  }, 100);
 }
 
 export function throttle(fn, delay) {
@@ -140,25 +140,34 @@ export function getIdealVolume(buffer) {
       // Ascending sort of the averages array
       averages.sort((a, b) => a - b);
       // Take the average at the 95th percentile
-      let a = averages[Math.floor(averages.length * 0.95)];
+      let a = averages[Math.floor(averages.length * 0.9)];
       let gain = 1.0 / a;
       let diff = 1.0 - a;
       // clamping
       //   gain = Math.max(gain, 0.02);
       // Turn down super loud sounds
       console.log("INITIAL GAIN:" + gain / 10);
-      console.log("Difference:" + diff);
-      if (gain <= 1.0) {
-        gain = gain / 25;
-      }
-      if (gain <= 5.0) {
-        gain = gain / 20;
-      }
-      if (gain <= 15.0) {
-        gain = gain / 4;
-      }
-      if (gain <= 30.0 && gain >= 15.0) {
-        gain = gain / 1.5;
+
+      if (diff > 0.999) {
+        console.log("possible error. being safe");
+        gain = gain / 30;
+      } else {
+        console.log("Difference:" + diff);
+        if (gain <= 1.0) {
+          gain = gain / 25;
+        }
+        if (gain <= 5.0) {
+          gain = gain / 20;
+        }
+        if (gain <= 15.0) {
+          gain = gain / 4;
+        }
+        if (gain <= 30.0 && gain >= 15.0) {
+          gain = gain / 1.5;
+        }
+        if (gain < 100 && gain > 30) {
+          gain = gain / 2;
+        }
       }
 
       gain = Math.min(gain, 7000.0);

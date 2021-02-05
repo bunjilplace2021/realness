@@ -7,13 +7,14 @@ import {
   Limiter,
   Meter,
   Volume,
+  FeedbackDelay,
 } from "tone";
 import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
     this.input = new Volume(0);
-    this.limiter = new Limiter(-18);
+    this.limiter = new Limiter(-20);
 
     this.effectsChain = [];
     this.ctx = ctx;
@@ -60,7 +61,7 @@ class MasterBus {
       for (let i = 0; i < this.effectsChain.length - 1; i++) {
         this.effectsChain[i].connect(this.effectsChain[i + 1]);
       }
-      effectsOutput.toDestination();
+      effectsOutput.connect(this.dest);
     } else {
       // there's just one effect. Just connect it
       this.input.connect(this.effectsChain[0]).connect(this.dest);
@@ -76,7 +77,7 @@ class MasterBus {
     this.chainEffect(this.filter);
   }
   delay(time = 100, fbk = 0.5) {
-    this.masterDelay = new Delay(time, fbk);
+    this.masterDelay = new FeedbackDelay(time, fbk);
     this.chainEffect(this.masterDelay);
   }
   meter(node) {
