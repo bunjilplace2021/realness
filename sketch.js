@@ -31,7 +31,9 @@ let mouseIsReleased = false;
 let initload = true;
 let initinst = true;
 
-var isWKWebView = false ;
+var isWKWebView = false;
+
+let detecttouch = false;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
@@ -67,6 +69,8 @@ function preload() {
   }
 
   isSafari = checkIfWebKit();
+  detecttouch = matchMedia('(hover: none)').matches;
+
 
   uuid = guid();
   shaderPreload();
@@ -172,7 +176,7 @@ function particle_draw(p) {
     p.blendMode(BLEND);
     p.background(0);
     p.blendMode(BLEND);
-  //  p.clear();
+    //  p.clear();
   }
 
   ps.run(p);
@@ -195,13 +199,13 @@ function particle_draw(p) {
     mousecount = mousecount + 1;
     if (mousecount === 30 && mousePressed) {
       window.dispatchEvent(window.down);
-if (window.recordingLimitReached){
-  document.getElementById("record_limit").style.display = "block";
-  setTimeout(function time() {
-    document.getElementById("record_limit").style.display = "none";
-    initinst = false;
-  }, 2000);
-}
+      if (window.recordingLimitReached) {
+        document.getElementById("record_limit").style.display = "block";
+        setTimeout(function time() {
+          document.getElementById("record_limit").style.display = "none";
+          initinst = false;
+        }, 2000);
+      }
     }
   }
 }
@@ -252,56 +256,58 @@ function checkIfWKWebView() {
   //Detect WKWebKit for Chrome on iOS and PWA apps
 
 
-    if (navigator.platform.substr(0,2) === 'iP'){
-      //iOS (iPhone, iPod or iPad)
-      var lte9 = /constructor/i.test(window.HTMLElement);
-      var nav = window.navigator, ua = nav.userAgent, idb = !!window.indexedDB;
-      if (ua.indexOf('Safari') !== -1 && ua.indexOf('Version') !== -1 && !nav.standalone){
-        //Safari (WKWebView/Nitro since 6+)
-      } else if ((!idb && lte9) || !window.statusbar.visible) {
-        isWKWebView = true;
-      } else if ((window.webkit && window.webkit.messageHandlers) || !lte9 || idb){
-        isWKWebView = true;
-      }
+  if (navigator.platform.substr(0, 2) === 'iP') {
+    //iOS (iPhone, iPod or iPad)
+    var lte9 = /constructor/i.test(window.HTMLElement);
+    var nav = window.navigator,
+      ua = nav.userAgent,
+      idb = !!window.indexedDB;
+    if (ua.indexOf('Safari') !== -1 && ua.indexOf('Version') !== -1 && !nav.standalone) {
+      //Safari (WKWebView/Nitro since 6+)
+    } else if ((!idb && lte9) || !window.statusbar.visible) {
+      isWKWebView = true;
+    } else if ((window.webkit && window.webkit.messageHandlers) || !lte9 || idb) {
+      isWKWebView = true;
     }
+  }
 }
 
 
 function windowResized() {
   if (!isMobile) {
-  resizeCanvas(windowWidth, windowHeight);
-  particlepg.resizeCanvas(windowWidth, windowHeight);
-  shaderWindowResized(windowWidth, windowHeight);
-} else {
-
-  checkIfWKWebView();
-
-//Fix for slow update of window.width on resize (WKWebKit)
-
-  if(isWKWebView){
-    let w = document.documentElement.clientWidth;
-    let h = document.documentElement.clientHeight;
-    resizeCanvas(w, h);
-    particlepg.resizeCanvas(w, h);
-    shaderWindowResized(w, h);
+    resizeCanvas(windowWidth, windowHeight);
+    particlepg.resizeCanvas(windowWidth, windowHeight);
+    shaderWindowResized(windowWidth, windowHeight);
   } else {
-    let innerh = iosInnerHeight();
-    resizeCanvas(windowWidth, innerh);
-    particlepg.resizeCanvas(windowWidth, innerh);
-    shaderWindowResized(windowWidth, innerh);
+
+    checkIfWKWebView();
+
+    //Fix for slow update of window.width on resize (WKWebKit)
+
+    if (isWKWebView) {
+      let w = document.documentElement.clientWidth;
+      let h = document.documentElement.clientHeight;
+      resizeCanvas(w, h);
+      particlepg.resizeCanvas(w, h);
+      shaderWindowResized(w, h);
+    } else {
+      let innerh = iosInnerHeight();
+      resizeCanvas(windowWidth, innerh);
+      particlepg.resizeCanvas(windowWidth, innerh);
+      shaderWindowResized(windowWidth, innerh);
+    }
   }
-}
 }
 
 function infoInstructions() {
   instruction_toggle = !instruction_toggle;
 
-  if (instload_toggle){
-  document.getElementById("menu_txt").style.display = "block";
-  myLinks.style.display = "none";
-}else{
-  myLinks.style.display = "block";
-}
+  if (instload_toggle) {
+    document.getElementById("menu_txt").style.display = "block";
+    myLinks.style.display = "none";
+  } else {
+    myLinks.style.display = "block";
+  }
 
   menuicon.classList.toggle("fa-window-close");
 
@@ -341,34 +347,34 @@ function infoInstructions() {
 }
 
 
-function mouseinst(){
+function mouseinst() {
 
-if (!isMobile){
+  if (!detecttouch) {
 
-if (initinst) {
-  document.getElementById("mouse_inst").style.display = "block";
-  setTimeout(function time() {
-    document.getElementById("mouse_inst").style.display = "none";
-    initinst = false;
-  }, 2000);
-} else {
-    document.getElementById("mouse_inst").style.display = "none";
+    if (initinst) {
+      document.getElementById("mouse_inst").style.display = "block";
+      setTimeout(function time() {
+        document.getElementById("mouse_inst").style.display = "none";
+        initinst = false;
+      }, 2000);
+    } else {
+      document.getElementById("mouse_inst").style.display = "none";
 
 
-}
-}else {
-  if (initinst) {
-    document.getElementById("tap_inst").style.display = "block";
-    setTimeout(function time() {
-      document.getElementById("tap_inst").style.display = "none";
-      initinst = false;
-    }, 2000);
+    }
   } else {
+    if (initinst) {
+      document.getElementById("tap_inst").style.display = "block";
+      setTimeout(function time() {
+        document.getElementById("tap_inst").style.display = "none";
+        initinst = false;
+      }, 2000);
+    } else {
       document.getElementById("tap_inst").style.display = "none";
 
 
-}
-}
+    }
+  }
 }
 
 function didactic() {
@@ -416,7 +422,7 @@ function cameratoggle() {
   if (!instload_toggle) {
     webc.classList.toggle("fa-circle-o");
 
-     var x = document.getElementById("spantxt");
+    var x = document.getElementById("spantxt");
 
     if (x.innerHTML === "view webcam") {
       x.innerHTML = "view artwork";
@@ -446,11 +452,11 @@ function fullScreenMenu() {
     fullicons.classList.toggle("fa-compress");
     var x = document.getElementById("fullspantxt");
 
-   if (x.innerHTML === "fullscreen mode") {
-     x.innerHTML = "exit fullscreen";
-   } else {
-     x.innerHTML = "fullscreen mode";
-   }
+    if (x.innerHTML === "fullscreen mode") {
+      x.innerHTML = "exit fullscreen";
+    } else {
+      x.innerHTML = "fullscreen mode";
+    }
     document.body.scrollTop = 0; // <-- pull the page back up to the top
     document.body.style.overflow = "hidden";
   } else {
