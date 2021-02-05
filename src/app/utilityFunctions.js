@@ -172,32 +172,38 @@ export function getNodes(obj) {
 }
 
 export function getIdealVolume(buffer) {
-  var decodedBuffer = buffer.getChannelData(0);
-  var sliceLen = Math.floor(buffer.sampleRate * 0.05);
-  var averages = [];
-  var sum = 0.0;
-  for (var i = 0; i < decodedBuffer.length; i++) {
-    sum += decodedBuffer[i] ** 2;
-    if (i % sliceLen === 0) {
-      sum = Math.sqrt(sum / sliceLen);
-      averages.push(sum);
-      sum = 0;
-    }
+  if (!typeof buffer === Object) {
+    soundLog("buffer is invalid. Skipping");
+    reject(false);
   }
-  // Ascending sort of the averages array
-  averages.sort(function (a, b) {
-    return a - b;
-  });
-  // Take the average at the 95th percentile
-  var a = averages[Math.floor(averages.length * 0.95)];
+  if (buffer) {
+    var decodedBuffer = buffer.getChannelData(0);
+    var sliceLen = Math.floor(buffer.sampleRate * 0.05);
+    var averages = [];
+    var sum = 0.0;
+    for (var i = 0; i < decodedBuffer.length; i++) {
+      sum += decodedBuffer[i] ** 2;
+      if (i % sliceLen === 0) {
+        sum = Math.sqrt(sum / sliceLen);
+        averages.push(sum);
+        sum = 0;
+      }
+    }
+    // Ascending sort of the averages array
+    averages.sort(function (a, b) {
+      return a - b;
+    });
+    // Take the average at the 95th percentile
+    var a = averages[Math.floor(averages.length * 0.95)];
 
-  var gain = 1.0 / a;
-  // Perform some clamping
-  //   gain = Math.max(gain, 0.02);
+    var gain = 1.0 / a;
+    // Perform some clamping
+    //   gain = Math.max(gain, 0.02);
 
-  //   gain = Math.min(gain, 2000.0);
+    //   gain = Math.min(gain, 2000.0);
 
-  return gain / 10.0;
+    return gain / 10.0;
+  }
 }
 export function safariPolyFill(safariAudioTrack) {
   safariAudioTrack = new Audio();
@@ -229,7 +235,7 @@ export function soundLog(str) {
 }
 
 export function checkFileVolume(buf) {
-  if (buf.getChannelData) {
+  if (buf) {
     window.logging && console.log(buf.getChannelData(0).length);
     if (buf.getChannelData(0).length < 65536) {
       if (Math.max(...buf.getChannelData(0)) > 0) {
