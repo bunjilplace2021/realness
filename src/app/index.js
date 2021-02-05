@@ -239,8 +239,9 @@ const reloadBuffers = async (customBuffer = null) => {
         }
         synth.reloadBuffers();
         !synth.isPlaying && synth.play();
-        synth.setLoopStart(0);
-        synth.randomInterpolate();
+
+        synths.randomStarts();
+        synths[i].randomInterpolate();
       });
       window.loadingBuffers = false;
       customBuffer = null;
@@ -292,7 +293,7 @@ const stopRecording = async () => {
 };
 
 window.addEventListener("down", async () => {
-  if (!recordingAllowed) {
+  if (!recordingAllowed && !window.isMuted) {
     recordingAllowed = await r.getPermissions();
     soundLog(`user has ${recordingAllowed ? "" : "not"} allowed recording.`);
   }
@@ -301,7 +302,7 @@ window.addEventListener("down", async () => {
     if (recordings > recordLimit) {
       window.recordingLimitReached = true;
     }
-    if (!window.recordingLimitReached) {
+    if (!window.recordingLimitReached && recordingAllowed) {
       startRecording();
     } else {
       soundLog("user recording limit reached");
@@ -424,7 +425,7 @@ const setupMasterBus = () => {
   masterBus.connectSource(u.master);
   // masterBus.lowpassFilter(5000, 1);
   window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
-  !window.isMp3 && masterBus.delay(50, 0.5);
+
   !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
   window.synthsLoaded = true;
   muteButton.classList = [];
@@ -527,7 +528,7 @@ const main = async () => {
   if (!window.isMp3) {
     f.suffix = "aac";
     numSources = 1;
-    numVoices = 3;
+    numVoices = 2;
   }
   await soundtrackAudioCtx.rawContext.resume();
   await loadSynths();
