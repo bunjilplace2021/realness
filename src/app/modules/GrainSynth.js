@@ -175,31 +175,25 @@ class GrainSynth {
   }
 
   randomInterpolate() {
-    console.log(this.grains[0]);
     const numGrains = this.grains.length;
-
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
       overlap: this.randArrayFromRange(numGrains, 0.01, 0.05),
-
       grainSize: this.randArrayFromRange(numGrains, 0.001, 0.5),
       playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.1),
       loopEnd: this.randArrayFromRange(numGrains, 0, this.buffer.duration),
     };
-
     randomValues.loopStart = this.randArrayFromRange(
       numGrains,
       0,
       ...randomValues.loopEnd
     );
     this.setClockFrequency(Math.random() * 0.5);
-
     //set values to random values
     this.setCurrentValues(randomValues);
   }
   outputMeter() {
     this.outputMeter = new Meter();
-
     this.output.connect(this.outputMeter);
   }
   getMeterValue() {
