@@ -1,4 +1,4 @@
-import { FMSynth, Frequency, PolySynth, Gain, now, AMSynth } from "tone";
+import { PolySynth, Gain, now, AMSynth } from "tone";
 
 // PRECOMPUTE RANDOM VALUES FOR PERFORMANCE
 class UISynth {
@@ -24,7 +24,7 @@ class UISynth {
       volume: 2,
     });
     this.idx = 0;
-    this.master = new Gain(0.1);
+    this.master = new Gain(1);
     this.uiSynth.connect(this.master);
   }
   play(notes) {

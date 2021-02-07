@@ -181,6 +181,7 @@ class GrainSynth {
     const randomValues = {
       detune: this.randArrayFromRange(numGrains, -1000, 100),
       overlap: this.randArrayFromRange(numGrains, 0.01, 0.05),
+
       grainSize: this.randArrayFromRange(numGrains, 0.001, 0.5),
       playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.1),
       loopEnd: this.randArrayFromRange(numGrains, 0, this.buffer.duration),

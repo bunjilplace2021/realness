@@ -1,11 +1,3 @@
-//  DEBOUNCE UI SOUNDS FOR PERFORMANCE
-function pixelSoundEvent(pixelX, pixelY) {
-  window.pixelAddEvent.data = {
-    pixelX,
-    pixelY,
-  };
-  window.dispatchEvent(window.pixelAddEvent, false);
-}
 function firebasesetup() {
   var firebaseConfig = {
     apiKey: "AIzaSyAbb8-7skMg99nzAlvUaqR6vfQvD7q_7Vs",
@@ -44,9 +36,20 @@ function gotData(data) {
     test.touchTime,
     test.uuid
   );
+
   if (!window.isMuted) {
     pixelSoundEvent(test.mouseX_loc, test.mouseY_loc);
   }
+}
+
+function pixelSoundEvent(pixelX, pixelY) {
+  window.pixelAddEvent.data = {
+    pixelX,
+    pixelY,
+  };
+  setTimeout(() => {
+    window.dispatchEvent(window.pixelAddEvent, false);
+  });
 }
 
 function errData(err) {

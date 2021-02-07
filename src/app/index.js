@@ -8,6 +8,7 @@ import UISynth from "./modules/UISynth";
 // GLOBAL VARIABLES
 import {
   getContext,
+  debug,
   Context,
   Noise,
   setContext,
@@ -15,6 +16,7 @@ import {
   AMOscillator,
   BiquadFilter,
 } from "tone";
+
 
 import {
   changeMuteButton,
@@ -38,7 +40,7 @@ import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
 
-// getContext().rawContext.suspend();
+getContext().rawContext.suspend();
 window.debounce = debounce;
 window.probeLevel = probeLevel;
 
@@ -238,10 +240,10 @@ const reloadBuffers = async (customBuffer = null) => {
           soundLog("error loading user buffer, continuing");
         }
         synth.reloadBuffers();
-        !synth.isPlaying && synth.play();
+        !synth.isPlaying && synth.play(soundtrackAudioCtx.currentTime);
 
-        synths.randomStarts();
-        synths[i].randomInterpolate();
+        synth.randomStarts();
+        synth.randomInterpolate();
       });
       window.loadingBuffers = false;
       customBuffer = null;
@@ -490,7 +492,7 @@ const subOscLoop = () => {
 
 const pollValues = () => {
   try {
-    if (ps && ps.particles) {
+    if (ps.particles ?? null) {
       let { radius, maxradius } = ps.particles[ps.particles.length - 1];
       synths.forEach((synth, i) => {
         // synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
