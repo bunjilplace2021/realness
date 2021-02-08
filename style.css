@@ -36,6 +36,11 @@ video {
   z-index: -999;
 }
 
+img {
+  height: auto;
+  width: 100%;
+}
+
 .topnav {
   overflow: hidden;
   position: fixed;
