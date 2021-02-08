@@ -145,10 +145,13 @@ export function getIdealVolume(buffer) {
       let diff = 1.0 - a;
       soundLog("INITIAL GAIN:" + gain / 10);
       soundLog("DIFF:" + diff);
-      if (diff > 0.999) {
+      let safeVal;
+      if (diff > 0.99) {
         soundLog("possible error. being safe");
-        gain = Math.min(gain, 5000.0);
+        safeVal = 2000;
+        gain = gain / 0.3;
       } else {
+        safeVal = 7000;
         // soundLog("Difference:" + diff);
         // if (gain <= 1.0) {
         //   gain = gain / 20;
@@ -166,7 +169,8 @@ export function getIdealVolume(buffer) {
         //   gain = gain / 2;
         // }
       }
-      gain = Math.min(gain, 7000.0);
+      gain = Math.min(gain, safeVal);
+      gain = Math.max(gain, 3);
       soundLog(`Adjusted gain x ${gain / 10}`);
       resolve((gain / 10.0).toFixed(2));
     }

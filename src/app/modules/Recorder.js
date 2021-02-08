@@ -30,10 +30,14 @@ class Recorder {
         } else {
           this.type = "audio/aac";
         }
-        console.log(this.type);
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
+
+        const stream = await navigator.mediaDevices
+          .getUserMedia({
+            audio: true,
+          })
+          .catch((err) => {
+            return err;
+          });
 
         this.stream = stream;
         clearTimeout(streamTimeout);

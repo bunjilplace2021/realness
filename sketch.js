@@ -18,7 +18,7 @@ let uuid;
 
 let webcam = false;
 
-let array_limit = 20;
+let array_limit = window.safari ? 15 : 20;
 
 let particlepg;
 
@@ -104,10 +104,19 @@ function checkIfiPhone() {
 
 function setup() {
   if (isMobile == false) {
+    pixelDensity(1);
+
     cnv = createCanvas(windowWidth, windowHeight);
+
     particlepg = createGraphics(windowWidth, windowHeight);
     cnv.id("mycanvas");
     cnv.style("display", "block");
+    // If it's desktop safari, limit the framerate
+    if (window.safari) {
+      frameRate(30);
+      // cnv.drawingContext.imageSmoothingEnabled = false;
+    }
+
     //icons_toolbar.style.display = "block";
   } else {
     if (windowWidth < windowHeight) {
@@ -131,7 +140,6 @@ function setup() {
     //     }
   }
 
-  pixelDensity(1);
   firebasesetup();
   shaderSetup();
 
@@ -143,9 +151,6 @@ function draw() {
   if (!instload_toggle) {
     particle_draw(particlepg);
   }
-
-  window.logging &&
-    showDebugText(window.masterLevel && window.masterLevel.toFixed(1));
 }
 
 function shaderToggle() {

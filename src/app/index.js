@@ -15,6 +15,8 @@ import {
   BiquadFilter,
   Transport,
   Meter,
+  getTransport,
+  Oscillator,
 } from "tone";
 
 import {
@@ -72,7 +74,7 @@ process.env.NODE_ENV === "development"
 // create own audio context
 const audioOpts = {
   sampleRate: 22050,
-  latencyHint: "balanced",
+  latencyHint: "playback",
   updateInterval: 1,
   lookAhead: 0.5,
   bufferSize: 4096,
@@ -80,8 +82,10 @@ const audioOpts = {
 };
 
 let soundtrackAudioCtx = new Context(audioOpts);
+let globalTransport = getTransport();
+globalTransport.PPQ = 8;
 
-soundtrackAudioCtx.clockSource = "worker";
+// soundtrackAudioCtx.clockSource = "worker";
 let muteClicked = 0;
 
 soundtrackAudioCtx.name = "Playback Context";
@@ -110,7 +114,7 @@ let synths = [];
 let numSources = isMobile ? 1 : 3;
 
 // number of voices per synth
-let numVoices = isMobile ? 3 : 3;
+let numVoices = isMobile ? 2 : 3;
 if (navigator.deviceMemory) {
   numSources = navigator.deviceMemory / 4;
   numVoices = navigator.deviceMemory / 2;
@@ -287,9 +291,11 @@ const stopRecording = async () => {
       soundLog(error);
     }
     await reloadBuffers(recordedBuffer);
-    f.uploadSample(r.audioBlob);
+
     soundLog("stopped user recording #" + recordings);
+    f.uploadSample(r.audioBlob);
     window.recording = false;
+
     console.log(soundtrackAudioCtx.state);
     if (soundtrackAudioCtx.state === "suspended") {
       await initSound();
@@ -329,13 +335,13 @@ window.addEventListener("released", () => {
 });
 // SETUP subOscillator
 const subOscillator = () => {
-  subOsc = new AMOscillator({
+  subOsc = new Oscillator({
     frequency: 40,
-    harmonicity: 0.5,
-    volume: -64,
+
+    volume: -24,
   });
   subOsc.filter = new BiquadFilter({
-    frequency: 20,
+    frequency: 60,
     gain: 10,
   });
   subOsc.connect(subOsc.filter);
@@ -345,7 +351,7 @@ const subOscillator = () => {
   });
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
-  subOsc.volume.targetRampTo(-18, 10);
+
   subOsc.filter.gain.value = 10;
   noise.start("+2");
   subOsc.start("+2");
@@ -403,7 +409,14 @@ const getBuffers = async (mp3Supported) => {
 //  method to download samples from Firebase and load them into buffers - run on page load
 const loadSynths = async () => {
   return new Promise(async (resolve, _) => {
-    let returnedBuffers = await getBuffers(window.isMp3);
+    let returnedBuffers;
+    try {
+      returnedBuffers = await getBuffers(window.isMp3);
+    } catch (error) {
+      console.log(error);
+      returnedBuffers = await getBuffers(window.isMp3);
+    }
+
     for (let i = 0; i < numSources; i++) {
       if (returnedBuffers[i]) {
         synths.push(
@@ -434,7 +447,7 @@ const setupMasterBus = () => {
   masterBus.connectSource(u.master);
   // masterBus.lowpassFilter(5000, 1);
   window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
-  !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
+  masterBus.reverb(true, 0.3, 3, 0.7);
   window.synthsLoaded = true;
   muteButton.classList = [];
 
@@ -479,7 +492,7 @@ const startAudio = async () => {
 // Loops to synchronize with cisual content
 const runLoops = () => {
   try {
-    Transport.scheduleRepeat((time) => {
+    globalTransport.scheduleRepeat((time) => {
       pollValues();
     }, 10);
   } catch (e) {
@@ -488,10 +501,9 @@ const runLoops = () => {
 };
 
 const subOscLoop = () => {
-  if (synths[0].transport) {
-    synths[0].transport.scheduleRepeat((time) => {
+  if (globalTransport) {
+    globalTransport.scheduleRepeat((time) => {
       subOsc.detune.rampTo(mapValue(Math.random(), 0, 1, -100, 100), 30);
-      subOsc.harmonicity.rampTo(mapValue(Math.random(), 0, 1, 0.5, 2), 30);
     }, 30);
   }
 };
@@ -531,6 +543,7 @@ const restartAudio = () => {
 const main = async () => {
   window.isMp3 = await isMp3Supported;
   if (!window.isMp3) {
+    window.pixelDensity(0.8);
     f.suffix = "aac";
     numSources = 1;
     numVoices = 2;

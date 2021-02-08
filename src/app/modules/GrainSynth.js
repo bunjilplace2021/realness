@@ -27,7 +27,7 @@ class GrainSynth {
     this.numVoices = voices;
     this.buffer = buffer;
     this.toneContext = ctx;
-    this.transport = this.toneContext.transport;
+    // this.transport = this.toneContext.transport;
     this.dest = this.toneContext.destination;
     this.dest.name = "Grainsynth Destination";
 
@@ -46,7 +46,9 @@ class GrainSynth {
     });
     for (let i = 0; i < this.numVoices; i++) {
       this.grains[i] = new GrainPlayer(this.buffer);
+      this.grains[i].unsync();
     }
+
     this.setupMaster();
     // evenly ditribute volumes to master
   }
@@ -103,7 +105,7 @@ class GrainSynth {
   }
   //  triggers
   async play(startTime = 1) {
-    this.transport.start();
+    // this.transport.start();
     this.output.gain.setValueAtTime(1 / this.numVoices, now());
     //  wait for grains to load before starting
     const grainPromises = this.grains.map((grain) => this.isGrainLoaded(grain));
