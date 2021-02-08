@@ -1,6 +1,5 @@
 import {
   Reverb,
-  Delay,
   Gain,
   BiquadFilter,
   Chorus,
@@ -8,26 +7,28 @@ import {
   Meter,
   Volume,
   FeedbackDelay,
+  Oscillator,
 } from "tone";
 import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
-    this.input = new Volume(0);
-    this.limiter = new Limiter(-20);
-
+    this.input = new Volume(6);
+    this.limiter = new Limiter(-6);
+    this.input.connect(this.limiter);
     this.effectsChain = [];
     this.ctx = ctx;
 
-    this.output = new Gain(1);
+    this.output = new Limiter(0);
     this.dest = this.ctx.destination;
-    window.isMobile ? (this.dest.volume.value = 6) : null;
+
+    this.output.connect(this.dest);
     this.chainEffect(this.limiter);
   }
   test() {
-    var oscillator = this.ctx.createOscillator();
+    var oscillator = new Oscillator(440);
     oscillator.frequency.setValueAtTime(440, this.ctx.currentTime);
-    oscillator.connect(this.output);
+    oscillator.connect(this.input);
     oscillator.start();
   }
   setVolume(val) {
@@ -61,10 +62,10 @@ class MasterBus {
       for (let i = 0; i < this.effectsChain.length - 1; i++) {
         this.effectsChain[i].connect(this.effectsChain[i + 1]);
       }
-      effectsOutput.connect(this.dest);
+      effectsOutput.connect(this.output);
     } else {
       // there's just one effect. Just connect it
-      this.input.connect(this.effectsChain[0]).connect(this.dest);
+      this.input.connect(this.effectsChain[0]).connect(this.output);
     }
   }
   removeEffect(effect) {
@@ -80,7 +81,7 @@ class MasterBus {
     this.masterDelay = new FeedbackDelay(time, fbk);
     this.chainEffect(this.masterDelay);
   }
-  meter(node) {
+  meterNode(node) {
     this.meter = new Meter({ smoothing: 0.8 });
     node.connect(this.meter);
     window.meterLoop = setInterval(() => {

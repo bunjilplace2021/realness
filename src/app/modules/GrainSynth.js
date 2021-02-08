@@ -3,7 +3,7 @@ import {
   now,
   Gain,
   GrainPlayer,
-  Reverb,
+  Limiter,
   PitchShift,
   Loop,
   LFO,
@@ -30,15 +30,16 @@ class GrainSynth {
     this.transport = this.toneContext.transport;
     this.dest = this.toneContext.destination;
     this.dest.name = "Grainsynth Destination";
-    //  make nodes
+
     this.grainOutput = new Gain(1);
     this.grainOutput.name = "Grain Output";
     this.filter = new BiquadFilter(10000, "lowpass");
     this.compressor = new Compressor({
-      ratio: 8,
-      threshold: -30,
-      release: 1,
-      attack: 0.003,
+      threshold: -6,
+      knee: 0,
+      ratio: 20,
+      attack: 0.001,
+      release: 0.1,
     });
     this.pitchShifter = new PitchShift({
       pitch: -12,

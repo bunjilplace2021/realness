@@ -4,19 +4,18 @@ import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
 
-// !TODO: Homegenize buffer loading process to "loadbuffers" function
 // GLOBAL VARIABLES
 import {
   getContext,
-  debug,
   Context,
   Noise,
   setContext,
   start,
   AMOscillator,
   BiquadFilter,
+  Transport,
+  Meter,
 } from "tone";
-
 
 import {
   changeMuteButton,
@@ -183,6 +182,14 @@ const UISound = () => {
   });
 };
 
+const checkOutput = (node) => {
+  const tempMeter = new Meter();
+  node.connect(tempMeter);
+  let value = tempMeter.getValue();
+  console.log(value);
+  tempMeter.disconnect();
+  return value;
+};
 //  MAIN FUNCTIONS
 
 const reloadBuffers = async (customBuffer = null) => {
@@ -194,7 +201,7 @@ const reloadBuffers = async (customBuffer = null) => {
 
       try {
         console.log("reloading buffers");
-        console.log(returnedBuffers);
+        // console.log(returnedBuffers);
         returnedBuffers.forEach(async (buf, i) => {
           try {
             console.log("changing buffers");
@@ -202,7 +209,6 @@ const reloadBuffers = async (customBuffer = null) => {
               buf.idealGain / numSources,
               soundtrackAudioCtx.currentTime
             );
-
             synths[i].buffer.copyToChannel(
               returnedBuffers[i].getChannelData(0),
               0,
@@ -216,6 +222,7 @@ const reloadBuffers = async (customBuffer = null) => {
           synths[i].randomStarts();
           synths[i].randomInterpolate();
         });
+
         window.loadingBuffers = false;
         resolve(true);
       } catch (err) {
@@ -230,7 +237,6 @@ const reloadBuffers = async (customBuffer = null) => {
         try {
           synth.grainOutput.gain.value = customBuffer.idealGain;
           try {
-            // synth.buffer = customBuffer;
             synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
             synth.reloadBuffers();
           } catch (error) {
@@ -240,11 +246,10 @@ const reloadBuffers = async (customBuffer = null) => {
           soundLog("error loading user buffer, continuing");
         }
         synth.reloadBuffers();
-        !synth.isPlaying && synth.play(soundtrackAudioCtx.currentTime);
-
         synth.randomStarts();
         synth.randomInterpolate();
       });
+
       window.loadingBuffers = false;
       customBuffer = null;
       resolve(true);
@@ -327,9 +332,11 @@ const subOscillator = () => {
   subOsc = new AMOscillator({
     frequency: 40,
     harmonicity: 0.5,
+    volume: -64,
   });
   subOsc.filter = new BiquadFilter({
     frequency: 20,
+    gain: 10,
   });
   subOsc.connect(subOsc.filter);
   const noise = new Noise({
@@ -338,8 +345,7 @@ const subOscillator = () => {
   });
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
-  subOsc.volume.value = -64;
-  subOsc.volume.targetRampTo(-28, 10);
+  subOsc.volume.targetRampTo(-18, 10);
   subOsc.filter.gain.value = 10;
   noise.start("+2");
   subOsc.start("+2");
@@ -405,9 +411,10 @@ const loadSynths = async () => {
         );
         synths.forEach((synth) => {
           synth.filter.frequency.value = 220;
-          // synth.filter.gain.value = 10;
+          synth.filter.Q.value = 5;
           returnedBuffers[i].idealGain
-            ? (synth.grainOutput.gain.value = returnedBuffers[i].idealGain)
+            ? (synth.grainOutput.gain.value =
+                returnedBuffers[i].idealGain / numSources)
             : null;
         });
         soundLog("Loaded GrainSynth " + (i + 1));
@@ -427,7 +434,6 @@ const setupMasterBus = () => {
   masterBus.connectSource(u.master);
   // masterBus.lowpassFilter(5000, 1);
   window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
-
   !isMobile && window.isMp3 ? masterBus.reverb(true, 0.3, 4, 0.7) : null;
   window.synthsLoaded = true;
   muteButton.classList = [];
@@ -473,7 +479,7 @@ const startAudio = async () => {
 // Loops to synchronize with cisual content
 const runLoops = () => {
   try {
-    synths[0].transport.scheduleRepeat((time) => {
+    Transport.scheduleRepeat((time) => {
       pollValues();
     }, 10);
   } catch (e) {
@@ -495,8 +501,7 @@ const pollValues = () => {
     if (ps.particles ?? null) {
       let { radius, maxradius } = ps.particles[ps.particles.length - 1];
       synths.forEach((synth, i) => {
-        // synth.setDetune(mapValue(radius, 0, maxradius, -1000, 0.05));
-        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 440, 880);
+        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 110, 880);
         !isMobile && synth.filter.frequency.rampTo(filterFreq, 5);
       });
       subOsc.filter.frequency.rampTo(
@@ -536,8 +541,10 @@ const main = async () => {
   window.ctx = soundtrackAudioCtx;
   window.sourceCount =
     soundtrackAudioCtx.rawContext._nativeAudioContext.activeSourceCount;
-
+  window.masterBus = masterBus;
+  window.checkOutput = checkOutput;
   UISound();
+
   const canvases = document.querySelectorAll("canvas");
   canvases.forEach((canvas) => {
     if (canvas.style.display === "none") {

@@ -255,7 +255,7 @@ class Particle {
 
   isDead() {
     if (!this.alive && !this.active) {
-      console.log("pixel is dead");
+      window.logging && console.log("pixel is dead");
       // setTimeout makes it async
       setTimeout(() => {
         window.dispatchEvent(window.radiusLimit);
