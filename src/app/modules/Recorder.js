@@ -14,7 +14,6 @@ class Recorder {
         let streamTimeout = setTimeout(() => {
           reject("permissions timed out");
         }, 5000);
-        console.log("getting permssions");
 
         if (window.mp3 === true) {
           this.type = "audio/mpeg-3";

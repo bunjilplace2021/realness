@@ -33,7 +33,11 @@ class GrainSynth {
 
     this.grainOutput = new Gain(1);
     this.grainOutput.name = "Grain Output";
-    this.filter = new BiquadFilter(10000, "lowpass");
+    this.filter = new BiquadFilter({
+      frequency: 220,
+      type: "lowpass",
+      Q: 8,
+    });
     this.compressor = new Compressor({
       threshold: -6,
       knee: 0,

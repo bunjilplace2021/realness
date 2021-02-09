@@ -247,7 +247,7 @@ const reloadBuffers = async (customBuffer = null) => {
       customBuffer.idealGain = await getIdealVolume(customBuffer);
       synths.forEach((synth) => {
         try {
-          synth.grainOutput.gain.value = customBuffer.idealGain;
+          synth.grainOutput.gain.value = customBuffer.idealGain / numSources;
           try {
             synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
             synth.reloadBuffers();
@@ -425,8 +425,6 @@ const loadSynths = async () => {
           new GrainSynth(returnedBuffers[i], soundtrackAudioCtx, numVoices)
         );
         synths.forEach((synth) => {
-          synth.filter.frequency.value = 220;
-          synth.filter.Q.value = 8;
           returnedBuffers[i].idealGain
             ? (synth.grainOutput.gain.value =
                 returnedBuffers[i].idealGain / numSources)
