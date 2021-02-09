@@ -11,11 +11,9 @@ import {
   Noise,
   setContext,
   start,
-  AMOscillator,
   BiquadFilter,
-  Transport,
   Meter,
-  getTransport,
+  setTransport,
   Oscillator,
 } from "tone";
 
@@ -41,7 +39,7 @@ import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
 
-getContext().rawContext.suspend();
+setContext(null);
 window.debounce = debounce;
 window.probeLevel = probeLevel;
 
@@ -76,14 +74,13 @@ const audioOpts = {
   sampleRate: 22050,
   latencyHint: "playback",
   updateInterval: 1,
-  lookAhead: 0.5,
+  lookAhead: 1,
   bufferSize: 4096,
   state: "suspended",
 };
 
 let soundtrackAudioCtx = new Context(audioOpts);
-let globalTransport = getTransport();
-globalTransport.PPQ = 8;
+let globalTransport = soundtrackAudioCtx.transport;
 
 // soundtrackAudioCtx.clockSource = "worker";
 let muteClicked = 0;
@@ -123,9 +120,21 @@ if (navigator.deviceMemory) {
 window.synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx, numVoices);
 let f = new FireBaseAudio(soundtrackAudioCtx);
-const recordLength = 500;
+const recordLength = 2000;
 let r = new Recorder(recordLength, soundtrackAudioCtx);
+let subOsc = new Oscillator({
+  frequency: 40,
 
+  volume: -24,
+});
+subOsc.filter = new BiquadFilter({
+  frequency: 60,
+  gain: 10,
+});
+const noise = new Noise({
+  type: "pink",
+  volume: -14,
+});
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
 const playButton = document.querySelector("#play");
@@ -133,7 +142,6 @@ const playButton = document.querySelector("#play");
 const audioTooltip = document.querySelector("#audiotooltip");
 
 // SUBOSCILLATOR
-let subOsc;
 
 /* EVENT LISTENERS */
 playButton.addEventListener("click", () => {
@@ -267,10 +275,15 @@ const startRecording = async () => {
   return new Promise(async (resolve, reject) => {
     if (window.MediaRecorder && recordingAllowed && !window.isMuted) {
       try {
+        let maxLength = setTimeout(() => {
+          soundLog("hit max length, stopping.");
+          resolve(true);
+        }, recordLength);
         soundLog("started user recording #" + recordings);
         window.recording = true;
         await r.recordChunks();
         resolve(true);
+        clearTimeout(maxLength);
       } catch (error) {
         soundLog(error);
         reject(false);
@@ -330,31 +343,18 @@ window.addEventListener("released", () => {
         stopRecording();
       }, 100);
     }
-    soundLog("mouse is released");
   }
 });
 // SETUP subOscillator
 const subOscillator = () => {
-  subOsc = new Oscillator({
-    frequency: 40,
-
-    volume: -24,
-  });
-  subOsc.filter = new BiquadFilter({
-    frequency: 60,
-    gain: 10,
-  });
   subOsc.connect(subOsc.filter);
-  const noise = new Noise({
-    type: "pink",
-    volume: -14,
-  });
+
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
-
-  subOsc.filter.gain.value = 10;
   noise.start("+2");
   subOsc.start("+2");
+
+  subOsc.filter.gain.value = 10;
 };
 
 const getBuffers = async (mp3Supported) => {
@@ -391,17 +391,19 @@ const getBuffers = async (mp3Supported) => {
 
     try {
       buffers = await Promise.all(bufPromises);
+      if (buffers.includes(undefined)) {
+        console.log("buffer array included undefined buffer. Trying again");
+        buffers = await getBuffers(mp3Supported);
+      }
 
       buffers.forEach(async (buffer) => {
         buffer.idealGain = await getIdealVolume(buffer);
       });
-      if (buffers.includes(undefined)) {
-        console.log("buffer array included undefined buffer. Trying again");
-      }
+
       resolve(buffers);
     } catch (error) {
       soundLog("invalid audio file, trying again");
-      getBuffers();
+      buffers = await getBuffers(mp3Supported);
     }
   });
 };
@@ -424,7 +426,7 @@ const loadSynths = async () => {
         );
         synths.forEach((synth) => {
           synth.filter.frequency.value = 220;
-          synth.filter.Q.value = 5;
+          synth.filter.Q.value = 8;
           returnedBuffers[i].idealGain
             ? (synth.grainOutput.gain.value =
                 returnedBuffers[i].idealGain / numSources)
@@ -434,7 +436,7 @@ const loadSynths = async () => {
       }
     }
     setupMasterBus();
-    subOscillator();
+
     hidePlayButton(playButton, muteButton);
     changetoUnmute(muteButton);
     changeTooltipText(audioTooltip);
@@ -447,7 +449,8 @@ const setupMasterBus = () => {
   masterBus.connectSource(u.master);
   // masterBus.lowpassFilter(5000, 1);
   window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
-  masterBus.reverb(true, 0.3, 3, 0.7);
+  window.isMp3 && masterBus.reverb(true, 0.3, 3, 0.7);
+  !window.isMp3 && masterBus.cheapReverb(true, 0.3, 3, 0.7);
   window.synthsLoaded = true;
   muteButton.classList = [];
 
@@ -480,6 +483,8 @@ const startAudio = async () => {
         masterBus.connectSource(synth.output);
       }
     });
+    globalTransport.start();
+    subOscillator();
     runLoops();
     subOscLoop();
   }
@@ -510,10 +515,12 @@ const subOscLoop = () => {
 
 const pollValues = () => {
   try {
-    if (ps.particles ?? null) {
-      let { radius, maxradius } = ps.particles[ps.particles.length - 1];
+    if (ps.particles) {
+      let { radius, maxradius } = ps.particles.last();
+
       synths.forEach((synth, i) => {
-        let filterFreq = (i + 1) * mapValue(radius, 0, maxradius, 110, 880);
+        synth.setDetune(0 - i * radius);
+        let filterFreq = (i + 1) * mapValue(~~radius, 0, maxradius, 110, 880);
         !isMobile && synth.filter.frequency.rampTo(filterFreq, 5);
       });
       subOsc.filter.frequency.rampTo(
@@ -543,21 +550,17 @@ const restartAudio = () => {
 const main = async () => {
   window.isMp3 = await isMp3Supported;
   if (!window.isMp3) {
-    window.pixelDensity(0.8);
+    window.pixelDensity && window.pixelDensity(0.8);
     f.suffix = "aac";
     numSources = 1;
     numVoices = 2;
   }
   await soundtrackAudioCtx.rawContext.resume();
-  await loadSynths();
-  window.synths = synths;
-  window.ctx = soundtrackAudioCtx;
-  window.sourceCount =
-    soundtrackAudioCtx.rawContext._nativeAudioContext.activeSourceCount;
-  window.masterBus = masterBus;
-  window.checkOutput = checkOutput;
-  UISound();
 
+  await loadSynths();
+
+  UISound();
+  window.logging && debug();
   const canvases = document.querySelectorAll("canvas");
   canvases.forEach((canvas) => {
     if (canvas.style.display === "none") {
@@ -568,3 +571,12 @@ const main = async () => {
 
 // run main loop
 main();
+
+const debug = () => {
+  window.synths = synths;
+  window.ctx = soundtrackAudioCtx;
+  window.sourceCount =
+    soundtrackAudioCtx.rawContext._nativeAudioContext.activeSourceCount;
+  window.masterBus = masterBus;
+  window.checkOutput = checkOutput;
+};

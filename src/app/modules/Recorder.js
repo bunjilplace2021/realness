@@ -14,18 +14,9 @@ class Recorder {
         let streamTimeout = setTimeout(() => {
           reject("permissions timed out");
         }, 5000);
-        const mp3 = navigator.mediaCapabilities
-          .decodingInfo({
-            type: "file",
-            audio: {
-              contentType: "audio/mp3",
-            },
-          })
-          .then((result) => {
-            return result.supported;
-          });
+        console.log("getting permssions");
 
-        if ((await mp3) === true) {
+        if (window.mp3 === true) {
           this.type = "audio/mpeg-3";
         } else {
           this.type = "audio/aac";

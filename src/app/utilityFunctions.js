@@ -219,3 +219,9 @@ export function checkFileVolume(buf) {
     return false;
   }
 }
+
+if (!Array.prototype.last) {
+  Array.prototype.last = function () {
+    return this[this.length - 1];
+  };
+}

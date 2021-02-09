@@ -1,6 +1,5 @@
 import {
   Reverb,
-  Gain,
   BiquadFilter,
   Chorus,
   Limiter,
@@ -13,7 +12,7 @@ import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
-    this.input = new Volume(window.isMobile ? 0 : 6);
+    this.input = new Volume(window.isMobile ? 6 : 0);
     this.limiter = new Limiter(-6);
     this.input.connect(this.limiter);
     this.effectsChain = [];
@@ -94,6 +93,18 @@ class MasterBus {
         wet,
       });
       await this.masterReverb.generate();
+      this.chainEffect(this.masterReverb);
+    } else {
+      this.masterReverb && this.removeEffect(this.masterReverb);
+    }
+  }
+  cheapReverb(reverbSwitch, preDelay = 0.3, decay = 4, wet = 1) {
+    if (reverbSwitch) {
+      this.masterReverb = new FeedbackDelay({
+        delayTime: 0.2,
+        maxDelay: 0.5,
+        feedback: 0.4,
+      });
       this.chainEffect(this.masterReverb);
     } else {
       this.masterReverb && this.removeEffect(this.masterReverb);

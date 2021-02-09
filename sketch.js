@@ -19,7 +19,8 @@ let uuid;
 let webcam = false;
 
 let array_limit = window.safari ? 15 : 20;
-
+let globalFrameRate = window.safari ? 30 : 60;
+let frameLimit = ~~globalFrameRate * 10;
 let particlepg;
 
 let isSafari = false;
@@ -105,17 +106,13 @@ function checkIfiPhone() {
 function setup() {
   if (isMobile == false) {
     pixelDensity(1);
-
+    // frameRate(globalFrameRate);
     cnv = createCanvas(windowWidth, windowHeight);
 
     particlepg = createGraphics(windowWidth, windowHeight);
     cnv.id("mycanvas");
     cnv.style("display", "block");
     // If it's desktop safari, limit the framerate
-    if (window.safari) {
-      frameRate(30);
-      // cnv.drawingContext.imageSmoothingEnabled = false;
-    }
 
     //icons_toolbar.style.display = "block";
   } else {
@@ -176,7 +173,7 @@ function guid() {
 }
 
 function particle_draw(p) {
-  touchtime = frameCount % 600; //10 second loop approx
+  touchtime = frameCount % frameLimit; //10 second loop approx
 
   if (!pixelShaderToggle) {
     p.blendMode(BLEND);
@@ -232,7 +229,9 @@ function mousePressed() {
 function mouseReleased() {
   // dispatch event to sound sketch
 
-  window.dispatchEvent(window.released);
+  if (!window.isMuted && !window.recordingLimitReached) {
+    window.dispatchEvent(window.released);
+  }
 
   mousecount = 0;
   mouseIsReleased = true;

@@ -36,7 +36,7 @@ class FireBaseAudio {
   }
 
   async listAll() {
-    this.files = await this.storageRef.list();
+    this.files = await this.storageRef.list({ maxResults: 200 });
   }
   async getAacFiles() {
     return new Promise(async (resolve, reject) => {

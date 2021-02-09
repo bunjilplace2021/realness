@@ -78,18 +78,18 @@ class GrainSynth {
       grain.loop = true;
       grain.connect(this.grainOutput);
     });
-    this.grainOutput.connect(this.filter);
+    this.grainOutput.connect(this.compressor);
     this.output = new Gain(1);
     this.output.name = "Output";
     this.output.gain.setValueAtTime(0.7 / this.numVoices, now());
     this.pitchShifter.windowSize = 1;
-    this.filter.connect(this.compressor);
+    this.compressor.connect(this.filter);
     if (window.isMp3) {
-      this.compressor.connect(this.pitchShifter);
+      this.filter.connect(this.pitchShifter);
       this.pitchShifter.connect(this.output);
     } else {
       this.pitchShifter.dispose();
-      this.compressor.dispose();
+      // this.compressor.dispose();
       this.filter.connect(this.output);
     }
 
@@ -180,11 +180,15 @@ class GrainSynth {
   randomInterpolate() {
     const numGrains = this.grains.length;
     const randomValues = {
-      detune: this.randArrayFromRange(numGrains, -1000, 100),
+      detune: this.randArrayFromRange(numGrains, -5000, 100),
       overlap: this.randArrayFromRange(numGrains, 0.01, 0.05),
       grainSize: this.randArrayFromRange(numGrains, 0.001, 0.5),
       playbackRate: this.randArrayFromRange(numGrains, 0.01, 0.1),
-      loopEnd: this.randArrayFromRange(numGrains, 0, this.buffer.duration),
+      loopEnd: this.randArrayFromRange(
+        numGrains,
+        this.buffer.duration / 2,
+        this.buffer.duration
+      ),
     };
     randomValues.loopStart = this.randArrayFromRange(
       numGrains,
@@ -210,10 +214,9 @@ class GrainSynth {
     return this.pitchShifter.pitch;
   }
   setDetune(val) {
+    console.log(val);
     const offset = val / 2;
-    this.grains.forEach(
-      (grain) => (grain.detune = Math.random() * val - offset)
-    );
+    this.grains.forEach((grain) => (grain.detune = val));
   }
   getGrainValues(key) {
     const values = [];
