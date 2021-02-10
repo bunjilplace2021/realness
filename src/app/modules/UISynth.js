@@ -32,7 +32,7 @@ class UISynth {
       this.uiSynth.set({
         envelope: envOpts,
         harmonicity: 2,
-        volume: 1,
+        volume: 1.5,
       });
     } else {
       this.uiSynth = new AMSynth({
@@ -41,7 +41,7 @@ class UISynth {
     }
 
     this.idx = 0;
-    this.master = new Volume(-8);
+    this.master = new Volume(-6);
     this.uiSynth.connect(this.master);
   }
   play(notes) {

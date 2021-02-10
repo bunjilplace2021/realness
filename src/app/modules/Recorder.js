@@ -28,7 +28,6 @@ class Recorder {
           .catch((err) => {
             return err;
           });
-
         this.stream = stream;
         clearTimeout(streamTimeout);
         resolve(stream);

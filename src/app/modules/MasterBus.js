@@ -98,17 +98,13 @@ class MasterBus {
       this.masterReverb && this.removeEffect(this.masterReverb);
     }
   }
-  cheapReverb(reverbSwitch, preDelay = 0.3, decay = 4, wet = 1) {
-    if (reverbSwitch) {
-      this.masterReverb = new FeedbackDelay({
-        delayTime: 0.2,
-        maxDelay: 0.5,
-        feedback: 0.4,
-      });
-      this.chainEffect(this.masterReverb);
-    } else {
-      this.masterReverb && this.removeEffect(this.masterReverb);
-    }
+  cheapDelay(delayTime = 0.3, maxDelay = 0.5, feedback = 0.4) {
+    this.cheapDelay = new FeedbackDelay({
+      delayTime,
+      maxDelay,
+      feedback,
+    });
+    this.chainEffect(this.cheapDelay);
   }
   disconnect() {
     this.dest.disconnect();

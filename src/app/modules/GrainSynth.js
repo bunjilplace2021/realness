@@ -1,22 +1,15 @@
 import {
-  debug,
   now,
   Gain,
   GrainPlayer,
-  Limiter,
   PitchShift,
-  Loop,
-  LFO,
   Compressor,
-  getContext,
   BiquadFilter,
   Meter,
 } from "tone";
 
 import regeneratorRuntime from "regenerator-runtime";
 
-// TODO: ADD PROBABILITY TO WHICH GRAIN PLAYS ON EACH LOOP
-// TODO: ADD PRESETS LOADED FROM JSON
 class GrainSynth {
   constructor(buffer, ctx, voices = 2) {
     // workaround to suspend audiocontext without warnings
@@ -27,7 +20,6 @@ class GrainSynth {
     this.numVoices = voices;
     this.buffer = buffer;
     this.toneContext = ctx;
-    // this.transport = this.toneContext.transport;
     this.dest = this.toneContext.destination;
     this.dest.name = "Grainsynth Destination";
 
@@ -39,7 +31,7 @@ class GrainSynth {
       Q: 8,
     });
     this.compressor = new Compressor({
-      threshold: -6,
+      threshold: -12,
       knee: 0,
       ratio: 20,
       attack: 0.001,
@@ -128,10 +120,12 @@ class GrainSynth {
   kill() {
     this.grains.forEach((grain) => grain.dispose());
   }
-
+  restart() {
+    this.grains.forEach((grain) => grain.restart());
+  }
   setClockFrequency(val) {
     this.grains.forEach((grain) =>
-      grain._clock.frequency.targetRampTo(val, "+0.1")
+      grain._clock.frequency.targetRampTo(val / grain.grainSize, "+0.1")
     );
   }
 
@@ -199,7 +193,7 @@ class GrainSynth {
       0,
       ...randomValues.loopEnd
     );
-    this.setClockFrequency(Math.random() * 0.5);
+    // this.setClockFrequency(Math.random());
     //set values to random values
     this.setCurrentValues(randomValues);
   }
@@ -218,8 +212,6 @@ class GrainSynth {
     return this.pitchShifter.pitch;
   }
   setDetune(val) {
-    console.log(val);
-    const offset = val / 2;
     this.grains.forEach((grain) => (grain.detune = val));
   }
   getGrainValues(key) {

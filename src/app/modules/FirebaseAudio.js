@@ -1,6 +1,7 @@
 import firebase from "firebase/app";
 import "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
+import { soundLog } from "../utilityFunctions";
 class FireBaseAudio {
   // needed methods
   // async fetch
@@ -53,9 +54,9 @@ class FireBaseAudio {
           this.fileNames.push(metaObject.fullPath);
         }
       });
-      console.log(`Found ${this.fileNames.length} files`);
+      soundLog(`Found ${this.fileNames.length} files`);
       this.fileNames.slice(0, 10);
-      console.log(this.fileNames);
+
       resolve(this.fileNames);
     });
   }

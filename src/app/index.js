@@ -6,15 +6,14 @@ import UISynth from "./modules/UISynth";
 
 // GLOBAL VARIABLES
 import {
-  getContext,
   Context,
   Noise,
   setContext,
   start,
   BiquadFilter,
   Meter,
-  setTransport,
   Oscillator,
+  getContext,
 } from "tone";
 
 import {
@@ -39,7 +38,7 @@ import regeneratorRuntime from "regenerator-runtime";
 
 // suspend auto generated audio context from tone import
 
-setContext(null);
+getContext().rawContext.suspend();
 window.debounce = debounce;
 window.probeLevel = probeLevel;
 
@@ -57,7 +56,6 @@ let isMp3Supported = navigator.mediaCapabilities
 // RECORDINGS
 let recordingAllowed = false;
 let recordLimit = isMobile ? 1 : 3;
-
 let recordings = 0;
 let recordedBuffer = null;
 window.recordingLimitReached = false;
@@ -79,52 +77,34 @@ const audioOpts = {
   state: "suspended",
 };
 
-let soundtrackAudioCtx = new Context(audioOpts);
-let globalTransport = soundtrackAudioCtx.transport;
-
-// soundtrackAudioCtx.clockSource = "worker";
-let muteClicked = 0;
-
+const soundtrackAudioCtx = new Context(audioOpts);
 soundtrackAudioCtx.name = "Playback Context";
+const globalTransport = soundtrackAudioCtx.transport;
 
-const initSound = async () => {
-  soundLog("attempting to start audio");
-  await soundtrackAudioCtx.rawContext.resume();
-  await start();
-  window.isSoundStarted = true;
-  soundLog("Audio context is: " + soundtrackAudioCtx.rawContext.state);
-  soundLog("Asking for microphone permissions");
-
-  try {
-    !r.stream && (await r.getPermissions());
-  } catch (error) {
-    console.log(error);
-  }
-};
+let muteClicked = 0;
 
 /* GLOBAL VARIABLES */
 setContext(soundtrackAudioCtx);
 let masterBus;
 let synths = [];
 // number of different sources to use
-
 let numSources = isMobile ? 1 : 3;
 
 // number of voices per synth
 let numVoices = isMobile ? 2 : 3;
-if (navigator.deviceMemory) {
-  numSources = navigator.deviceMemory / 4;
-  numVoices = navigator.deviceMemory / 2;
-}
+
+// if (navigator.deviceMemory) {
+//   numSources = navigator.deviceMemory / 4;
+//   numVoices = navigator.deviceMemory / 2;
+// }
 
 window.synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx, numVoices);
-let f = new FireBaseAudio(soundtrackAudioCtx);
+const f = new FireBaseAudio(soundtrackAudioCtx);
 const recordLength = 2000;
-let r = new Recorder(recordLength, soundtrackAudioCtx);
-let subOsc = new Oscillator({
-  frequency: 40,
-
+const r = new Recorder(recordLength, soundtrackAudioCtx);
+const subOsc = new Oscillator({
+  frequency: 60,
   volume: -24,
 });
 subOsc.filter = new BiquadFilter({
@@ -141,8 +121,20 @@ const playButton = document.querySelector("#play");
 // AUDIO TOOLTIP
 const audioTooltip = document.querySelector("#audiotooltip");
 
-// SUBOSCILLATOR
-
+// INITIALIZE SOUND
+const initSound = async () => {
+  soundLog("attempting to start audio");
+  await soundtrackAudioCtx.rawContext.resume();
+  await start();
+  window.isSoundStarted = true;
+  soundLog("Audio context is: " + soundtrackAudioCtx.rawContext.state);
+  soundLog("Asking for microphone permissions");
+  try {
+    !r.stream && (await r.getPermissions());
+  } catch (error) {
+    console.log(error);
+  }
+};
 /* EVENT LISTENERS */
 playButton.addEventListener("click", () => {
   const playTimeout = setTimeout(() => {
@@ -250,20 +242,19 @@ const reloadBuffers = async (customBuffer = null) => {
           synth.grainOutput.gain.value = customBuffer.idealGain / numSources;
           try {
             synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
-            synth.reloadBuffers();
           } catch (error) {
             synth.buffer = customBuffer;
           }
         } catch (error) {
           soundLog("error loading user buffer, continuing");
         }
+        synth.restart();
         synth.reloadBuffers();
         synth.randomStarts();
         synth.randomInterpolate();
       });
-
       window.loadingBuffers = false;
-      customBuffer = null;
+
       resolve(true);
     }
   });
@@ -348,13 +339,11 @@ window.addEventListener("released", () => {
 // SETUP subOscillator
 const subOscillator = () => {
   subOsc.connect(subOsc.filter);
-
   noise.connect(subOsc.filter);
   masterBus.connectSource(subOsc.filter);
   noise.start("+2");
   subOsc.start("+2");
-
-  subOsc.filter.gain.value = 10;
+  subOsc.filter.gain.value = 20;
 };
 
 const getBuffers = async (mp3Supported) => {
@@ -376,6 +365,7 @@ const getBuffers = async (mp3Supported) => {
       });
     } else {
       if (f.fileNames === undefined) {
+        // get the AAC file list (only if it is undefined)
         await f.getAacFiles();
       }
       let urlPromises = Array.from({ length: numSources }, () => {
@@ -395,11 +385,9 @@ const getBuffers = async (mp3Supported) => {
         console.log("buffer array included undefined buffer. Trying again");
         buffers = await getBuffers(mp3Supported);
       }
-
       buffers.forEach(async (buffer) => {
         buffer.idealGain = await getIdealVolume(buffer);
       });
-
       resolve(buffers);
     } catch (error) {
       soundLog("invalid audio file, trying again");
@@ -434,7 +422,6 @@ const loadSynths = async () => {
       }
     }
     setupMasterBus();
-
     hidePlayButton(playButton, muteButton);
     changetoUnmute(muteButton);
     changeTooltipText(audioTooltip);
@@ -445,13 +432,11 @@ const loadSynths = async () => {
 const setupMasterBus = () => {
   masterBus = new MasterBus(soundtrackAudioCtx);
   masterBus.connectSource(u.master);
-  // masterBus.lowpassFilter(5000, 1);
-  window.isMp3 && masterBus.chorus(0.01, 300, 0.9);
-  window.isMp3 && masterBus.reverb(true, 0.3, 3, 0.7);
-  !window.isMp3 && masterBus.cheapReverb(true, 0.3, 3, 0.7);
+  window.isMp3 && masterBus.chorus(0.05, 300, 0.9);
+  window.isMp3 && masterBus.reverb(true, 0.3, 4, 0.7);
+  !window.isMp3 && masterBus.cheapDelay(0.3, 0.5, 0.4);
   window.synthsLoaded = true;
   muteButton.classList = [];
-
   soundLog("Voices loaded");
   // DEBUG SOUND LEVEL
 };
@@ -515,14 +500,17 @@ const pollValues = () => {
   try {
     if (ps.particles) {
       let { radius, maxradius } = ps.particles.last();
+      if (Math.random() > 0.2) {
+        synths.forEach((synth, i) => {
+          synth.setDetune(0 - (i + 1 * radius));
+          let filterFreq =
+            Math.random() * mapValue(~~radius, 0, maxradius, 440, 2000);
+          synth.filter.frequency.rampTo(filterFreq, 10);
+        });
+      }
 
-      synths.forEach((synth, i) => {
-        synth.setDetune(0 - i * radius);
-        let filterFreq = (i + 1) * mapValue(~~radius, 0, maxradius, 110, 880);
-        !isMobile && synth.filter.frequency.rampTo(filterFreq, 5);
-      });
       subOsc.filter.frequency.rampTo(
-        mapValue(~~radius, 0, ~~maxradius, 50, 200),
+        mapValue(~~radius, 0, ~~maxradius, 50, 300),
         10
       );
     }
@@ -547,6 +535,9 @@ const restartAudio = () => {
 
 const main = async () => {
   window.isMp3 = await isMp3Supported;
+
+  // debug
+  // window.isMp3 = false;
   if (!window.isMp3) {
     window.pixelDensity && window.pixelDensity(0.8);
     f.suffix = "aac";
@@ -554,17 +545,9 @@ const main = async () => {
     numVoices = 2;
   }
   await soundtrackAudioCtx.rawContext.resume();
-
   await loadSynths();
-
   UISound();
   window.logging && debug();
-  const canvases = document.querySelectorAll("canvas");
-  canvases.forEach((canvas) => {
-    if (canvas.style.display === "none") {
-      canvas.parentNode.removeChild(canvas);
-    }
-  });
 };
 
 // run main loop
