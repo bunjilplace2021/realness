@@ -93,10 +93,10 @@ let numSources = isMobile ? 1 : 3;
 // number of voices per synth
 let numVoices = isMobile ? 2 : 3;
 
-// if (navigator.deviceMemory) {
-//   numSources = navigator.deviceMemory / 4;
-//   numVoices = navigator.deviceMemory / 2;
-// }
+if (navigator.deviceMemory) {
+  numSources = navigator.deviceMemory / 4;
+  numVoices = navigator.deviceMemory / 2;
+}
 
 window.synthsLoaded = false;
 const u = new UISynth(soundtrackAudioCtx, numVoices);
