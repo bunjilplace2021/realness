@@ -31,6 +31,8 @@ let mouseIsReleased = false;
 let initload = true;
 let initinst = true;
 
+let webcam_init_inst = true;
+
 var isWKWebView = false;
 
 let detecttouch = false;
@@ -346,6 +348,25 @@ function infoInstructions() {
   }
 }
 
+function webcamInst() {
+
+
+  if (webcam_init_inst) {
+    document.getElementById("webcam_inst").style.display = "block";
+    setTimeout(function time() {
+      document.getElementById("webcam_inst").style.display = "none";
+      webcam_init_inst = false;
+    }, 2000);
+  } else {
+    document.getElementById("webcam_inst").style.display = "none";
+  }
+
+}
+
+
+
+
+
 
 function mouseinst() {
 
@@ -433,6 +454,9 @@ function cameratoggle() {
 
     if (webcam) {
       pixelShaderToggle = !pixelShaderToggle;
+      webcamInst();
+
+
     } else {
       document.getElementById("camera_inst").style.display = "block";
       setTimeout(function time() {
