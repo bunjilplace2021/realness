@@ -217,7 +217,6 @@ function mousePressed() {
 
   //sample and upload pixel to firebase
   shaderMousePressed();
-  saveCanvas(particlepg,'realness','jpg');
   mouseIsReleased = false;
   initload = false;
 }
@@ -252,8 +251,8 @@ function keyPressed() {
     removeData();
   }
 
-  if (key == "S" || key == "s") {
-    saveCanvas(particlepg,'realness','jpg');
+if (key == "S" || key == "s") {
+saveCanvas(particlepg,'realness','jpg');
 }
 
 }
