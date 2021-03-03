@@ -250,7 +250,16 @@ function keyPressed() {
   if (key == "R" || key == "r") {
     removeData();
   }
+
+if (key == "S" || key == "s") {
+saveCanvas(particlepg,'realness','jpg');
 }
+
+}
+
+
+
+
 
 
 function checkIfWKWebView() {
