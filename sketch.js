@@ -39,7 +39,12 @@ var isWKWebView = false;
 let detecttouch = false;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
-window.pixelAddEvent = new Event("pixel_added");
+window.pixelAddEvent = new CustomEvent("pixel_added", {
+  detail: {},
+  bubbles: false,
+  cancelable: true,
+  composed: false,
+});
 window.radiusLimit = new Event("radius_reached");
 window.down = new Event("down");
 window.released = new Event("released");
@@ -236,7 +241,7 @@ function mousePressed() {
 function mouseReleased() {
   // dispatch event to sound sketch
 
-  if (!window.isMuted && !window.recordingLimitReached) {
+  if (!window.isMuted && !window.recordingLimitReached && window.recording) {
     window.dispatchEvent(window.released);
   }
 

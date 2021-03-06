@@ -178,11 +178,10 @@ window.addEventListener("radius_reached", async () => {
 // method to play UI sounds
 const UISound = () => {
   window.addEventListener("pixel_added", (e) => {
-    e.preventDefault();
     soundLog("pixel added");
     !window.isMuted &&
       !u.isPlaying &&
-      u.play([~~e.data.pixelX, window.height - ~~e.data.pixelY]);
+      u.play([~~e.detail.pixelX, window.height - ~~e.detail.pixelY]);
   });
 };
 
@@ -315,6 +314,7 @@ window.addEventListener("down", async () => {
     soundLog(`user has ${recordingAllowed ? "" : "not"} allowed recording.`);
   }
   if (!window.isMuted && recordingAllowed) {
+    window.recording = true;
     recordings++;
     if (recordings > recordLimit) {
       window.recordingLimitReached = true;
@@ -539,7 +539,7 @@ const main = async () => {
   // debug
   // window.isMp3 = false;
   if (!window.isMp3) {
-    window.pixelDensity && window.pixelDensity(0.8);
+    window.pixelDensity && window.pixelDensity(0.9);
     f.suffix = "aac";
     numSources = 1;
     numVoices = 2;

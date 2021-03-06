@@ -21,6 +21,7 @@ function firebasesetup() {
 }
 
 function gotData(data) {
+  console.time("getting data");
   var test = data.val();
   var keys = Object.keys(test);
 
@@ -36,20 +37,21 @@ function gotData(data) {
     test.touchTime,
     test.uuid
   );
-
+  console.timeEnd("getting data");
   if (!window.isMuted) {
     pixelSoundEvent(test.mouseX_loc, test.mouseY_loc);
   }
 }
 
 function pixelSoundEvent(pixelX, pixelY) {
-  window.pixelAddEvent.data = {
-    pixelX,
-    pixelY,
-  };
-  setTimeout(() => {
-    window.dispatchEvent(window.pixelAddEvent, false);
-  });
+  window.dispatchEvent(
+    new CustomEvent("pixel_added", {
+      detail: {
+        pixelX,
+        pixelY,
+      },
+    })
+  );
 }
 
 function errData(err) {
