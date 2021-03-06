@@ -162,7 +162,7 @@ function webcamCheck() {
 function quickGet(p, x, y){
   p.loadPixels();
 
-  let d = pixelDensity();
+  let d = 1.0;//pixelDensity();
 let off = (y * width + x) * d * 4;
 let components = [
   p.pixels[off],
