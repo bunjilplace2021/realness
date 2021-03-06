@@ -95,7 +95,7 @@ let numVoices = isMobile ? 2 : 3;
 
 if (navigator.deviceMemory) {
   numSources = navigator.deviceMemory / 4;
-  numVoices = navigator.deviceMemory / 2;
+  numVoices = navigator.deviceMemory / 4;
 }
 
 window.synthsLoaded = false;
@@ -177,12 +177,12 @@ window.addEventListener("radius_reached", async () => {
 
 // method to play UI sounds
 const UISound = () => {
-  window.addEventListener("pixel_added", (e) => {
-    soundLog("pixel added");
-    !window.isMuted &&
-      !u.isPlaying &&
-      u.play([~~e.detail.pixelX, window.height - ~~e.detail.pixelY]);
-  });
+  // window.addEventListener("pixel_added", (e) => {
+  //   soundLog("pixel added");
+  //   !window.isMuted &&
+  //     !u.isPlaying &&
+  //     u.play([~~e.detail.pixelX, window.height - ~~e.detail.pixelY]);
+  // });
 };
 
 const checkOutput = (node) => {

@@ -233,6 +233,7 @@ function mousePressed() {
   // dispatchevent to sound sketch
 
   //sample and upload pixel to firebase
+
   shaderMousePressed();
   mouseIsReleased = false;
   initload = false;

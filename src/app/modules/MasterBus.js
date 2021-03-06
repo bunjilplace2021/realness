@@ -12,7 +12,7 @@ import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
-    this.input = new Volume(6);
+    this.input = new Volume(0);
     this.limiter = new Limiter(-6);
     this.input.connect(this.limiter);
     this.effectsChain = [];
