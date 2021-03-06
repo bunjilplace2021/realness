@@ -12,13 +12,14 @@ import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
-    this.input = new Volume(window.isMobile ? 6 : 0);
+    this.input = new Volume(6);
     this.limiter = new Limiter(-6);
     this.input.connect(this.limiter);
     this.effectsChain = [];
     this.ctx = ctx;
     this.output = new Limiter(0);
     this.dest = this.ctx.destination;
+
     this.output.connect(this.dest);
     this.chainEffect(this.limiter);
   }
