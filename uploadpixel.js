@@ -83,7 +83,7 @@ function pipShaderDraw() {
 	let my = map(mouseY, 0, height, 0, 1);
 
 	let pipx = width - 30;
-	let pipy = isMobile && width < height ? windowHeight - 30 : height - 30;
+	let pipy = isMobile && width < height ? document.documentElement.clientHeight - 30 : height - 30;
 
 	let pip_x = map(pipx, 0, width, 1, 0);
 	let pip_y = map(pipy, 0, height, 0, 1);

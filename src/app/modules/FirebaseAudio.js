@@ -61,12 +61,10 @@ class FireBaseAudio {
     });
   }
   async getRandomSample() {
-    if (!this.suffix === "aac") {
-      const ChosenFile = this.files.items[
-        ~~(Math.random() * this.files.items.length)
-      ];
-      this.audioFile = await ChosenFile.getDownloadURL();
-    }
+    const ChosenFile = this.files.items[
+      ~~(Math.random() * this.files.items.length)
+    ];
+    this.audioFile = await ChosenFile.getDownloadURL();
   }
   async downloadSample(url) {
     return fetch(url, { cors: "opaque" })

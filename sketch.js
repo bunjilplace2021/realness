@@ -32,6 +32,12 @@ let mouseIsReleased = false;
 let initload = true;
 let initinst = true;
 
+let webcam_init_inst = true;
+
+var isWKWebView = false;
+
+let detecttouch = false;
+
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new Event("pixel_added");
 window.radiusLimit = new Event("radius_reached");
@@ -66,6 +72,7 @@ function preload() {
   }
 
   isSafari = checkIfWebKit();
+  detecttouch = matchMedia("(hover: none)").matches;
 
   uuid = guid();
   shaderPreload();
@@ -255,6 +262,37 @@ function keyPressed() {
   if (key == "R" || key == "r") {
     removeData();
   }
+
+  if (key == "S" || key == "s") {
+    saveCanvas(particlepg, "realness", "jpg");
+  }
+}
+
+function checkIfWKWebView() {
+  //Detect WKWebKit for Chrome on iOS and PWA apps
+
+  if (navigator.platform.substr(0, 2) === "iP") {
+    //iOS (iPhone, iPod or iPad)
+    var lte9 = /constructor/i.test(window.HTMLElement);
+    var nav = window.navigator,
+      ua = nav.userAgent,
+      idb = !!window.indexedDB;
+    if (
+      ua.indexOf("Safari") !== -1 &&
+      ua.indexOf("Version") !== -1 &&
+      !nav.standalone
+    ) {
+      //Safari (WKWebView/Nitro since 6+)
+    } else if ((!idb && lte9) || !window.statusbar.visible) {
+      isWKWebView = true;
+    } else if (
+      (window.webkit && window.webkit.messageHandlers) ||
+      !lte9 ||
+      idb
+    ) {
+      isWKWebView = true;
+    }
+  }
 }
 
 function windowResized() {
@@ -263,15 +301,34 @@ function windowResized() {
     particlepg.resizeCanvas(windowWidth, windowHeight);
     shaderWindowResized(windowWidth, windowHeight);
   } else {
-    let innerh = iosInnerHeight();
-    resizeCanvas(windowWidth, innerh);
-    particlepg.resizeCanvas(windowWidth, innerh);
-    shaderWindowResized(windowWidth, innerh);
+    checkIfWKWebView();
+
+    //Fix for slow update of window.width on resize (WKWebKit)
+
+    if (isWKWebView) {
+      let w = document.documentElement.clientWidth;
+      let h = document.documentElement.clientHeight;
+      resizeCanvas(w, h);
+      particlepg.resizeCanvas(w, h);
+      shaderWindowResized(w, h);
+    } else {
+      let innerh = iosInnerHeight();
+      resizeCanvas(windowWidth, innerh);
+      particlepg.resizeCanvas(windowWidth, innerh);
+      shaderWindowResized(windowWidth, innerh);
+    }
   }
 }
 
 function infoInstructions() {
   instruction_toggle = !instruction_toggle;
+
+  if (instload_toggle) {
+    document.getElementById("menu_txt").style.display = "block";
+    myLinks.style.display = "none";
+  } else {
+    myLinks.style.display = "block";
+  }
 
   menuicon.classList.toggle("fa-window-close");
   myLinks.style.display = "block";
@@ -309,8 +366,20 @@ function infoInstructions() {
   }
 }
 
+function webcamInst() {
+  if (webcam_init_inst) {
+    document.getElementById("webcam_inst").style.display = "block";
+    setTimeout(function time() {
+      document.getElementById("webcam_inst").style.display = "none";
+      webcam_init_inst = false;
+    }, 2000);
+  } else {
+    document.getElementById("webcam_inst").style.display = "none";
+  }
+}
+
 function mouseinst() {
-  if (!isMobile) {
+  if (!detecttouch) {
     if (initinst) {
       document.getElementById("mouse_inst").style.display = "block";
       setTimeout(function time() {
@@ -388,6 +457,7 @@ function cameratoggle() {
 
     if (webcam) {
       pixelShaderToggle = !pixelShaderToggle;
+      webcamInst();
     } else {
       document.getElementById("camera_inst").style.display = "block";
       setTimeout(function time() {
