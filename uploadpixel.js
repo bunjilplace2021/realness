@@ -185,7 +185,7 @@ function shaderMousePressed() {
 	//colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
 
 	colour = quickGet(pixelpg, width - mouseX, isSafari ? mouseY : height - mouseY);
-
+console.log(colour);  //phone debug
 
 	let rand_gen = floor(random(0, 3));
 
