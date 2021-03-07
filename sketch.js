@@ -142,6 +142,11 @@ function setup() {
 
       console.log("landscape");
     }
+
+    //     if (!isAndroid){
+    //     fullicons.style.display = "none";
+    // console.log('test')
+    //     }
   }
 
   firebasesetup();
@@ -203,7 +208,7 @@ function particle_draw(p) {
     pipShaderDraw();
   }
 
-  image(particlepg, 0, 0, width, height);
+  image(particlepg, 0, 0);
 
   if (pixelShaderToggle) {
     image(pippg, 0, 0);
