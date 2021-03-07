@@ -21,8 +21,6 @@ let webcam = false;
 let array_limit = window.safari ? 15 : 20;
 let globalFrameRate = window.safari ? 30 : 60;
 let frameLimit = ~~globalFrameRate * 10;
-
-
 let particlepg;
 
 let isSafari = false;
@@ -124,6 +122,7 @@ function setup() {
     cnv = createCanvas(windowWidth, windowHeight);
 
     particlepg = createGraphics(windowWidth, windowHeight);
+    cnv.id("mycanvas");
     cnv.style("display", "block");
     // If it's desktop safari, limit the framerate
 
@@ -138,10 +137,16 @@ function setup() {
     } else {
       cnv = createCanvas(windowWidth, windowHeight);
       particlepg = createGraphics(windowWidth, windowHeight);
+      cnv.id("mycanvas");
       cnv.style("display", "block");
 
       console.log("landscape");
     }
+
+    //     if (!isAndroid){
+    //     fullicons.style.display = "none";
+    // console.log('test')
+    //     }
   }
 
   firebasesetup();
