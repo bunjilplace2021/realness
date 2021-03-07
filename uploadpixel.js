@@ -158,12 +158,35 @@ function webcamCheck() {
 		});
 }
 
-function shaderMousePressed() {
-	if (webcam_permission) {
-		webcamCheck();
-	}
+function quickGet(p, x, y) {
+  p.loadPixels();
 
-	colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
+  let d = pixelDensity();
+  //   convert to INT
+  let off = Math.floor((y * width + x) * d * 4);
+  let components = [
+    p.pixels[off],
+    p.pixels[off + 1],
+    p.pixels[off + 2],
+    p.pixels[off + 3],
+  ];
+
+  return components;
+}
+
+function shaderMousePressed() {
+  if (webcam_permission) {
+    webcamCheck();
+  }
+
+  //colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
+
+  colour = quickGet(
+    pixelpg,
+    width - mouseX,
+    isSafari ? mouseY : height - mouseY
+  );
+
 	let rand_gen = floor(random(0, 3));
 
 	// texture upside down?
