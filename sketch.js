@@ -117,7 +117,6 @@ function checkIfiPhone() {
 
 function setup() {
   if (isMobile == false) {
-    pixelDensity(1);
     // frameRate(globalFrameRate);
     cnv = createCanvas(windowWidth, windowHeight);
 
@@ -148,7 +147,7 @@ function setup() {
     // console.log('test')
     //     }
   }
-
+  pixelDensity(1);
   firebasesetup();
   shaderSetup();
 
