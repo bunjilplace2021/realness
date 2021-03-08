@@ -32,14 +32,8 @@ vec2 st = gl_FragCoord.xy;  //centre screen
 
   uv.y = (1.0 -uv.y) * step(u_safari,0.9) + uv.y * step(0.9,u_safari);
 
-
-  float tiles = 30.0;
-  uv = floor( uv * tiles ) / tiles;
-
-
-
-
-
+    float tiles = 30.0;
+    uv = floor( uv * tiles ) / tiles;
 
   // get the webcam as a vec4 using texture2D
   vec3 tex = texture2D(tex0,uv).rgb;
