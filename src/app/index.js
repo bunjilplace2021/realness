@@ -108,12 +108,12 @@ const subOsc = new Oscillator({
   volume: -24,
 });
 subOsc.filter = new BiquadFilter({
-  frequency: 60,
+  frequency: isMobile ? 200 : 60,
   gain: 10,
 });
 const noise = new Noise({
   type: "pink",
-  volume: -14,
+  volume: isMobile ? -6 : -14,
 });
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
@@ -177,12 +177,12 @@ window.addEventListener("radius_reached", async () => {
 
 // method to play UI sounds
 const UISound = () => {
-  // window.addEventListener("pixel_added", (e) => {
-  //   soundLog("pixel added");
-  //   !window.isMuted &&
-  //     !u.isPlaying &&
-  //     u.play([~~e.detail.pixelX, window.height - ~~e.detail.pixelY]);
-  // });
+  window.addEventListener("pixel_added", (e) => {
+    soundLog("pixel added");
+    !window.isMuted &&
+      !u.isPlaying &&
+      u.play([~~e.detail.pixelX, window.height - ~~e.detail.pixelY]);
+  });
 };
 
 const checkOutput = (node) => {
