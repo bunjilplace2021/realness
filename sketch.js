@@ -19,7 +19,7 @@ let uuid;
 let webcam = false;
 
 let array_limit = window.safari ? 15 : 20;
-let globalFrameRate = window.safari ? 30 : 60;
+let globalFrameRate = 60;
 let frameLimit = ~~globalFrameRate * 10;
 let particlepg;
 

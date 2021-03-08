@@ -69,10 +69,10 @@ process.env.NODE_ENV === "development"
 
 // create own audio context
 const audioOpts = {
-  sampleRate: 22050,
-  latencyHint: "playback",
+  sampleRate: 8000,
+  latencyHint: window.safari ? 5 : "playback",
   updateInterval: 1,
-  lookAhead: 1,
+  lookAhead: window.safari ? 1 : 0.5,
   bufferSize: 4096,
   state: "suspended",
 };
@@ -108,12 +108,12 @@ const subOsc = new Oscillator({
   volume: -24,
 });
 subOsc.filter = new BiquadFilter({
-  frequency: isMobile ? 200 : 60,
+  frequency: isMobile || window.safari ? 200 : 60,
   gain: 10,
 });
 const noise = new Noise({
   type: "pink",
-  volume: isMobile ? -6 : -14,
+  volume: isMobile || window.safari ? -6 : -14,
 });
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
@@ -539,10 +539,10 @@ const main = async () => {
   // debug
   // window.isMp3 = false;
   if (!window.isMp3) {
-    window.pixelDensity && window.pixelDensity(0.9);
+    // window.pixelDensity && window.pixelDensity(0.9);
     f.suffix = "aac";
     numSources = 1;
-    numVoices = 2;
+    numVoices = 1;
   }
   await soundtrackAudioCtx.rawContext.resume();
   await loadSynths();
