@@ -14,6 +14,7 @@ class ParticleSystem {
       particlecount = this.particles.length;
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
+      //  DEBOUNCE UI SOUNDS FOR PERFORMANCE
     }
   }
 

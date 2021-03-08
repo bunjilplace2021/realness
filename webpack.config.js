@@ -2,10 +2,10 @@ const path = require("path");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
-
+const isProduction = process.env.NODE_ENV === "production" ? true : false;
 module.exports = {
   mode: process.env.NODE_ENV,
-  devtool: false,
+  devtool: isProduction ? false : "source-map",
   entry: __dirname + "/src/app/index.js", // webpack entry point. Module to start building dependency graph
   output: {
     path: path.resolve(__dirname, "sound/"),

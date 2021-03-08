@@ -18,8 +18,9 @@ let uuid;
 
 let webcam = false;
 
-let array_limit = 20;
-
+let array_limit = window.safari ? 15 : 20;
+let globalFrameRate = 60;
+let frameLimit = ~~globalFrameRate * 10;
 let particlepg;
 
 let isSafari = false;
@@ -38,7 +39,12 @@ var isWKWebView = false;
 let detecttouch = false;
 
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
-window.pixelAddEvent = new Event("pixel_added");
+window.pixelAddEvent = new CustomEvent("pixel_added", {
+  detail: {},
+  bubbles: false,
+  cancelable: true,
+  composed: false,
+});
 window.radiusLimit = new Event("radius_reached");
 window.down = new Event("down");
 window.released = new Event("released");
@@ -71,8 +77,7 @@ function preload() {
   }
 
   isSafari = checkIfWebKit();
-  detecttouch = matchMedia('(hover: none)').matches;
-
+  detecttouch = matchMedia("(hover: none)").matches;
 
   uuid = guid();
   shaderPreload();
@@ -111,11 +116,18 @@ function checkIfiPhone() {
 }
 
 function setup() {
+
+  pixelDensity(1);
+
   if (isMobile == false) {
+    // frameRate(globalFrameRate);
     cnv = createCanvas(windowWidth, windowHeight);
+
     particlepg = createGraphics(windowWidth, windowHeight);
     cnv.id("mycanvas");
     cnv.style("display", "block");
+    // If it's desktop safari, limit the framerate
+
     //icons_toolbar.style.display = "block";
   } else {
     if (windowWidth < windowHeight) {
@@ -139,7 +151,6 @@ function setup() {
     //     }
   }
 
-  pixelDensity(1);
   firebasesetup();
   shaderSetup();
 
@@ -157,6 +168,14 @@ function shaderToggle() {
   pixelShaderToggle = !pixelShaderToggle;
 }
 
+function showDebugText(str) {
+  push();
+  noStroke();
+  fill(255);
+  textSize(20);
+  text(str, 100, 100);
+  pop();
+}
 function guid() {
   //someone else's function
   //https://slavik.meltser.info/the-efficient-way-to-create-guid-uuid-in-javascript-with-explanation/
@@ -168,7 +187,7 @@ function guid() {
 }
 
 function particle_draw(p) {
-  touchtime = frameCount % 600; //10 second loop approx
+  touchtime = frameCount % frameLimit; //10 second loop approx
 
   if (!pixelShaderToggle) {
     p.blendMode(BLEND);
@@ -216,6 +235,7 @@ function mousePressed() {
   // dispatchevent to sound sketch
 
   //sample and upload pixel to firebase
+
   shaderMousePressed();
   mouseIsReleased = false;
   initload = false;
@@ -223,10 +243,10 @@ function mousePressed() {
 
 function mouseReleased() {
   // dispatch event to sound sketch
-  let timeout;
-  timeout && clearTimeout(timeout);
 
-  window.dispatchEvent(window.released);
+  if (!window.isMuted && !window.recordingLimitReached && window.recording) {
+    window.dispatchEvent(window.released);
+  }
 
   mousecount = 0;
   mouseIsReleased = true;
@@ -251,38 +271,37 @@ function keyPressed() {
     removeData();
   }
 
-if (key == "S" || key == "s") {
-saveCanvas(particlepg,'realness','jpg');
+  if (key == "S" || key == "s") {
+    saveCanvas(particlepg, "realness", "jpg");
+  }
 }
-
-}
-
-
-
-
-
 
 function checkIfWKWebView() {
-
   //Detect WKWebKit for Chrome on iOS and PWA apps
 
-
-  if (navigator.platform.substr(0, 2) === 'iP') {
+  if (navigator.platform.substr(0, 2) === "iP") {
     //iOS (iPhone, iPod or iPad)
     var lte9 = /constructor/i.test(window.HTMLElement);
     var nav = window.navigator,
       ua = nav.userAgent,
       idb = !!window.indexedDB;
-    if (ua.indexOf('Safari') !== -1 && ua.indexOf('Version') !== -1 && !nav.standalone) {
+    if (
+      ua.indexOf("Safari") !== -1 &&
+      ua.indexOf("Version") !== -1 &&
+      !nav.standalone
+    ) {
       //Safari (WKWebView/Nitro since 6+)
     } else if ((!idb && lte9) || !window.statusbar.visible) {
       isWKWebView = true;
-    } else if ((window.webkit && window.webkit.messageHandlers) || !lte9 || idb) {
+    } else if (
+      (window.webkit && window.webkit.messageHandlers) ||
+      !lte9 ||
+      idb
+    ) {
       isWKWebView = true;
     }
   }
 }
-
 
 function windowResized() {
   if (!isMobile) {
@@ -290,7 +309,6 @@ function windowResized() {
     particlepg.resizeCanvas(windowWidth, windowHeight);
     shaderWindowResized(windowWidth, windowHeight);
   } else {
-
     checkIfWKWebView();
 
     //Fix for slow update of window.width on resize (WKWebKit)
@@ -321,7 +339,7 @@ function infoInstructions() {
   }
 
   menuicon.classList.toggle("fa-window-close");
-
+  myLinks.style.display = "block";
 
   document.getElementById("top").style.backgroundColor =
     "rgba(127, 127, 127, 0.2)";
@@ -353,13 +371,10 @@ function infoInstructions() {
     document.getElementById("top").style.paddingLeft = "1em";
     document.getElementById("menu_txt").style.display = "block";
     mouseinst();
-
   }
 }
 
 function webcamInst() {
-
-
   if (webcam_init_inst) {
     document.getElementById("webcam_inst").style.display = "block";
     setTimeout(function time() {
@@ -369,18 +384,10 @@ function webcamInst() {
   } else {
     document.getElementById("webcam_inst").style.display = "none";
   }
-
 }
 
-
-
-
-
-
 function mouseinst() {
-
   if (!detecttouch) {
-
     if (initinst) {
       document.getElementById("mouse_inst").style.display = "block";
       setTimeout(function time() {
@@ -389,8 +396,6 @@ function mouseinst() {
       }, 2000);
     } else {
       document.getElementById("mouse_inst").style.display = "none";
-
-
     }
   } else {
     if (initinst) {
@@ -401,8 +406,6 @@ function mouseinst() {
       }, 2000);
     } else {
       document.getElementById("tap_inst").style.display = "none";
-
-
     }
   }
 }
@@ -460,12 +463,9 @@ function cameratoggle() {
       x.innerHTML = "view webcam";
     }
 
-
     if (webcam) {
       pixelShaderToggle = !pixelShaderToggle;
       webcamInst();
-
-
     } else {
       document.getElementById("camera_inst").style.display = "block";
       setTimeout(function time() {

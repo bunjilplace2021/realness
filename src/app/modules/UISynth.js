@@ -1,50 +1,64 @@
-import { FMSynth, Frequency, PolySynth, Gain, now } from "tone";
+import {
+  PolySynth,
+  Gain,
+  now,
+  AMSynth,
+  Volume,
+  getTransport,
+  AMOscillator,
+} from "tone";
 
 // PRECOMPUTE RANDOM VALUES FOR PERFORMANCE
 class UISynth {
-  constructor(ctx) {
+  constructor(ctx, polyphony = 3) {
     this.randomValues = [...Array(20)].map(() => {
-      return Math.floor(Math.random() * 12);
+      return Math.floor(Math.random() * 6);
     });
     this.ctx = ctx;
+    this.isPlaying = false;
+    const envOpts = {
+      attack: 0,
+      decay: 0.5,
+      sustain: 0,
+      release: 0.7,
+    };
+    if (window.isMp3) {
+      this.uiSynth = new PolySynth({
+        polyphony,
+        voice: AMSynth,
+        maxPolyphony: polyphony,
+      });
 
-    this.uiSynth = new PolySynth({
-      polyphony: 3,
-      voice: FMSynth,
-      maxPolyphony: 3,
-    });
-    this.uiSynth.set({
-      envelope: {
-        attack: 0,
-        decay: 0.1,
+      this.uiSynth.set({
+        envelope: envOpts,
+        harmonicity: 2,
+        volume: 1.5,
+      });
+    } else {
+      this.uiSynth = new AMSynth({
+        envelope: envOpts,
+      });
+    }
 
-        release: 0.5,
-      },
-      harmonicity: 2,
-      volume: 2,
-    });
     this.idx = 0;
-    this.master = new Gain(0.1);
+    this.master = new Volume(-6);
     this.uiSynth.connect(this.master);
   }
   play(notes) {
+    this.isPlaying = true;
+    this.notes = notes.slice(0, this.uiSynth.maxPolyphony);
     this.idx++;
     this.uiSynth.set({
       harmonicity: this.randomValues[this.idx % this.randomValues.length],
     });
-    this.uiSynth.set({
-      modulationIndex: this.randomValues[this.idx % this.randomValues.length],
-    });
     try {
-      notes.forEach((note) => {
-        this.uiSynth.triggerAttackRelease(
-          Frequency(note).harmonize([0, 3, 7, 11, 13, 15, 17, 19, 21, 23]),
-          0,
-          now()
-        );
-      });
+      this.uiSynth.triggerAttackRelease(...this.notes);
+      // this.uiSynth.releaseAll();
+      this.isPlaying = false;
     } catch (error) {
-      this.uiSynth.releaseAll();
+      // console.log(error);
+      // this.uiSynth.releaseAll();
+      this.isPlaying = false;
     }
   }
 }

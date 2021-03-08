@@ -1,6 +1,7 @@
 import firebase from "firebase/app";
 import "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
+import { soundLog } from "../utilityFunctions";
 class FireBaseAudio {
   // needed methods
   // async fetch
@@ -36,11 +37,7 @@ class FireBaseAudio {
   }
 
   async listAll() {
-    this.files = await this.storageRef.list();
-
-    if (this.suffix === "aac") {
-      this.getAacFiles();
-    }
+    this.files = await this.storageRef.list({ maxResults: 200 });
   }
   async getAacFiles() {
     return new Promise(async (resolve, reject) => {
@@ -49,6 +46,7 @@ class FireBaseAudio {
       this.files.items.forEach(async (file) => {
         this.filePromises.push(file.getMetadata());
       });
+
       this.filesMetadata = await Promise.all(this.filePromises);
 
       this.filesMetadata.filter((metaObject) => {
@@ -56,6 +54,9 @@ class FireBaseAudio {
           this.fileNames.push(metaObject.fullPath);
         }
       });
+      soundLog(`Found ${this.fileNames.length} files`);
+      this.fileNames.slice(0, 10);
+
       resolve(this.fileNames);
     });
   }

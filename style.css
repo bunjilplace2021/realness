@@ -17,16 +17,15 @@ body {
   align-items: center;
   font-family: "Avenir Next", "Avenir", "Nunito Sans", sans-serif;
   -webkit-user-select: none;
+  user-select: none;
   touch-action: manipulation;
-
 }
 
 canvas {
   display: block;
   -webkit-user-select: none;
+  user-select: none;
   touch-action: manipulation;
-
-
 }
 
 video {
@@ -122,11 +121,7 @@ img {
   margin-left: -10px;
 }
 
-
-
 @media (hover: none) {
-
-
   .tooltip .tooltiptext {
     top: 25%;
     left: 92%;
@@ -134,27 +129,26 @@ img {
     margin-left: -10px;
     font-size: calc(0.25em + 0.5vw);
     width: calc(100% / 6);
-}
+  }
 }
 
-@media (hover: none ) and (orientation: landscape) {
+@media (hover: none) and (orientation: landscape) {
   .tooltip .tooltiptext {
     top: 10%;
     left: 90%;
     font-size: calc(0.2em + 0.5vw);
-}
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {
   .topnav a:hover {
     background-color: none;
     color: white;
-    opacity: 1.0;
+    opacity: 1;
   }
 
   .tooltip:hover .tooltiptext {
     visibility: visible;
-
   }
 }
 
@@ -170,10 +164,10 @@ img {
   height: 70vh;
 }
 
-
-
 /* if backdrop support: very transparent and blurred */
-@supports ((-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))) {
+@supports (
+  (-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))
+) {
   .content {
     -webkit-backdrop-filter: blur(30px);
     backdrop-filter: blur(30px);
@@ -191,14 +185,13 @@ img {
   text-decoration: none;
   background: transparent;
   color: white;
-  padding-left: .5em;
+  padding-left: 0.5em;
 }
 
 /* Add a hover effect if you want */
 .content .fa:hover {
   opacity: 0.8;
 }
-
 
 .content #myInfo {
   display: none;
@@ -227,11 +220,11 @@ img {
 
 /* Responsive layout - makes a one column-layout instead of a two-column layout */
 @media (hover: none) {
-  .flex-item-right, .flex-item-left {
+  .flex-item-right,
+  .flex-item-left {
     flex: 100%;
   }
 }
-
 
 .content #instructions {
   display: none;
@@ -240,10 +233,9 @@ img {
   padding: 1rem;
   color: white;
   font-size: calc(0.8em + 0.2vh);
-  padding-top:5%;
+  padding-top: 5%;
   padding-left: 25%;
   padding-right: 25%;
-
 }
 
 .content a:link {
@@ -280,7 +272,6 @@ img {
   color: white;
 }
 
-
 #record_limit {
   display: none;
   width: 100%;
@@ -298,10 +289,9 @@ img {
   padding: 1rem;
   color: white;
   font-size: calc(0.8em + 0.2vh);
-  padding-top:25vh;
+  padding-top: 25vh;
   padding-left: 25%;
   padding-right: 25%;
-
 }
 
 #tap_inst {
@@ -312,11 +302,10 @@ img {
   padding: 1rem;
   color: white;
   font-size: calc(0.8em + 0.2vh);
-  padding-top:25vh;
+  padding-top: 25vh;
   padding-left: 25%;
   padding-right: 25%;
 }
-
 
 #webcam_inst {
   display: none;
@@ -326,12 +315,10 @@ img {
   padding: 1rem;
   color: white;
   font-size: calc(0.8em + 0.2vh);
-  padding-top:25vh;
+  padding-top: 25vh;
   padding-left: 25%;
   padding-right: 25%;
-
-
-
+}
 
 @media (hover: none) {
   .topnav a:hover {
@@ -359,7 +346,6 @@ img {
 .content .fa-instagram {
   font-size: 1em;
 }
-
 
 /* CLASS FOR DISABLED BUTTONS -- USED FOR MUTE BUTTON */
 .disabled {
