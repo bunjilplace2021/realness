@@ -111,6 +111,8 @@ function checkIfiPhone() {
 }
 
 function setup() {
+
+  pixelDensity(1.0);
   if (isMobile == false) {
     cnv = createCanvas(windowWidth, windowHeight);
     particlepg = createGraphics(windowWidth, windowHeight);
