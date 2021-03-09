@@ -271,9 +271,6 @@ function keyPressed() {
     removeData();
   }
 
-  if (key == "S" || key == "s") {
-    saveCanvas(particlepg, "realness", "jpg");
-  }
 }
 
 function checkIfWKWebView() {
