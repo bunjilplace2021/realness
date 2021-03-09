@@ -38,6 +38,8 @@ var isWKWebView = false;
 
 let detecttouch = false;
 
+let text_interval_time = 3000;
+
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new CustomEvent("pixel_added", {
   detail: {},
@@ -225,7 +227,7 @@ function particle_draw(p) {
         setTimeout(function time() {
           document.getElementById("record_limit").style.display = "none";
           initinst = false;
-        }, 2000);
+        }, text_interval_time);
       }
     }
   }
@@ -377,7 +379,7 @@ function webcamInst() {
     setTimeout(function time() {
       document.getElementById("webcam_inst").style.display = "none";
       webcam_init_inst = false;
-    }, 2000);
+    }, text_interval_time);
   } else {
     document.getElementById("webcam_inst").style.display = "none";
   }
@@ -390,7 +392,7 @@ function mouseinst() {
       setTimeout(function time() {
         document.getElementById("mouse_inst").style.display = "none";
         initinst = false;
-      }, 2000);
+      }, text_interval_time);
     } else {
       document.getElementById("mouse_inst").style.display = "none";
     }
@@ -400,7 +402,7 @@ function mouseinst() {
       setTimeout(function time() {
         document.getElementById("tap_inst").style.display = "none";
         initinst = false;
-      }, 2000);
+      }, text_interval_time);
     } else {
       document.getElementById("tap_inst").style.display = "none";
     }
@@ -467,7 +469,7 @@ function cameratoggle() {
       document.getElementById("camera_inst").style.display = "block";
       setTimeout(function time() {
         document.getElementById("camera_inst").style.display = "none";
-      }, 2000);
+      }, text_interval_time);
     }
   }
   //icons.classList.toggle("select");
@@ -494,7 +496,7 @@ function fullScreenMenu() {
       document.getElementById("iPhone").style.display = "block";
       setTimeout(function time() {
         document.getElementById("iPhone").style.display = "none";
-      }, 2000);
+      }, text_interval_time);
     }
   }
 }
