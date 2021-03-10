@@ -417,16 +417,20 @@ function didactic() {
   myInfo.style.overflowY = "scroll";
 
   instructions.style.display = "none";
-  document.getElementById("top").style.height = "auto";
   instructions.style.overflowY = "hidden";
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    document.getElementById("top").style.height = "auto";
+    myInfo.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+    myInfo.style.webkitBackdropFilter = "blur(30px)";
+    myInfo.style.backdropFilter = "blur(30px)";
+
   } else {
     myInfo.style.display = "none";
-    document.getElementById("top").style.height = "auto";
     myInfo.style.overflowY = "hidden";
+    myInfo.style.backgroundColor = "rgba(0, 0, 0, 0)";
+    myInfo.style.webkitBackdropFilter = "blur(0px)";
+    myInfo.style.backdropFilter = "blur(0px)";
   }
 }
 
