@@ -91,7 +91,7 @@ function pipShaderDraw() {
   let pip_y = map(pipy, 0, height, 0, 1);
 
   let pip_mx = norm(map(mouseX, 0, width, pipx - width / 5, pipx), 0, width);
-  let pip_my = norm(map(mouseY, 0, height, pipy - height / 5, pipy), 0, height);
+  let pip_my = norm(map(mouseY, 0, height, pipy - height / 5, pipy), height, 0);
 
   pipShader.setUniform("u_resolution", [width, height]);
   pipShader.setUniform("u_mouse", [mx, my]);
