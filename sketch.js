@@ -422,7 +422,7 @@ function didactic() {
 
   if (didactic_toggle) {
     myInfo.style.display = "block";
-    document.getElementById("top").style.height = "100%";
+    document.getElementById("top").style.height = "auto";
   } else {
     myInfo.style.display = "none";
     document.getElementById("top").style.height = "auto";

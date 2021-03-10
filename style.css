@@ -44,7 +44,7 @@ img {
   overflow: hidden;
   position: fixed;
   top: 0;
-  bottom: top;
+  bottom: auto;
   width: 100%;
   background-color: rgba(0, 0, 0, 0);
   padding-left: 1em;
@@ -122,6 +122,17 @@ img {
 }
 
 @media (hover: none) {
+
+.topnav{
+  top: auto;
+  bottom: 0;
+  position:fixed;
+}
+
+.topnav .fa {
+
+}
+
   .tooltip .tooltiptext {
     top: 25%;
     left: 92%;
@@ -130,6 +141,14 @@ img {
     font-size: calc(0.25em + 0.5vw);
     width: calc(100% / 6);
   }
+}
+
+@media (hover: none) and (orientation: portrait) {
+
+  .topnav .fa {
+    font-size: calc(1em + 2vw);
+  }
+
 }
 
 @media (hover: none) and (orientation: landscape) {

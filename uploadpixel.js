@@ -83,8 +83,8 @@ function pipShaderDraw() {
 
   let pipx = width - 30;
   let pipy =
-    isMobile && width < height
-      ? document.documentElement.clientHeight - 30
+    detecttouch
+      ? 30
       : height - 30;
 
   let pip_x = map(pipx, 0, width, 1, 0);
