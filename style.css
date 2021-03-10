@@ -69,6 +69,11 @@ img {
   transition: all 0.3s ease;
 }
 
+.topnav .fa {
+  padding-left: 0;
+
+}
+
 .topnav a.menu_text {
   top: 0;
   bottom: auto;
@@ -81,23 +86,6 @@ img {
   visibility: visible;
 }
 
-/* #recordButton {
-  text-align: center;
-}
-
-#recordButton:hover {
-  opacity: 0.5;
-  transition: opacity 0.3s ease-out;
-}
-
-.red {
-  color: red;
-}
-
-#mute {
-  transition: opacity 0.3s ease-out;
-  color: white;
-} */
 
 .tooltip {
   position: relative;
@@ -130,6 +118,7 @@ img {
 }
 
 .topnav .fa {
+  padding-left: 0;
 
 }
 
