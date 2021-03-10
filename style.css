@@ -71,7 +71,7 @@ img {
 }
 
 .topnav .fa {
-  padding-left: 0;
+padding-right:1.0rem ; */
 
 }
 
@@ -315,7 +315,7 @@ img {
     top: 25%;
     left: 92%;
     visibility: visible;
-    margin-left: -10px;
+    margin-left: -15px;
     font-size: calc(0.25em + 0.5vw);
     width: calc(100% / 6);
   }
