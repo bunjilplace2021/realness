@@ -109,56 +109,6 @@ img {
   margin-left: -10px;
 }
 
-@media (hover: none) {
-
-.topnav{
-  top: auto;
-  bottom: 0;
-  position:fixed;
-}
-
-.topnav .fa {
-  padding-left: 0;
-
-}
-
-  .tooltip .tooltiptext {
-    top: 25%;
-    left: 92%;
-    visibility: visible;
-    margin-left: -10px;
-    font-size: calc(0.25em + 0.5vw);
-    width: calc(100% / 6);
-  }
-}
-
-@media (hover: none) and (orientation: portrait) {
-
-  .topnav .fa {
-    font-size: calc(1em + 2vw);
-  }
-
-}
-
-@media (hover: none) and (orientation: landscape) {
-  .tooltip .tooltiptext {
-    top: 10%;
-    left: 90%;
-    font-size: calc(0.2em + 0.5vw);
-  }
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .topnav a:hover {
-    background-color: none;
-    color: white;
-    opacity: 1;
-  }
-
-  .tooltip:hover .tooltiptext {
-    visibility: visible;
-  }
-}
 
 .active {
   background-color: #4caf50;
@@ -329,15 +279,69 @@ img {
 }
 
 @media (hover: none) {
+
+.topnav{
+  top: auto;
+  bottom: 0;
+  position:fixed;
+}
+
+.topnav a:hover {
+  background-color: transparent;
+  opacity: 1;
+}
+
+.topnav .fa {
+  padding-left: 0;
+
+}
+
+.content {
+  position: absolute;
+  overflow-y: auto;
+  top:10%;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+  .tooltip .tooltiptext {
+    top: 25%;
+    left: 92%;
+    visibility: visible;
+    margin-left: -10px;
+    font-size: calc(0.25em + 0.5vw);
+    width: calc(100% / 6);
+  }
+}
+
+@media (hover: none) and (orientation: portrait) {
+
+  .topnav .fa {
+    font-size: calc(1em + 2vw);
+  }
+
+}
+
+@media (hover: none) and (orientation: landscape) {
+  .tooltip .tooltiptext {
+    top: 10%;
+    left: 90%;
+    font-size: calc(0.2em + 0.5vw);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
   .topnav a:hover {
-    background-color: transparent;
+    background-color: none;
+    color: white;
     opacity: 1;
   }
 
-  .content {
-    -webkit-overflow-scrolling: touch;
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
   }
 }
+
 
 .topnav a {
   font-size: calc(1em + 0.5vw);
