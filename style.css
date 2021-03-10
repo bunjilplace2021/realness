@@ -119,8 +119,8 @@ img {
 .content {
   position: absolute;
   overflow-y: auto;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
 }
 
 /* if backdrop support: very transparent and blurred */
