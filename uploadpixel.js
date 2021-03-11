@@ -84,7 +84,7 @@ function pipShaderDraw() {
   let pipx = width - 30;
   let pipy =
     detecttouch
-      ? document.documentElement.clientHeight * .2;
+      ? document.documentElement.clientHeight - (document.documentElement.clientHeight-30);
       : height - 30;
 
   let pip_x = map(pipx, 0, width, 1, 0);
