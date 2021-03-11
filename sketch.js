@@ -332,7 +332,11 @@ function infoInstructions() {
 
   if (instload_toggle) {
     document.getElementById("menu_txt").style.display = "block";
-    myLinks.style.display = "none";
+    document.getElementById("myLinks").style.display = "none";
+    document.getElementById("top").style.backgroundColor =
+      "rgba(0, 0, 0, 0.)";
+    document.getElementById("instructions").style.webkitBackdropFilter = "blur(0px)";
+    document.getElementById("instructions").style.backdropFilter = "blur(0px)";
   } else {
     myLinks.style.display = "block";
   }
@@ -351,7 +355,6 @@ function infoInstructions() {
   if (instruction_toggle) {
     document.getElementById("menu_txt").style.display = "none";
 
-    //    icons_toolbar.style.display = "block";
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
@@ -440,12 +443,18 @@ function init_instructions() {
   instructions.style.display = "block";
   instructions.style.overflowY = "scroll";
 
+  document.getElementById("menu_txt").style.display = "block";
+  document.getElementById("myLinks").style.display = "none";
+  document.getElementById("top").style.backgroundColor =
+    "rgba(0, 0, 0, 0.)";
+  document.getElementById("instructions").style.webkitBackdropFilter = "blur(0px)";
+  document.getElementById("instructions").style.backdropFilter = "blur(0px)";
+
+
   if (instload_toggle) {
     instructions.style.display = "block";
-    document.getElementById("top").style.height = "100%";
   } else {
     instructions.style.display = "none";
-    document.getElementById("top").style.height = "auto";
     instructions.style.overflowY = "hidden";
   }
 }
