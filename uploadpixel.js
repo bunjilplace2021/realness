@@ -195,7 +195,7 @@ function shaderMousePressed() {
     width - mouseX,
     isSafari ? mouseY : height - mouseY
   );
-  console.log(colour); //phone debug
+
 
   let rand_gen = floor(random(0, 3));
 
@@ -228,9 +228,7 @@ if (!detecttouch){
 }else{
   if (mouseY >= height - rect.height) {
     menu_loc = true;
-    console.log(menu_loc, rect.height);
   } else {
-    console.log(menu_loc, rect.height, mouseY, height - rect.height);
     menu_loc = false;
   }
 }
