@@ -217,11 +217,23 @@ function shaderMousePressed() {
 
   rect = document.getElementById("top").getBoundingClientRect();
 
+
+if (!detecttouch){
   if (mouseY <= rect.height) {
     menu_loc = true;
+
   } else {
     menu_loc = false;
   }
+}else{
+  if (mouseY >= height - rect.height) {
+    menu_loc = true;
+    console.log(menu_loc, rect.height);
+  } else {
+    console.log(menu_loc, rect.height, mouseY, height - rect.height);
+    menu_loc = false;
+  }
+}
 
   if (webcam && !menu_loc) {
     test.push(data);
