@@ -113,82 +113,11 @@ function pipShaderDraw() {
   pippg.rect(0, 0, width, height);
 }
 
-function removeData() {
-  var testremove = database.ref("test3");
-  testremove
-    .remove()
-    .then(function () {
-      console.log("Remove succeeded.");
-    })
-    .catch(function (error) {
-      console.log("Remove failed: " + error.message);
-    });
-
-  //color_lerp = 0;
-}
-
-function hasGetUserMedia() {
-  //permission check
-  let constraints = {
-    video: true,
-    // audio: true
-  };
-
-  navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then(function (stream) {
-      webcam_permission = true;
-      webcam = true;
-      console.log("webcam connected");
-      window.stream = stream;
-    })
-    .catch(function (err) {
-      webcam = false;
-      webcam_permission = false;
-      console.log("No Webcam", err);
-    });
-}
-
-function webcamCheck() {
-  //check if still connected
-  navigator.mediaDevices
-    .enumerateDevices()
-    .then((devices) => {
-      const cameras = devices.filter((d) => d.kind === "videoinput");
-      if (cameras.length > 0) {
-        webcam = true;
-      } else {
-        webcam = false;
-      }
-    })
-    .catch(function (err) {
-      console.log(err.name + ": " + err.message);
-      webcam = false;
-    });
-}
-
-function quickGet(p, x, y) {
-  p.loadPixels();
-
-  let d = pixelDensity();
-  //   convert to INT
-  let off = Math.floor((y * width + x) * d * 4);
-  let components = [
-    p.pixels[off],
-    p.pixels[off + 1],
-    p.pixels[off + 2],
-    p.pixels[off + 3],
-  ];
-
-  return components;
-}
-
 function shaderMousePressed() {
   if (webcam_permission) {
     webcamCheck();
   }
 
-  //colour = pixelpg.get(width - mouseX, isSafari ? mouseY : height - mouseY);
 
   colour = quickGet(
     pixelpg,
@@ -226,14 +155,14 @@ if (!detecttouch){
     menu_loc = false;
   }
 }else{
-  if (mouseY >= height - rect.height) {
+  if (mouseY >= rect.top) {
     menu_loc = true;
   } else {
     menu_loc = false;
   }
 }
 
-  if (webcam && !menu_loc) {
+  if (webcam && !menu_loc && instload_toggle == false) {
     test.push(data);
     console.log(data);
   }
