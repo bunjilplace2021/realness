@@ -87,7 +87,7 @@ class Particle {
       this.fill_col = lerpColor(
         this.col,
         this.fill_col,
-        map(this.duration, 0, 800, 0, 1)
+        constrain(map(this.duration, 100, 800, 0, 1),0,1)
       );
       this.strokeweight = lerp(5, 0, map(this.duration, 0, 800, 0, 1));
     }
