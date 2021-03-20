@@ -82,18 +82,17 @@ function pipShaderDraw() {
   let my = map(mouseY, 0, height, 0, 1);
 
   let pipx = width - 30;
-  let pipy =
-    detecttouch
-      ? document.documentElement.clientHeight * 0.1
-      : height - 30;
+  let pipy = detecttouch
+    ? document.documentElement.clientHeight * 0.1
+    : height - 30;
 
   let pip_x = map(pipx, 0, width, 1, 0);
   let pip_y = map(pipy, 0, height, 0, 1);
 
   let pip_mx = norm(map(mouseX, 0, width, pipx - width / 5, pipx), 0, width);
   let pip_my = detecttouch
-              ?   norm(map(mouseY, 0, height, pipy, pipy + height / 5), 0, height)
-              :   norm(map(mouseY, 0, height, pipy - height / 5, pipy), 0, height);
+    ? norm(map(mouseY, 0, height, pipy, pipy + height / 5), 0, height)
+    : norm(map(mouseY, 0, height, pipy - height / 5, pipy), 0, height);
 
   norm(map(mouseY, 0, height, pipy - height / 5, pipy), 0, height);
 
@@ -118,13 +117,11 @@ function shaderMousePressed() {
     webcamCheck();
   }
 
-
   colour = quickGet(
     pixelpg,
     width - mouseX,
     isSafari ? mouseY : height - mouseY
   );
-
 
   let rand_gen = floor(random(0, 3));
 
@@ -139,28 +136,26 @@ function shaderMousePressed() {
     deviceHeight: height,
     touchTime: touchtime,
   };
-
+  window.audioUUID ? (data.audioUUID = window.audioUUID) : null;
   var test = database.ref("test3");
 
   //do not upload pixel if location under menu element check
 
   rect = document.getElementById("top").getBoundingClientRect();
 
-
-if (!detecttouch){
-  if (mouseY <= rect.height) {
-    menu_loc = true;
-
+  if (!detecttouch) {
+    if (mouseY <= rect.height) {
+      menu_loc = true;
+    } else {
+      menu_loc = false;
+    }
   } else {
-    menu_loc = false;
+    if (mouseY >= rect.top) {
+      menu_loc = true;
+    } else {
+      menu_loc = false;
+    }
   }
-}else{
-  if (mouseY >= rect.top) {
-    menu_loc = true;
-  } else {
-    menu_loc = false;
-  }
-}
 
   if (webcam && !menu_loc && instload_toggle == false) {
     test.push(data);
