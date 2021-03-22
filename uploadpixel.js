@@ -136,7 +136,7 @@ function shaderMousePressed() {
     deviceHeight: height,
     touchTime: touchtime,
   };
-  window.audioUUID && !window.recordingLimitReached ? (data.audioUUID = window.audioUUID) : (data.audioUUID = null);
+  window.audioUUID && !window.recordingLimitReached ? (data.audioUUID = window.audioUUID) : (data.audioUUID = noAudio);
 
 
   var test = database.ref("test3");
