@@ -116,6 +116,28 @@ class Particle {
       this.recordcount == 0 &&
       window.recordingLimitReached == false
     ) {
+      for (var i = 0; i < 10; i++) {
+        this.diam = this.outerDiam - 100 * i;
+        if (this.diam > 0) {
+          this.fade = map(this.diam, 0, 200, 255, 0);
+          p.fill(127,this.fade);
+          p.noStroke();
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+        }
+      }
+
+      this.outerDiam = this.outerDiam + 3;
+
+      if (this.outerDiam >= 500) {
+        this.recordcount = this.recordcount + 1;
+      }
+    }
+  }
+
+  audiobuffer(p) {
+
+    if (this.active && this.audioUUID == window.audioBuffer && this.recordcount > 0) {
+
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
         if (this.diam > 0) {
@@ -129,8 +151,9 @@ class Particle {
       this.outerDiam = this.outerDiam + 3;
 
       if (this.outerDiam >= 500) {
-        this.recordcount = this.recordcount + 1;
+        //this.recordcount = this.recordcount + 1;
       }
+
     }
   }
 
