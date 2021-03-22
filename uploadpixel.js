@@ -136,7 +136,9 @@ function shaderMousePressed() {
     deviceHeight: height,
     touchTime: touchtime,
   };
-  window.audioUUID ? (data.audioUUID = window.audioUUID) : null;
+  window.audioUUID && !window.recordingLimitReached ? (data.audioUUID = window.audioUUID) : null;
+
+
   var test = database.ref("test3");
 
   //do not upload pixel if location under menu element check
