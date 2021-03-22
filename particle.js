@@ -105,6 +105,7 @@ class Particle {
   }
 
   holdevent(p) {
+
     if (window.recording && this.duration < 51 && this.firstrun) {
       this.recording = true;
     }
@@ -134,35 +135,11 @@ class Particle {
     }
   }
 
-  audiobuffer(p) {
-
-    if (this.active && this.audioUUID == window.audioBuffer) {
-
-      for (var i = 0; i < 10; i++) {
-        this.diam = this.outerDiam - 100 * i;
-        if (this.diam > 0) {
-          this.fade = map(this.diam, 0, 200, 255, 0);
-          this.cl = color(255,0,255);
-          p.fill(this.cl,this.fade);
-          p.noStroke();
-          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
-        }
-      }
-
-      this.outerDiam = this.outerDiam + 3;
-
-      if (this.outerDiam >= 500) {
-        //this.recordcount = this.recordcount + 1;
-      }
-
-    }
-  }
 
   run(p) {
     this.update();
     this.display(p);
     this.holdevent(p);
-    this.audiobuffer(p);
     //console.log(width,height,this.position.x,this.position.y,this.map_position.x,this.map_position.y);
   }
 
@@ -262,6 +239,23 @@ class Particle {
     }
   }
 
+  audioBuffer(p) {
+
+    for (var i = 0; i < 10; i++) {
+      this.diam = this.radius - (10 * i);
+      if (this.diam > 0) {
+        if (this.firstrun) {
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+        } else {
+          p.ellipse(this.position.x, this.position.y, this.diam);
+        }
+        this.diam += this.resize;
+      }
+    }
+
+  }
+
+
   // Method to display
   display(p) {
     p.push();
@@ -283,12 +277,24 @@ class Particle {
     p.ellipseMode(CENTER);
 
     if (this.initload) {
+
       p.ellipse(this.position.x, this.position.y, this.radius);
+
     } else {
       if (this.firstrun) {
-        p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+
+        if (this.audioUUID == window.audioUUID) {
+          this.audioBuffer(p);
+        } else {
+          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+        }
+
       } else {
-        p.ellipse(this.position.x, this.position.y, this.radius);
+        if (this.audioUUID == window.audioUUID) {
+          this.audioBuffer(p);
+        } else {
+          p.ellipse(this.position.x, this.position.y, this.radius);
+        }
       }
     }
     p.pop();
