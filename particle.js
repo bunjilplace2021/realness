@@ -116,11 +116,11 @@ class Particle {
       this.recordcount == 0 &&
       window.recordingLimitReached == false
     ) {
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
         if (this.diam > 0) {
           this.fade = map(this.diam, 0, 200, 255, 0);
-          p.fill(127,this.fade);
+          p.fill(this.fade);
           p.noStroke();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
         }
@@ -138,11 +138,11 @@ class Particle {
 
     if (this.active && this.audioUUID == window.audioBuffer && this.recordcount > 0) {
 
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 10; i++) {
         this.diam = this.outerDiam - 100 * i;
         if (this.diam > 0) {
           this.fade = map(this.diam, 0, 200, 255, 0);
-          p.fill(this.fade);
+          p.fill(127,this.fade);
           p.noStroke();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
         }
@@ -161,6 +161,7 @@ class Particle {
     this.update();
     this.display(p);
     this.holdevent(p);
+    this.audiobuffer(p);
     //console.log(width,height,this.position.x,this.position.y,this.map_position.x,this.map_position.y);
   }
 
