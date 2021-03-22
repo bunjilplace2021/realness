@@ -241,8 +241,8 @@ class Particle {
 
   audioBuffer(p) {
 
-    for (var i = 0; i < 5; i++) {
-      this.diam = this.radius - (50 * i);
+    for (var i = 0; i < 3; i++) {
+      this.diam = this.radius - (100 * i);
       if (this.diam > 0) {
         if (this.firstrun) {
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
