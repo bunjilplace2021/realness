@@ -1,5 +1,5 @@
 class Particle {
-  constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
+  constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID, part_audioUUID) {
     this.origposition = createVector(x, y);
     this.map_position = createVector(
       constrain(map(x, 0, devWidth, 0, width), 0, width),
@@ -44,6 +44,7 @@ class Particle {
     this.recordcount = 0.0;
     this.initload = initload;
     this.outerDiam = 0;
+    this.audioUUID = part_audioUUID;
   }
 
   colour() {
