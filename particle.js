@@ -242,21 +242,17 @@ class Particle {
   audioBuffer(p) {
 
     for (var i = 0; i < 6; i++) {
-      this.diam = this.radius - (30 * i);
+      this.diam = this.radius - (60 * i);
       if (this.diam > 0) {
         if (this.firstrun) {
           p.push();
           this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
-          p.strokeWeight(3);
-          p.stroke(this.cl);
           p.fill(this.cl);
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
           p.pop();
         } else {
           p.push();
           this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
-          p.strokeWeight(3);
-          p.stroke(this.cl);
           p.fill(this.cl);
           p.ellipse(this.position.x, this.position.y, this.diam);
           p.pop();
