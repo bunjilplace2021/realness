@@ -128,6 +128,7 @@ function shaderMousePressed() {
   // texture upside down?
   var data = {
     uuid: uuid,
+    audioUUID: window.audioUUID && !window.recordingLimitReached ? window.audioUUID : "noAudio",
     mouseX_loc: mouseX,
     mouseY_loc: mouseY,
     rand: rand_gen,
@@ -136,7 +137,7 @@ function shaderMousePressed() {
     deviceHeight: height,
     touchTime: touchtime,
   };
-  window.audioUUID && !window.recordingLimitReached ? (data.audioUUID = window.audioUUID) : (data.audioUUID = "noAudio");
+  //window.audioUUID && !window.recordingLimitReached ? (data.audioUUID = window.audioUUID) : (data.audioUUID = "noAudio");
 
 
   var test = database.ref("test3");
