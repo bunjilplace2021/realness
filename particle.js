@@ -257,7 +257,7 @@ class Particle {
           p.ellipse(this.position.x, this.position.y, this.diam);
           p.pop();
         }
-        this.diam += 3.0; //(this.resize*10.0);
+        this.diam += this.resize;
       }
     }
 
