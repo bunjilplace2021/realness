@@ -242,7 +242,7 @@ class Particle {
   audioBuffer(p) {
 
     for (var i = 0; i < 6; i++) {
-      this.diam = this.radius - (30 * i);
+      this.diam = this.radius - (60 * i);
       if (this.diam > 0) {
         if (this.firstrun) {
           p.push();
