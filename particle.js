@@ -248,14 +248,14 @@ class Particle {
           p.push();
           this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
           p.stroke(this.cl);
-          p.noFill();
+          //p.noFill();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
           p.pop();
         } else {
           p.push();
           this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
           p.stroke(this.cl);
-          p.noFill();
+          //p.noFill();
           p.ellipse(this.position.x, this.position.y, this.diam);
           p.pop();
         }
