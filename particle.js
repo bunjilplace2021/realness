@@ -247,6 +247,7 @@ class Particle {
         if (this.firstrun) {
           p.push();
           this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
+          p.strokeWeight(3);
           p.stroke(this.cl);
           p.fill(this.cl);
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
@@ -254,6 +255,7 @@ class Particle {
         } else {
           p.push();
           this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
+          p.strokeWeight(3);
           p.stroke(this.cl);
           p.fill(this.cl);
           p.ellipse(this.position.x, this.position.y, this.diam);
