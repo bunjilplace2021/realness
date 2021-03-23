@@ -243,23 +243,21 @@ class Particle {
 
     for (var i = 0; i < 6; i++) {
       this.diam = this.radius - (30 * i);
-      if (this.diam > this.radius) {
+      if (this.diam > 0) {
         if (this.firstrun) {
           p.push();
           this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
           p.stroke(this.cl);
-          //p.noFill();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
           p.pop();
         } else {
           p.push();
           this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
           p.stroke(this.cl);
-          //p.noFill();
           p.ellipse(this.position.x, this.position.y, this.diam);
           p.pop();
         }
-        this.diam += (this.resize * 3.0);
+        this.diam += this.resize;
       }
     }
 
