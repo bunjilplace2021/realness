@@ -105,6 +105,7 @@ class Particle {
   }
 
   holdevent(p) {
+
     if (window.recording && this.duration < 51 && this.firstrun) {
       this.recording = true;
     }
@@ -133,6 +134,7 @@ class Particle {
       }
     }
   }
+
 
   run(p) {
     this.update();
@@ -237,6 +239,31 @@ class Particle {
     }
   }
 
+  audioBuffer(p) {
+
+    for (var i = 0; i < 6; i++) {
+      this.diam = this.radius - (60 * i);
+      if (this.diam > 0) {
+        if (this.firstrun) {
+          p.push();
+          this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/(i+1));
+          p.fill(this.cl);
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+          p.pop();
+        } else {
+          p.push();
+          this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/(i+1));
+          p.fill(this.cl);
+          p.ellipse(this.position.x, this.position.y, this.diam);
+          p.pop();
+        }
+        this.diam += this.resize;
+      }
+    }
+
+  }
+
+
   // Method to display
   display(p) {
     p.push();
@@ -258,12 +285,24 @@ class Particle {
     p.ellipseMode(CENTER);
 
     if (this.initload) {
+
       p.ellipse(this.position.x, this.position.y, this.radius);
+
     } else {
       if (this.firstrun) {
-        p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0) {
+          this.audioBuffer(p);
+        } else {
+          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+        }
+
       } else {
-        p.ellipse(this.position.x, this.position.y, this.radius);
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0)  {
+          this.audioBuffer(p);
+        } else {
+          p.ellipse(this.position.x, this.position.y, this.radius);
+        }
       }
     }
     p.pop();
