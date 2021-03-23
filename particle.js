@@ -252,7 +252,7 @@ class Particle {
           p.pop();
         } else {
           p.push();
-          this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);
+          this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/i);d
           p.fill(this.cl);
           p.ellipse(this.position.x, this.position.y, this.diam);
           p.pop();
@@ -291,14 +291,14 @@ class Particle {
     } else {
       if (this.firstrun) {
 
-        if (this.audioUUID == window.audioUUID) {
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0) {
           this.audioBuffer(p);
         } else {
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         }
 
       } else {
-        if (this.audioUUID == window.audioUUID) {
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0)  {
           this.audioBuffer(p);
         } else {
           p.ellipse(this.position.x, this.position.y, this.radius);
