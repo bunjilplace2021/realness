@@ -247,7 +247,7 @@ class Particle {
       this.diam = this.outerDiam - 100 * i;
       if (this.diam > 0) {
         if (this.firstrun) {
-          this.fade = map(this.diam, 0, fade, this.fill_alpha, 0);
+          this.fade = map(this.diam, 0, 200, this.fill_alpha, 0);
           p.push();
           p.fill(this.fade);
           p.noStroke();
