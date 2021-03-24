@@ -277,6 +277,10 @@ class Particle {
 
     if (this.outerDiam >= this.maxradius) {
       this.outerDiam = 0;
+      //this.count = this.count + 1;
+    }
+
+    if (this.fade == 0){
       this.count = this.count + 1;
     }
 
