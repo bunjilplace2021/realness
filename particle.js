@@ -254,9 +254,9 @@ class Particle {
           p.noStroke();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam+this.radius);
           p.pop();
-          if (this.fade == 0){
-            this.count = this.count + 1;
-          }
+            if (this.fade == 0){
+              this.count = this.count + 1;
+            }
           }
         } else {
           this.fade = constrain (map(this.diam, 0, 200, this.fill_alpha*0.5, 0),0,this.fill_alpha*0.5);
@@ -267,9 +267,9 @@ class Particle {
           p.pop();
         }
       }
-    }
-console.log(this.count);
-    this.outerDiam = this.outerDiam + 3;
+
+      console.log(this.count);
+      this.outerDiam = this.outerDiam + 3;
 
 
 
@@ -277,7 +277,7 @@ console.log(this.count);
       this.outerDiam = 0;
     }
 
-
+}
 
 
 
