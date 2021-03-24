@@ -266,7 +266,7 @@ class Particle {
 
     this.outerDiam = this.outerDiam + 3;
 
-    if (this.outerDiam >= this.maxradius) {
+    if (this.outerDiam >= (this.radius*3)) {
       this.outerDiam = 0;
     }
 
