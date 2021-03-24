@@ -244,7 +244,7 @@ class Particle {
 
   audioBuffer(p) {
 
-console.log(this.count);
+console.log(this.count,this.diam);
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
@@ -281,9 +281,9 @@ console.log(this.count);
       this.count = this.count + 1;
     }
 
-    // if (this.fade == 0){
-    //   this.count = this.count + 1;
-    // }
+     if (this.diam == 500){
+      this.count = this.count + 1;
+     }
 
 
 
