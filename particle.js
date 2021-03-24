@@ -245,11 +245,13 @@ class Particle {
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
-      if (this.diam > 0) {
+      if (this.diam > 0 & this.duration > 51) {
         this.fade = map(this.diam, 0, 200, 255, 0);
+        p.push();
         p.fill(this.fade);
         p.noStroke();
         p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+        p.pop();
       }
     }
 
