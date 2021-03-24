@@ -244,10 +244,11 @@ class Particle {
 
   audioBuffer(p) {
 
+console.log(this.count);
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
-      if (this.diam > 0 && this.active && this.count < 3) {
+      if (this.diam > 0 && this.active && this.count < 10) {
         if (this.firstrun) {
           this.fade = constrain(
             map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
