@@ -248,7 +248,8 @@ class Particle {
       if (this.diam > 0 & this.duration > 51) {
         this.fade = map(this.diam, 0, 200, 255, 0);
         p.push();
-        p.fill(this.fill_col, this.fade);
+        this.cl = (this.fill_col[0],this.fill_col[1],this.fill_col[2]);
+        p.fill(this.cl, this.fade);
         p.noStroke();
         p.ellipse(this.map_position.x, this.map_position.y, this.diam);
         p.pop();
