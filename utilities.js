@@ -174,13 +174,12 @@ function infoInstructions() {
     myLinks.style.display = "block";
   }
 
-
   if(detecttouch && instload_toggle){
 menuicon.classList.toggle("fa-angle-double-right");
 }else{
   menuicon.classList.toggle("fa-window-close");
 }
-
+  
   myLinks.style.display = "block";
 
   document.getElementById("top").style.backgroundColor =
