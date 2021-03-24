@@ -247,18 +247,18 @@ class Particle {
       this.diam = (this.outerDiam+this.radius) - 100 * i;
       if (this.diam > this.radius) {
         if (this.firstrun) {
-          this.fade = map(this.diam, 0, 200, 255, 0);
+          this.fade = map(this.diam, 0, 200+this.radius, 255, 0);
           p.push();
           p.fill(this.fade);
           p.noStroke();
-          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam+this.radius);
           p.pop();
         } else {
-          this.fade = map(this.diam, 0, 200, 255, 0);
+          this.fade = map(this.diam, 0, 200+this.radius, 255, 0);
           p.push();
           p.fill(this.fade);
           p.noStroke();
-          p.ellipse(this.position.x, this.position.y, this.diam);
+          p.ellipse(this.position.x, this.position.y, this.diam+this.radius);
           p.pop();
         }
       }
