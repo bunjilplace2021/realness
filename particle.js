@@ -245,13 +245,22 @@ class Particle {
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
-      if (this.diam > 0) {
-        this.fade = map(this.diam, 0, 200, 255, 0);
-        p.push();
-        p.fill(this.fade);
-        p.noStroke();
-        p.ellipse(this.map_position.x, this.map_position.y, this.diam);
-        p.pop();
+      if (this.diam > this.radius) {
+        if (this.firstrun) {
+          this.fade = map(this.diam, 0, 200, 255, 0);
+          p.push();
+          p.fill(this.fade);
+          p.noStroke();
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+          p.pop();
+        } else {
+          this.fade = map(this.diam, 0, 200, 255, 0);
+          p.push();
+          p.fill(this.fade);
+          p.noStroke();
+          p.ellipse(this.position.x, this.position.y, this.diam);
+          p.pop();
+        }
       }
     }
 
@@ -313,14 +322,15 @@ class Particle {
 
         if (this.audioUUID == window.audioUUID && this.recordcount > 0) {
           this.audioBuffer(p);
+          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         } else {
-
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         }
 
       } else {
-        if (this.audioUUID == window.audioUUID && this.recordcount > 0)  {
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0) {
           this.audioBuffer(p);
+            p.ellipse(this.position.x, this.position.y, this.radius);
         } else {
           p.ellipse(this.position.x, this.position.y, this.radius);
         }
