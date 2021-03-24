@@ -251,14 +251,14 @@ class Particle {
           p.push();
           p.fill(this.fade);
           p.noStroke();
-          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam+this.radius);
           p.pop();
         } else {
           this.fade = map(this.diam, 0, 200, 255, 0);
           p.push();
           p.fill(this.fade);
           p.noStroke();
-          p.ellipse(this.position.x, this.position.y, this.diam);
+          p.ellipse(this.position.x, this.position.y, this.diam+this.radius);
           p.pop();
         }
       }
