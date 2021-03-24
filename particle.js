@@ -244,7 +244,6 @@ class Particle {
 
   audioBuffer(p) {
 
-console.log(this.count,this.diam);
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
@@ -275,42 +274,10 @@ console.log(this.count,this.diam);
 
     this.outerDiam = this.outerDiam + 3;
 
-
-    // if (this.outerDiam >= this.maxradius) {
-    //   this.outerDiam = 0;
-    //   //this.count = this.count + 1;
-    // }
-
      if (this.diam == 586){
-         this.outerDiam = 0;
+      this.outerDiam = 0;
       this.count = this.count + 1;
      }
-
-
-
-
-
-
-
-    // for (var i = 0; i < 3; i++) {
-    //   this.diam = this.radius - (60 * i);
-    //   if (this.diam > 0) {
-    //     if (this.firstrun) {
-    //       p.push();
-    //       this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/(i+1));
-    //       p.fill(this.cl);
-    //       p.ellipse(this.map_position.x, this.map_position.y, this.diam);
-    //       p.pop();
-    //     } else {
-    //       p.push();
-    //       this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/(i+1));
-    //       p.fill(this.cl);
-    //       p.ellipse(this.position.x, this.position.y, this.diam);
-    //       p.pop();
-    //     }
-    //     this.diam += this.resize;
-    //   }
-    // }
 
   }
 
