@@ -276,12 +276,13 @@ console.log(this.count,this.diam);
     this.outerDiam = this.outerDiam + 3;
 
 
-    if (this.outerDiam >= this.maxradius) {
-      this.outerDiam = 0;
-      //this.count = this.count + 1;
-    }
+    // if (this.outerDiam >= this.maxradius) {
+    //   this.outerDiam = 0;
+    //   //this.count = this.count + 1;
+    // }
 
      if (this.diam == 586){
+         this.outerDiam = 0;
       this.count = this.count + 1;
      }
 
