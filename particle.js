@@ -45,6 +45,7 @@ class Particle {
     this.initload = initload;
     this.outerDiam = 0;
     this.audioUUID = part_audioUUID;
+    this.count = 0;
   }
 
   colour() {
@@ -131,6 +132,7 @@ class Particle {
 
       if (this.outerDiam >= 500) {
         this.recordcount = this.recordcount + 1;
+        this.outerDiam = 0;
       }
     }
   }
@@ -235,31 +237,47 @@ class Particle {
       this.firstrun = false;
       this.intersect = 0.0;
       this.initload = false;
+      this.count = 0;
       initload = false; //global flag
     }
   }
 
   audioBuffer(p) {
 
-    for (var i = 0; i < 6; i++) {
-      this.diam = this.radius - (60 * i);
-      if (this.diam > 0) {
+
+    for (var i = 0; i < 3; i++) {
+      this.diam = this.outerDiam - 100 * i;
+      if (this.diam > 0 && this.active && this.count < 2) {
         if (this.firstrun) {
+          this.fade = constrain(
+            map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
+            0,
+            this.fill_alpha);
           p.push();
-          this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/(i+1));
-          p.fill(this.cl);
-          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+          p.fill(this.fade);
+          p.noStroke();
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam+this.radius);
           p.pop();
         } else {
+          this.fade = constrain(
+            map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
+            0,
+            this.fill_alpha);
           p.push();
-          this.cl = color(this.fill_col[0], this.fill_col[1], this.fill_col[2], this.fill_alpha/(i+1));
-          p.fill(this.cl);
-          p.ellipse(this.position.x, this.position.y, this.diam);
+          p.fill(this.fade);
+          p.noStroke();
+          p.ellipse(this.position.x, this.position.y, this.diam+this.radius);
           p.pop();
         }
-        this.diam += this.resize;
       }
     }
+
+    this.outerDiam = this.outerDiam + 3;
+
+     if (this.diam == 586){
+      this.outerDiam = 0;
+      this.count = this.count + 1;
+     }
 
   }
 
@@ -267,12 +285,6 @@ class Particle {
   // Method to display
   display(p) {
     p.push();
-
-    // if (pixelShaderToggle && this.UUID == uuid) {
-    //   p.stroke(255, this.fill_alpha);
-    // } else {
-    //   p.noStroke();
-    // }
 
     if (!pixelShaderToggle && this.UUID != uuid && this.firstrun) {
       p.strokeWeight(this.strokeweight);
@@ -293,13 +305,15 @@ class Particle {
 
         if (this.audioUUID == window.audioUUID && this.recordcount > 0) {
           this.audioBuffer(p);
+          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         } else {
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         }
 
       } else {
-        if (this.audioUUID == window.audioUUID && this.recordcount > 0)  {
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0) {
           this.audioBuffer(p);
+            p.ellipse(this.position.x, this.position.y, this.radius);
         } else {
           p.ellipse(this.position.x, this.position.y, this.radius);
         }
