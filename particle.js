@@ -248,7 +248,7 @@ console.log(this.count,this.diam);
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
-      if (this.diam > 0 && this.active && this.count < 10) {
+      if (this.diam > 0 && this.active && this.count < 2) {
         if (this.firstrun) {
           this.fade = constrain(
             map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
@@ -278,10 +278,10 @@ console.log(this.count,this.diam);
 
     if (this.outerDiam >= this.maxradius) {
       this.outerDiam = 0;
-      this.count = this.count + 1;
+      //this.count = this.count + 1;
     }
 
-     if (this.diam == 500){
+     if (this.diam == 586){
       this.count = this.count + 1;
      }
 
