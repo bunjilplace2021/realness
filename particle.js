@@ -264,9 +264,9 @@ class Particle {
       }
     }
 
-    this.outerDiam = this.outerDiam + 1;
+    this.outerDiam = this.outerDiam + 3;
 
-    if (this.outerDiam >= 500) {
+    if (this.outerDiam >= this.maxradius) {
       this.outerDiam = 0;
     }
 
