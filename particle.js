@@ -268,12 +268,6 @@ class Particle {
   display(p) {
     p.push();
 
-    // if (pixelShaderToggle && this.UUID == uuid) {
-    //   p.stroke(255, this.fill_alpha);
-    // } else {
-    //   p.noStroke();
-    // }
-
     if (!pixelShaderToggle && this.UUID != uuid && this.firstrun) {
       p.strokeWeight(this.strokeweight);
       p.stroke(this.fill_col, this.fill_alpha);
@@ -294,6 +288,7 @@ class Particle {
         if (this.audioUUID == window.audioUUID && this.recordcount > 0) {
           this.audioBuffer(p);
         } else {
+          this.audioBuffer(p);
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         }
 
