@@ -45,6 +45,7 @@ class Particle {
     this.initload = initload;
     this.outerDiam = 0;
     this.audioUUID = part_audioUUID;
+    this.count = 0;
   }
 
   colour() {
@@ -242,7 +243,7 @@ class Particle {
 
   audioBuffer(p) {
 
-this.count = 0;
+
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
       if (this.diam > 0 && this.active && this.count < 4) {
@@ -265,7 +266,7 @@ this.count = 0;
     }
 
     this.outerDiam = this.outerDiam + 3;
-    this.count = this.count +1;
+    this.count = this.count + 1;
     console.log(this.count);
 
     if (this.outerDiam >= this.maxradius) {
