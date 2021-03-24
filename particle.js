@@ -105,6 +105,7 @@ class Particle {
   }
 
   holdevent(p) {
+    console.log(this.outerDiam);
 
     if (window.recording && this.duration < 51 && this.firstrun) {
       this.recording = true;
@@ -131,6 +132,7 @@ class Particle {
 
       if (this.outerDiam >= 500) {
         this.recordcount = this.recordcount + 1;
+        this.outerDiam = 0;
       }
     }
   }
@@ -254,6 +256,7 @@ class Particle {
     this.outerDiam = this.outerDiam + 3;
 
     if (this.outerDiam >= 500) {
+      this.outerDiam = 0;
     //  this.recordcount = this.recordcount + 1;
     }
 
