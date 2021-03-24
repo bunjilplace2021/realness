@@ -272,11 +272,12 @@ class Particle {
     }
 
     this.outerDiam = this.outerDiam + 3;
-    this.count = this.count + 1;
 
 
     if (this.outerDiam >= this.maxradius) {
       this.outerDiam = 0;
+      this.count = this.count + 1;
+        console.log(this.count);
     }
 
 
