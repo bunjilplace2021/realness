@@ -149,6 +149,7 @@ muteButton.onclick = async () => {
   muteClicked++;
   window.isMuted = !window.isMuted;
   changeMuteButton(window.isMuted, muteButton);
+  changeTooltipText(audioTooltip);
   //  if synths are loaded, start audio and change DOM element
   if (window.synthsLoaded) {
     if (!window.isMuted) {
