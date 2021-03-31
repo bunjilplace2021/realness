@@ -3,6 +3,7 @@ import FireBaseAudio from "./modules/FirebaseAudio";
 import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
+import webAudioPeakMeter from "web-audio-peak-meter";
 
 // GLOBAL VARIABLES
 import {
@@ -32,6 +33,7 @@ import {
   soundLog,
   randomChoice,
   getIdealVolume,
+  addMeter,
 } from "./utilityFunctions";
 
 import regeneratorRuntime from "regenerator-runtime";
@@ -118,6 +120,8 @@ const noise = new Noise({
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
 const playButton = document.querySelector("#play");
+const peakMeter = document.querySelector("#peakMeter");
+console.log(peakMeter);
 // AUDIO TOOLTIP
 const audioTooltip = document.querySelector("#audiotooltip");
 
@@ -435,9 +439,11 @@ const setupMasterBus = () => {
   window.isMp3 && masterBus.chorus(0.05, 300, 0.9);
   window.isMp3 && masterBus.reverb(true, 0.3, 4, 0.7);
   !window.isMp3 && masterBus.cheapDelay(0.3, 0.5, 0.4);
+  masterBus.highpassFilter(80, 1);
   window.synthsLoaded = true;
   muteButton.classList = [];
   soundLog("Voices loaded");
+  addMeter(peakMeter, masterBus, soundtrackAudioCtx);
   // DEBUG SOUND LEVEL
 };
 

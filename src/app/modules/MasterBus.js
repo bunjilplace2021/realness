@@ -12,14 +12,13 @@ import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
-    this.input = new Volume(-6);
+    this.input = new Volume(3);
     this.limiter = new Limiter(-6);
     this.input.connect(this.limiter);
     this.effectsChain = [];
     this.ctx = ctx;
-    this.output = new Limiter(0);
+    this.output = new Limiter(-3);
     this.dest = this.ctx.destination;
-
     this.output.connect(this.dest);
     this.chainEffect(this.limiter);
   }
@@ -73,6 +72,10 @@ class MasterBus {
 
   lowpassFilter(frequency, resonance) {
     this.filter = new BiquadFilter(frequency, "lowpass", resonance);
+    this.chainEffect(this.filter);
+  }
+  highpassFilter(frequency, resonance) {
+    this.filter = new BiquadFilter(frequency, "highpass", resonance);
     this.chainEffect(this.filter);
   }
   delay(time = 100, fbk = 0.5) {
