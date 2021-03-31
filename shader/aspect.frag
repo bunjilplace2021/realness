@@ -36,6 +36,10 @@ vec2 st = gl_FragCoord.xy;  //centre screen
   // get the webcam as a vec4 using texture2D
   vec3 tex = texture2D(tex0,uv).rgb;
 
+
+  float gamma = 2.2;
+  tex.rgb = pow(tex.rgb, vec3(1.0/gamma));
+
 vec3 col = lerp(vec3(0.0),tex,vec3(u_lerp));
 
   gl_FragColor = vec4(col,u_lerp);
