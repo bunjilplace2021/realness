@@ -1,5 +1,11 @@
 import { decodeAudioData } from "standardized-audio-context";
 import { Meter } from "tone";
+import webAudioPeakMeter from "web-audio-peak-meter";
+
+export async function addMeter(elt, node, ctx) {
+  const meterNode = webAudioPeakMeter.createMeterNode(node, ctx);
+  webAudioPeakMeter.createMeter(elt, meterNode, {});
+}
 
 export async function fetchSample(url, ctx, contentType = "audio/mpeg-3") {
   return fetch(url)
@@ -87,6 +93,7 @@ export function probeLevel(node, time = 10) {
 
 export function throttle(fn, delay) {
   let scheduledId;
+
   return function throttled() {
     const context = this;
     const args = arguments;
