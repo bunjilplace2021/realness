@@ -27,15 +27,16 @@ class GrainSynth {
     this.grainOutput.name = "Grain Output";
     this.filter = new BiquadFilter({
       frequency: 220,
-      type: "lowpass",
+      type: "bandpass",
       Q: 8,
+      gain: 20,
     });
     this.compressor = new Compressor({
       threshold: -12,
       knee: 0,
-      ratio: 20,
-      attack: 0.001,
-      release: 0.1,
+      ratio: 10,
+      attack: 0.1,
+      release: 1,
     });
     this.pitchShifter = new PitchShift({
       pitch: -12,
@@ -75,9 +76,12 @@ class GrainSynth {
       grain.connect(this.grainOutput);
     });
     this.grainOutput.connect(this.compressor);
-    this.output = new Gain(1);
+    this.output = new Gain({
+      gain: 1,
+      convert: true,
+    });
     this.output.name = "Output";
-    this.output.gain.setValueAtTime(0.7 / this.numVoices, now());
+    // this.output.gain.setValueAtTime(0.7 / this.numVoices, now());
     this.pitchShifter.windowSize = 1;
     this.compressor.connect(this.filter);
     if (window.isMp3) {
