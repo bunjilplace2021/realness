@@ -2,12 +2,22 @@ class Particle {
   constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
     this.origposition = createVector(x, y);
     this.map_position = createVector(
-      constrain(map(x, 0, devWidth, 0, width),0,width),
-      constrain(map(y, 0, devHeight, 0, height),0,height));
+      constrain(map(x, 0, devWidth, 0, width), 0, width),
+      constrain(map(y, 0, devHeight, 0, height), 0, height)
+    );
     this.alignpixel = 100;
     this.position = createVector(
-      constrain(round(this.map_position.x / this.alignpixel) * this.alignpixel, this.alignpixel, width - this.alignpixel),
-      constrain(round(this.map_position.y / this.alignpixel) * this.alignpixel, this.alignpixel, height - this.alignpixel));
+      constrain(
+        round(this.map_position.x / this.alignpixel) * this.alignpixel,
+        this.alignpixel,
+        width - this.alignpixel
+      ),
+      constrain(
+        round(this.map_position.y / this.alignpixel) * this.alignpixel,
+        this.alignpixel,
+        height - this.alignpixel
+      )
+    );
     this.resize_position = createVector();
     this.velocity = createVector();
     this.acceleration = createVector();
@@ -87,7 +97,7 @@ class Particle {
       this.fill_col = lerpColor(
         this.col,
         this.fill_col,
-        constrain(map(this.duration, 100, 800, 0, 1),0,1)
+        constrain(map(this.duration, 100, 800, 0, 1), 0, 1)
       );
       this.strokeweight = lerp(5, 0, map(this.duration, 0, 800, 0, 1));
     }
@@ -164,9 +174,15 @@ class Particle {
     );
 
     this.resize_position.x = constrain(
-      round(this.resize_position.x / this.alignpixel) * this.alignpixel, this.alignpixel, width - this.alignpixel);
+      round(this.resize_position.x / this.alignpixel) * this.alignpixel,
+      this.alignpixel,
+      width - this.alignpixel
+    );
     this.resize_position.y = constrain(
-      round(this.resize_position.y / this.alignpixel) * this.alignpixel, this.alignpixel, height - this.alignpixel);
+      round(this.resize_position.y / this.alignpixel) * this.alignpixel,
+      this.alignpixel,
+      height - this.alignpixel
+    );
 
     this.resize = 0.2 * int(random(1, 3)) + width * 0.0001;
     this.maxradius = width >= height ? width : height;

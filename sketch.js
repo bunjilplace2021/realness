@@ -53,8 +53,6 @@ window.released = new Event("released");
 // set minimum record length for users
 window.minimumRecordLength = 200;
 
-
-
 p5.disableFriendlyErrors = true; // disables FES
 
 function preload() {
@@ -82,7 +80,6 @@ function preload() {
 }
 
 function setup() {
-
   pixelDensity(1);
 
   if (isMobile == false) {
@@ -150,7 +147,7 @@ function particle_draw(p) {
 
   shaderDraw();
 
-  if (pixelShaderToggle) {
+  if (pixelShaderToggle || window.customBuffer) {
     pipShaderDraw();
   }
 
@@ -214,7 +211,6 @@ function keyPressed() {
   if (key == "R" || key == "r") {
     removeData();
   }
-
 }
 
 function windowResized() {
