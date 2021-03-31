@@ -17,9 +17,10 @@ class MasterBus {
     this.input.connect(this.limiter);
     this.effectsChain = [];
     this.ctx = ctx;
-    this.output = new Limiter(-3);
+    this.output = new Limiter(-6);
     this.dest = this.ctx.destination;
     this.output.connect(this.dest);
+    this.dest.volume.value = 8;
     this.chainEffect(this.limiter);
   }
   test() {
@@ -41,7 +42,12 @@ class MasterBus {
     }
   }
   chorus(freq = 0.1, delay = 20, depth = 0.9) {
-    this.chorus = new Chorus(freq, delay, depth).start();
+    this.chorus = new Chorus({
+      frequency: freq,
+      delayTime: delay,
+      depth: depth,
+    }).start();
+
     this.chainEffect(this.chorus);
   }
   chainEffect(effect) {

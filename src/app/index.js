@@ -3,7 +3,6 @@ import FireBaseAudio from "./modules/FirebaseAudio";
 import Recorder from "./modules/Recorder";
 import MasterBus from "./modules/MasterBus";
 import UISynth from "./modules/UISynth";
-import webAudioPeakMeter from "web-audio-peak-meter";
 
 // GLOBAL VARIABLES
 import {
@@ -120,8 +119,7 @@ const noise = new Noise({
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
 const playButton = document.querySelector("#play");
-const peakMeter = document.querySelector("#peakMeter");
-console.log(peakMeter);
+
 // AUDIO TOOLTIP
 const audioTooltip = document.querySelector("#audiotooltip");
 
@@ -215,7 +213,7 @@ const reloadBuffers = async (customBuffer = null) => {
           try {
             console.log("changing buffers");
             synths[i].grainOutput.gain.setValueAtTime(
-              buf.idealGain / numSources,
+              buf.idealGain,
               soundtrackAudioCtx.currentTime
             );
             synths[i].buffer.copyToChannel(
@@ -245,7 +243,7 @@ const reloadBuffers = async (customBuffer = null) => {
       customBuffer.idealGain = await getIdealVolume(customBuffer);
       synths.forEach((synth) => {
         try {
-          synth.grainOutput.gain.value = customBuffer.idealGain / numSources;
+          synth.grainOutput.gain.value = customBuffer.idealGain * 0.7;
           try {
             synth.buffer.copyToChannel(customBuffer.getChannelData(0), 0, 0);
           } catch (error) {
@@ -424,8 +422,7 @@ const loadSynths = async () => {
         );
         synths.forEach((synth) => {
           returnedBuffers[i].idealGain
-            ? (synth.grainOutput.gain.value =
-                returnedBuffers[i].idealGain / numSources)
+            ? (synth.grainOutput.gain.value = returnedBuffers[i].idealGain)
             : null;
         });
         soundLog("Loaded GrainSynth " + (i + 1));
@@ -442,15 +439,13 @@ const loadSynths = async () => {
 const setupMasterBus = () => {
   masterBus = new MasterBus(soundtrackAudioCtx);
   masterBus.connectSource(u.master);
-  window.isMp3 && masterBus.chorus(0.05, 300, 0.9);
-  window.isMp3 && masterBus.reverb(true, 0.3, 4, 0.9);
+  // window.isMp3 && masterBus.chorus(0.05, 300, 0.9);
+  window.isMp3 && masterBus.reverb(true, 0.3, 4, 0.7);
   !window.isMp3 && masterBus.cheapDelay(0.3, 0.5, 0.4);
   masterBus.highpassFilter(80, 1);
   window.synthsLoaded = true;
   muteButton.classList = [];
   soundLog("Voices loaded");
-  addMeter(peakMeter, masterBus, soundtrackAudioCtx);
-  // DEBUG SOUND LEVEL
 };
 
 // method to start audio
@@ -516,7 +511,7 @@ const pollValues = () => {
         synths.forEach((synth, i) => {
           synth.setDetune(0 - (i + 1 * radius));
           let filterFreq =
-            Math.random() * mapValue(~~radius, 0, maxradius, 440, 2000);
+            Math.random() * mapValue(~~radius, 0, maxradius, 220, 2000);
           synth.filter.frequency.rampTo(filterFreq, 10);
         });
       }
