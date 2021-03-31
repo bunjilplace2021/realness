@@ -439,13 +439,8 @@ const loadSynths = async () => {
 const setupMasterBus = () => {
   masterBus = new MasterBus(soundtrackAudioCtx);
   masterBus.connectSource(u.master);
-<<<<<<< HEAD
   // window.isMp3 && masterBus.chorus(0.05, 300, 0.9);
   window.isMp3 && masterBus.reverb(true, 0.3, 4, 0.7);
-=======
-  window.isMp3 && masterBus.chorus(0.05, 300, 0.9);
-  window.isMp3 && masterBus.reverb(true, 0.3, 4, 0.9);
->>>>>>> feedback
   !window.isMp3 && masterBus.cheapDelay(0.3, 0.5, 0.4);
   masterBus.highpassFilter(80, 1);
   window.synthsLoaded = true;
