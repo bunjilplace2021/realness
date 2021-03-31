@@ -388,6 +388,7 @@ padding-right:1.0rem ; */
 
 /* Remove passing on mutebutton for centred */
 #mute{
+  text-align: left;
   margin: 0;
   padding: 0;
 }
