@@ -386,6 +386,12 @@ padding-right:1.0rem ; */
   font-size: 1em;
 }
 
+/* Remove passing on mutebutton for centred */
+#mute{
+  text-align: left;
+  margin: 0;
+  padding: 0;
+}
 /* CLASS FOR DISABLED BUTTONS -- USED FOR MUTE BUTTON */
 .disabled {
   opacity: 0.2;

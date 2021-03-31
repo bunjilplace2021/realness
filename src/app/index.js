@@ -151,6 +151,7 @@ muteButton.onclick = async () => {
   muteClicked++;
   window.isMuted = !window.isMuted;
   changeMuteButton(window.isMuted, muteButton);
+  changeTooltipText(audioTooltip);
   //  if synths are loaded, start audio and change DOM element
   if (window.synthsLoaded) {
     if (!window.isMuted) {
@@ -202,6 +203,7 @@ const reloadBuffers = async (customBuffer = null) => {
     window.loadingBuffers = true;
     // fetch new samples from database and load them into existing buffers
     if (!customBuffer) {
+      window.customBuffer = false;
       let returnedBuffers = await getBuffers(window.isMp3);
 
       try {
@@ -235,6 +237,7 @@ const reloadBuffers = async (customBuffer = null) => {
         reloadBuffers();
       }
     } else {
+      window.customBuffer = true;
       soundLog("CUSTOM BUFFER!");
       console.log(customBuffer);
       customBuffer.idealGain = await getIdealVolume(customBuffer);
@@ -297,7 +300,10 @@ const stopRecording = async () => {
     }
     await reloadBuffers(recordedBuffer);
 
+    window.audioUUID = f.audioUUID;
+
     soundLog("stopped user recording #" + recordings);
+    soundLog("User Audio UUID " + window.audioUUID);
     f.uploadSample(r.audioBlob);
     window.recording = false;
 
@@ -433,8 +439,13 @@ const loadSynths = async () => {
 const setupMasterBus = () => {
   masterBus = new MasterBus(soundtrackAudioCtx);
   masterBus.connectSource(u.master);
+<<<<<<< HEAD
   // window.isMp3 && masterBus.chorus(0.05, 300, 0.9);
   window.isMp3 && masterBus.reverb(true, 0.3, 4, 0.7);
+=======
+  window.isMp3 && masterBus.chorus(0.05, 300, 0.9);
+  window.isMp3 && masterBus.reverb(true, 0.3, 4, 0.9);
+>>>>>>> feedback
   !window.isMp3 && masterBus.cheapDelay(0.3, 0.5, 0.4);
   masterBus.highpassFilter(80, 1);
   window.synthsLoaded = true;

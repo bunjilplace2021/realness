@@ -33,11 +33,16 @@ class FireBaseAudio {
     this.audioCtx = ctx;
     this.storage = firebase.storage();
     this.storageRef = this.storage.ref();
-    this.audioRef = this.storageRef.child(`audio-${uuidv4()}.${this.suffix}`);
+    this.generateUUID();
+    this.audioRef = this.storageRef.child(
+      `audio-${this.audioUUID}.${this.suffix}`
+    );
   }
-
+  generateUUID() {
+    this.audioUUID = uuidv4();
+  }
   async listAll() {
-    this.files = await this.storageRef.list({ maxResults: 200 });
+    this.files = await this.storageRef.list({ maxResults: 20 });
   }
   async getAacFiles() {
     return new Promise(async (resolve, reject) => {
