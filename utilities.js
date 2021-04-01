@@ -42,6 +42,27 @@ function quickGet(p, x, y) {
   return components;
 }
 
+
+function averageBrightness(p,w,h) {  //use cam width & height
+  p.loadPixels();
+      if (p.pixels.length > 0) { // don't forget this!
+          var total = 0;
+          var i = 0;
+          for (var y = 0; y < h; y++) {
+              for (var x = 0; x < w; x++) {
+                  var redValue = p.pixels[i];
+                  total += redValue;
+                  i += 4;
+              }
+          }
+          var n = w * h;
+          var avg = int(total / n);
+          //select('#average-value').elt.innerText = avg;
+          //select('#average-color').elt.style.backgroundColor = 'rgb(' + avg + ',' + avg + ',' + avg + ')';
+      }
+  return constrain(map(avg,0,127,0,1),0,1);
+}
+
 //browser checks
 
 function checkIfWKWebView() {
@@ -175,13 +196,11 @@ function infoInstructions() {
   }
 
 
-  //menuicon.classList.toggle("fa-window-close");
   if(detecttouch && instload_toggle){
 menuicon.classList.toggle("fa-angle-double-right");
 }else{
   menuicon.classList.toggle("fa-window-close");
 }
-
 
   myLinks.style.display = "block";
 

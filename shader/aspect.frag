@@ -10,6 +10,7 @@ uniform vec2 u_resolution;
 uniform vec2 u_devicecamres;
 uniform float u_lerp;
 uniform float u_safari;
+uniform float u_avgBrightness;
 
 
 vec3 lerp(vec3 from, vec3 to, vec3 rel){
@@ -21,6 +22,8 @@ void main() {
 
 vec2 uv = vTexCoord;
 vec2 st = gl_FragCoord.xy;  //centre screen
+
+
 
   float aspect_ratio_ratio = u_resolution.x / u_resolution.y / (u_devicecamres.x / u_devicecamres.y);
 
@@ -36,11 +39,15 @@ vec2 st = gl_FragCoord.xy;  //centre screen
   // get the webcam as a vec4 using texture2D
   vec3 tex = texture2D(tex0,uv).rgb;
 
-
+//gamma boost for low light based on scene avg brightness
   float gamma = 2.2;
-  tex.rgb = pow(tex.rgb, vec3(1.0/gamma));
 
-vec3 col = lerp(vec3(0.0),tex,vec3(u_lerp));
+//  tex.rgb = pow(tex.rgb, vec3(1.0/gamma)) * step(u_avgBrightness,40.) + tex.rgb * step(40.,u_safari);
+  vec3 tex_gamma = pow(tex.rgb, vec3(1.0/gamma));
+
+  vec3 texlerp = lerp(tex_gamma,tex,vec3(u_avgBrightness));
+
+vec3 col = lerp(vec3(0.0),texlerp,vec3(u_lerp));
 
   gl_FragColor = vec4(col,u_lerp);
 }

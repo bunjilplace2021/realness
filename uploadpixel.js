@@ -43,6 +43,9 @@ function shaderSetup() {
 }
 
 function shaderDraw() {
+
+let avgBrightness = averageBrightness(cam,cam.width,cam.height);
+
   // shader() sets the active shader with our shader
   pixelpg.shader(pixelShader);
 
@@ -60,6 +63,7 @@ function shaderDraw() {
   pixelShader.setUniform("u_resolution", [width, height]);
   pixelShader.setUniform("u_lerp", 1); //map(lerp_amount, 0, 50, 0, 1)
   pixelShader.setUniform("u_safari", isSafari ? 1 : 0);
+  pixelShader.setUniform("u_avgBrightness", avgBrightness);
   // lets just send the cam to our shader as a uniform
   if (!isMobile) {
     //check camera and device orientation on mobile
@@ -76,6 +80,7 @@ function shaderDraw() {
 
 function pipShaderDraw() {
   //	backgroundpg.shader(backgroundShader);
+
   pippg.shader(pipShader);
 
   let mx = map(mouseX, 0, width, 0, 1);
@@ -136,7 +141,9 @@ function shaderMousePressed() {
     deviceHeight: height,
     touchTime: touchtime,
   };
-  window.audioUUID ? (data.audioUUID = window.audioUUID) : null;
+  window.audioUUID && !window.recordingLimitReached ? (data.audioUUID = window.audioUUID) : (data.audioUUID = "noAudio");
+
+
   var test = database.ref("test3");
 
   //do not upload pixel if location under menu element check
