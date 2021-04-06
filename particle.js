@@ -303,21 +303,25 @@ class Particle {
     } else {
       if (this.firstrun) {
 
-        if (this.audioUUID == window.audioUUID && this.recordcount > 0 && !pixelShaderToggle) {
+for (var i = 0; i < window.audioUUIDs.length; i++){
+        if (this.audioUUID == window.audioUUID[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
           this.audioBuffer(p);
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         } else {
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         }
+      }
 
       } else {
-        if (this.audioUUID == window.audioUUID && this.recordcount > 0 && !pixelShaderToggle) {
+        for (var i = 0; i < window.audioUUIDs.length; i++){
+        if (this.audioUUID == window.audioUUID[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
           this.audioBuffer(p);
-            p.ellipse(this.position.x, this.position.y, this.radius);
+          p.ellipse(this.position.x, this.position.y, this.radius);
         } else {
           p.ellipse(this.position.x, this.position.y, this.radius);
         }
       }
+    }
     }
     p.pop();
   }
