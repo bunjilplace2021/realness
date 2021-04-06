@@ -314,15 +314,6 @@ class Particle {
 
         p.pop();
 
-
-
-
-
-
-
-
-
-
     // if (this.initload) {
     //
     //   p.ellipse(this.position.x, this.position.y, this.radius);

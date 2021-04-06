@@ -177,7 +177,7 @@ function mousePressed() {
 
   //sample and upload pixel to firebase
 
-  setTimeout(shaderMousePressed,1000);
+  shaderMousePressed();
   mouseIsReleased = false;
   initload = false;
 }
