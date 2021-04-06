@@ -275,6 +275,8 @@ const startRecording = async () => {
   return new Promise(async (resolve, reject) => {
     if (window.MediaRecorder && recordingAllowed && !window.isMuted) {
       try {
+        window.audioUUIDs.push(f.audioUUID);
+        console.log(window.audioUUIDs);
         let maxLength = setTimeout(() => {
           soundLog("hit max length, stopping.");
           resolve(true);
@@ -304,8 +306,6 @@ const stopRecording = async () => {
       soundLog(error);
     }
     await reloadBuffers(recordedBuffer);
-
-    window.audioUUIDs.push(f.audioUUID);
 
     soundLog("stopped user recording #" + recordings);
     soundLog(
