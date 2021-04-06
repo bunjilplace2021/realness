@@ -393,6 +393,7 @@ const getBuffers = async (mp3Supported) => {
       );
     }
     let buffers;
+    window.audioUUIDs = [];
     urls.forEach((url) => {
       pushUUID(url);
     });
