@@ -393,7 +393,10 @@ const getBuffers = async (mp3Supported) => {
       );
     }
     let buffers;
-    window.audioUUIDs = [];
+    console.log(f.audioUUID);
+    window.audioUUIDs = window.audioUUIDs.filter(
+      (uuid) => uuid === f.audioUUID
+    );
     urls.forEach((url) => {
       pushUUID(url);
     });
@@ -573,6 +576,7 @@ const main = async () => {
 main();
 
 const debug = () => {
+  window.f = f;
   window.synths = synths;
   window.ctx = soundtrackAudioCtx;
   window.sourceCount =
