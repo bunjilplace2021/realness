@@ -272,7 +272,7 @@ class Particle {
       }
     }
 
-    this.outerDiam = this.outerDiam + 3;
+    this.outerDiam = this.outerDiam + 1;
 
     if (this.diam == 586) {
       this.outerDiam = 0;
@@ -314,34 +314,7 @@ class Particle {
 
         p.pop();
 
-    // if (this.initload) {
-    //
-    //   p.ellipse(this.position.x, this.position.y, this.radius);
-    //
-    // } else {
-    //   if (this.firstrun) {
-    //
-    //     for (var i = 0; i < window.audioUUIDs.length; i++) {
-    //       if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
-    //         this.audioBuffer(p);
-    //         p.ellipse(this.map_position.x, this.map_position.y, this.radius);
-    //       } else {
-    //         p.ellipse(this.map_position.x, this.map_position.y, this.radius);
-    //       }
-    //     }
-    //
-    //   } else {
-    //     for (var i = 0; i < window.audioUUIDs.length; i++) {
-    //       if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
-    //         this.audioBuffer(p);
-    //         p.ellipse(this.position.x, this.position.y, this.radius);
-    //       } else {
-    //         p.ellipse(this.position.x, this.position.y, this.radius);
-    //       }
-    //     }
-    //   }
-    // }
-    // p.pop();
+
   }
 
   isDead() {
