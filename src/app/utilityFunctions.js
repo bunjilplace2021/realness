@@ -1,5 +1,11 @@
 import { decodeAudioData } from "standardized-audio-context";
 import { Meter } from "tone";
+import webAudioPeakMeter from "web-audio-peak-meter";
+
+export async function addMeter(elt, node, ctx) {
+  const meterNode = webAudioPeakMeter.createMeterNode(node, ctx);
+  webAudioPeakMeter.createMeter(elt, meterNode, {});
+}
 
 export async function fetchSample(url, ctx, contentType = "audio/mpeg-3") {
   return fetch(url)
@@ -87,6 +93,7 @@ export function probeLevel(node, time = 10) {
 
 export function throttle(fn, delay) {
   let scheduledId;
+
   return function throttled() {
     const context = this;
     const args = arguments;
@@ -146,9 +153,9 @@ export function getIdealVolume(buffer) {
       soundLog("INITIAL GAIN:" + gain / 10);
       soundLog("DIFF:" + diff);
       let safeVal;
-      if (diff > 0.99) {
+      if (diff > 0.999) {
         soundLog("possible error. being safe");
-        safeVal = 2000;
+        safeVal = 3000;
         gain = gain / 0.3;
       } else {
         safeVal = 7000;
@@ -169,8 +176,8 @@ export function getIdealVolume(buffer) {
         //   gain = gain / 2;
         // }
       }
-      gain = Math.min(gain, safeVal);
-      gain = Math.max(gain, 3);
+      // gain = Math.min(gain, safeVal);
+      // gain = Math.max(gain, 3);
       soundLog(`Adjusted gain x ${gain / 10}`);
       resolve((gain / 10.0).toFixed(2));
     }
