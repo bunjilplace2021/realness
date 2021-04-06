@@ -125,12 +125,14 @@ function shaderMousePressed() {
 
   let rand_gen = floor(random(0, 3));
 
+  //let currentAudioUUID = window.audioUUIDs[window.audioUUIDs.length - 1];
+
   // texture upside down?
   var data = {
     uuid: uuid,
     audioUUID:
-      window.audioUUID && !window.recordingLimitReached
-        ? window.audioUUID
+      window.recording && !window.recordingLimitReached
+        ? window.audioUUIDs[window.audioUUIDs.length - 1]
         : "noAudio",
     mouseX_loc: mouseX,
     mouseY_loc: mouseY,
