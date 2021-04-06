@@ -250,23 +250,23 @@ class Particle {
       if (this.diam > 0 && this.active && this.count < 2) {
         if (this.firstrun) {
           this.fade = constrain(
-            map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
+            map(this.diam, 0, 200, this.fill_alpha * 0.5, 0),
             0,
             this.fill_alpha);
           p.push();
           p.fill(this.fade);
           p.noStroke();
-          p.ellipse(this.map_position.x, this.map_position.y, this.diam+this.radius);
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam + this.radius);
           p.pop();
         } else {
           this.fade = constrain(
-            map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
+            map(this.diam, 0, 200, this.fill_alpha * 0.5, 0),
             0,
             this.fill_alpha);
           p.push();
           p.fill(this.fade);
           p.noStroke();
-          p.ellipse(this.position.x, this.position.y, this.diam+this.radius);
+          p.ellipse(this.position.x, this.position.y, this.diam + this.radius);
           p.pop();
         }
       }
@@ -274,10 +274,10 @@ class Particle {
 
     this.outerDiam = this.outerDiam + 3;
 
-     if (this.diam == 586){
+    if (this.diam == 586) {
       this.outerDiam = 0;
       this.count = this.count + 1;
-     }
+    }
 
   }
 
@@ -297,33 +297,60 @@ class Particle {
     p.ellipseMode(CENTER);
 
     if (this.initload) {
-
-      p.ellipse(this.position.x, this.position.y, this.radius);
-
-    } else {
-      if (this.firstrun) {
-
-for (var i = 0; i < window.audioUUIDs.length; i++){
-        if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
-          this.audioBuffer(p);
-          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
-        } else {
-          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
-        }
-      }
-
-      } else {
-        for (var i = 0; i < window.audioUUIDs.length; i++){
-        if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
-          this.audioBuffer(p);
           p.ellipse(this.position.x, this.position.y, this.radius);
         } else {
-          p.ellipse(this.position.x, this.position.y, this.radius);
+          if (this.firstrun) {
+            p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+          } else {
+            p.ellipse(this.position.x, this.position.y, this.radius);
+          }
         }
-      }
-    }
-    }
-    p.pop();
+
+        for (var i = 0; i < window.audioUUIDs.length; i++) {
+          if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
+            this.audioBuffer(p);
+          }
+        }
+
+        p.pop();
+
+
+
+
+
+
+
+
+
+
+    // if (this.initload) {
+    //
+    //   p.ellipse(this.position.x, this.position.y, this.radius);
+    //
+    // } else {
+    //   if (this.firstrun) {
+    //
+    //     for (var i = 0; i < window.audioUUIDs.length; i++) {
+    //       if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
+    //         this.audioBuffer(p);
+    //         p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+    //       } else {
+    //         p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+    //       }
+    //     }
+    //
+    //   } else {
+    //     for (var i = 0; i < window.audioUUIDs.length; i++) {
+    //       if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
+    //         this.audioBuffer(p);
+    //         p.ellipse(this.position.x, this.position.y, this.radius);
+    //       } else {
+    //         p.ellipse(this.position.x, this.position.y, this.radius);
+    //       }
+    //     }
+    //   }
+    // }
+    // p.pop();
   }
 
   isDead() {
