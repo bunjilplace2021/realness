@@ -115,7 +115,7 @@ subOsc.filter = new BiquadFilter({
 });
 const noise = new Noise({
   type: "pink",
-  volume: isMobile || window.safari ? -6 : -14,
+  volume: isMobile || window.safari ? -14 : -14,
 });
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");

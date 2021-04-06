@@ -403,9 +403,9 @@ padding-right:1.0rem ; */
   font-size: 1em;
 }
 
-/* Remove passing on mutebutton for centred */
+/* Remove padding on mutebutton to fix centering */
 #mute{
-  text-align: left;
+  text-align: center;
   margin: 0;
   padding: 0;
 }
