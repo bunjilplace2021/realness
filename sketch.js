@@ -177,7 +177,7 @@ function mousePressed() {
 
   //sample and upload pixel to firebase
 
-  shaderMousePressed();
+
   mouseIsReleased = false;
   initload = false;
 }
@@ -191,6 +191,7 @@ function mouseReleased() {
 
   mousecount = 0;
   mouseIsReleased = true;
+  shaderMousePressed();
 }
 
 function keyPressed() {
