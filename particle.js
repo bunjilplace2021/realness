@@ -304,7 +304,7 @@ class Particle {
       if (this.firstrun) {
 
 for (var i = 0; i < window.audioUUIDs.length; i++){
-        if (this.audioUUID == window.audioUUID[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
+        if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
           this.audioBuffer(p);
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         } else {
@@ -314,7 +314,7 @@ for (var i = 0; i < window.audioUUIDs.length; i++){
 
       } else {
         for (var i = 0; i < window.audioUUIDs.length; i++){
-        if (this.audioUUID == window.audioUUID[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
+        if (this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
           this.audioBuffer(p);
           p.ellipse(this.position.x, this.position.y, this.radius);
         } else {
