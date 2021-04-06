@@ -199,9 +199,13 @@ const checkOutput = (node) => {
 };
 //  MAIN FUNCTIONS
 const pushUUID = async (uuid) => {
-  const filenamePattern = /(?<=audio-)(.*)(?=.mp3|.aac)/;
+  try {
+    const filenamePattern = /(\w{8}(-\w{4}){3}-\w{12}?)/;
 
-  window.audioUUIDs.push(uuid.match(filenamePattern)[0]);
+    window.audioUUIDs.push(uuid.match(filenamePattern)[0]);
+  } catch (error) {
+    console.log("Safari does not support lookbehind regex");
+  }
 };
 const reloadBuffers = async (customBuffer = null) => {
   return new Promise(async (resolve, reject) => {
@@ -537,7 +541,7 @@ const pollValues = () => {
       );
     }
   } catch (error) {
-    console.warn("particle system not defined, threw error" + error);
+    // console.warn("particle system not defined, threw error" + error);
   }
 };
 
