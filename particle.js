@@ -248,7 +248,7 @@ class Particle {
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
-      if (this.diam > 0 && this.active && this.duration < 500 && this.radius === 0) {
+      if (this.diam > 0 && this.active && this.duration < 500 && this.radius < 250) {
         if (this.firstrun) {
           this.fade = constrain(
             map(this.diam, 0, 200, 255, 0),
