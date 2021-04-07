@@ -181,9 +181,9 @@ function mousePressed() {
   mouseIsReleased = false;
   initload = false;
 
-  if (detecttouch){
+//  if (detecttouch){
   setTimeout(shaderMousePressed,200);
-}
+//}
 
 
 }
@@ -198,9 +198,9 @@ function mouseReleased() {
   mousecount = 0;
   mouseIsReleased = true;
 
-  if (!detecttouch){
-  shaderMousePressed();
-}
+//   if (!detecttouch){
+//   shaderMousePressed();
+// }
 }
 
 function keyPressed() {
