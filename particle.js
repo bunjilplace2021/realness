@@ -256,7 +256,7 @@ class Particle {
           p.push();
           p.fill(80,this.fade);
           p.noStroke();
-          p.ellipse(this.map_position.x, this.map_position.y, this.diam + this.radius);
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
           p.pop();
         } else {
           this.fade = constrain(
@@ -266,7 +266,7 @@ class Particle {
           p.push();
           p.fill(80,this.fade);
           p.noStroke();
-          p.ellipse(this.position.x, this.position.y, this.diam + this.radius);
+          p.ellipse(this.position.x, this.position.y, this.diam);
           p.pop();
         }
       }
