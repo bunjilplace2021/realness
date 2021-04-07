@@ -383,7 +383,7 @@ function circtimer(){
   }
 
 
-  if (runanim){
+  if (runanim && !window.recordingLimitReached && !window.isMuted){
     circ(x,y);
   }
 
