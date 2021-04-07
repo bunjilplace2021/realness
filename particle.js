@@ -116,7 +116,8 @@ class Particle {
       this.recording &&
       this.active &&
       this.recordcount == 0 &&
-      window.recordingLimitReached == false
+      window.recordingLimitReached == false &&
+      detecttouch == true
     ) {
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
