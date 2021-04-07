@@ -63,6 +63,7 @@ window.recordingLimitReached = false;
 window.recording = false;
 window.isMuted = true;
 window.audioUUIDs = [];
+window.auUUID;
 
 // switch logging
 process.env.NODE_ENV === "development"
@@ -401,8 +402,8 @@ const getBuffers = async (mp3Supported) => {
     }
     let buffers;
     console.log(f.audioUUID);
-    const auUUID = f.audioUUID;
-    console.log(auUUID);
+    window.auUUID = f.audioUUID;
+    console.log(window.auUUID);
 
     window.audioUUIDs = window.audioUUIDs.filter(
       (uuid) => uuid === f.audioUUID
