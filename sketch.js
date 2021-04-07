@@ -182,7 +182,7 @@ function mousePressed() {
   initload = false;
 
 //  if (detecttouch){
-  setTimeout(shaderMousePressed,1000);
+  setTimeout(shaderMousePressed,500);
   //shaderMousePressed();
 //}
 
