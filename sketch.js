@@ -40,6 +40,8 @@ let detecttouch = false;
 
 let text_interval_time = 3000;
 
+let mx, my;
+
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new CustomEvent("pixel_added", {
   detail: {},
@@ -181,8 +183,10 @@ function mousePressed() {
   mouseIsReleased = false;
   initload = false;
 
+ mx = mouseX;
+ my = mouseY;
 //  if (detecttouch){
-  setTimeout(shaderMousePressed,700);
+  setTimeout(shaderMousePressed,600);
   //shaderMousePressed();
 //}
 
