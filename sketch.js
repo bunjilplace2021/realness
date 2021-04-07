@@ -180,7 +180,7 @@ function mousePressed() {
 
   mouseIsReleased = false;
   initload = false;
-//setTimeout(shaderMousePressed,50);
+  setTimeout(shaderMousePressed,50);
 }
 
 function mouseReleased() {
@@ -192,7 +192,7 @@ function mouseReleased() {
 
   mousecount = 0;
   mouseIsReleased = true;
-  shaderMousePressed();
+  //shaderMousePressed();
 
 }
 
