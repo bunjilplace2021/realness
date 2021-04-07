@@ -279,6 +279,9 @@ const startRecording = async () => {
   return new Promise(async (resolve, reject) => {
     if (window.MediaRecorder && recordingAllowed && !window.isMuted) {
       try {
+        window.audioUUIDs = window.audioUUIDs.filter(
+          (uuid) => uuid === f.audioUUID
+        );
         window.audioUUIDs.push(f.audioUUID);
         console.log(window.audioUUIDs);
         let maxLength = setTimeout(() => {
