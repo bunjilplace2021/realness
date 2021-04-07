@@ -131,8 +131,8 @@ function shaderMousePressed() {
   var data = {
     uuid: uuid,
     audioUUID:
-      Array.isArray(window.audioUUIDs) && !window.recordingLimitReached && mousecount > 30
-        ? window.audioUUIDs[window.audioUUIDs.length - 1]
+        !window.recordingLimitReached && mousecount > 30
+        ? window.auUUID
         : "noAudio",
     mouseX_loc: mouseX,
     mouseY_loc: mouseY,
