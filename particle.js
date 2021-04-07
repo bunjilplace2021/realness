@@ -1,5 +1,5 @@
 class Particle {
-  constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
+  constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID, part_audioUUID) {
     this.origposition = createVector(x, y);
     this.map_position = createVector(
       constrain(map(x, 0, devWidth, 0, width), 0, width),
@@ -44,6 +44,8 @@ class Particle {
     this.recordcount = 0.0;
     this.initload = initload;
     this.outerDiam = 0;
+    this.audioUUID = part_audioUUID;
+    this.count = 0;
   }
 
   colour() {
@@ -104,6 +106,7 @@ class Particle {
   }
 
   holdevent(p) {
+
     if (window.recording && this.duration < 51 && this.firstrun) {
       this.recording = true;
     }
@@ -129,9 +132,11 @@ class Particle {
 
       if (this.outerDiam >= 500) {
         this.recordcount = this.recordcount + 1;
+        this.outerDiam = 0;
       }
     }
   }
+
 
   run(p) {
     this.update();
@@ -232,19 +237,54 @@ class Particle {
       this.firstrun = false;
       this.intersect = 0.0;
       this.initload = false;
+      this.count = 0;
       initload = false; //global flag
     }
   }
 
+  audioBuffer(p) {
+
+
+    for (var i = 0; i < 3; i++) {
+      this.diam = this.outerDiam - 100 * i;
+      if (this.diam > 0 && this.active && this.count < 2) {
+        if (this.firstrun) {
+          this.fade = constrain(
+            map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
+            0,
+            this.fill_alpha);
+          p.push();
+          p.fill(this.fade);
+          p.noStroke();
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam+this.radius);
+          p.pop();
+        } else {
+          this.fade = constrain(
+            map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
+            0,
+            this.fill_alpha);
+          p.push();
+          p.fill(this.fade);
+          p.noStroke();
+          p.ellipse(this.position.x, this.position.y, this.diam+this.radius);
+          p.pop();
+        }
+      }
+    }
+
+    this.outerDiam = this.outerDiam + 3;
+
+     if (this.diam == 586){
+      this.outerDiam = 0;
+      this.count = this.count + 1;
+     }
+
+  }
+
+
   // Method to display
   display(p) {
     p.push();
-
-    // if (pixelShaderToggle && this.UUID == uuid) {
-    //   p.stroke(255, this.fill_alpha);
-    // } else {
-    //   p.noStroke();
-    // }
 
     if (!pixelShaderToggle && this.UUID != uuid && this.firstrun) {
       p.strokeWeight(this.strokeweight);
@@ -257,12 +297,26 @@ class Particle {
     p.ellipseMode(CENTER);
 
     if (this.initload) {
+
       p.ellipse(this.position.x, this.position.y, this.radius);
+
     } else {
       if (this.firstrun) {
-        p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0 && !pixelShaderToggle) {
+          this.audioBuffer(p);
+          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+        } else {
+          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+        }
+
       } else {
-        p.ellipse(this.position.x, this.position.y, this.radius);
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0 && !pixelShaderToggle) {
+          this.audioBuffer(p);
+            p.ellipse(this.position.x, this.position.y, this.radius);
+        } else {
+          p.ellipse(this.position.x, this.position.y, this.radius);
+        }
       }
     }
     p.pop();
