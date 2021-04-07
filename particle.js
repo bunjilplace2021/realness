@@ -247,14 +247,14 @@ class Particle {
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
-      if (this.diam > 0 && this.active && this.count === 0) {
+      if (this.diam > 0 && this.active && this.duration < 51) {
         if (this.firstrun) {
           this.fade = constrain(
             map(this.diam, 0, 200, this.fill_alpha, 0),
             0,
             this.fill_alpha);
           p.push();
-          p.fill(50,this.fade);
+          p.fill(80,this.fade);
           p.noStroke();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam + this.radius);
           p.pop();
@@ -264,7 +264,7 @@ class Particle {
             0,
             this.fill_alpha);
           p.push();
-          p.fill(50,this.fade);
+          p.fill(80,this.fade);
           p.noStroke();
           p.ellipse(this.position.x, this.position.y, this.diam + this.radius);
           p.pop();
