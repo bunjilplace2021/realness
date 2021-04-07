@@ -180,7 +180,12 @@ function mousePressed() {
 
   mouseIsReleased = false;
   initload = false;
-//  shaderMousePressed();
+
+  if (detecttouch){
+  shaderMousePressed();
+}
+
+
 }
 
 function mouseReleased() {
@@ -192,8 +197,10 @@ function mouseReleased() {
 
   mousecount = 0;
   mouseIsReleased = true;
-  shaderMousePressed();
 
+  if (!detecttouch){
+  shaderMousePressed();
+}
 }
 
 function keyPressed() {
