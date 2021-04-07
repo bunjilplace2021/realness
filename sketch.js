@@ -185,8 +185,9 @@ function mousePressed() {
 
  mx = mouseX;
  my = mouseY;
+
 //  if (detecttouch){
-  setTimeout(shaderMousePressed,600);
+//  setTimeout(shaderMousePressed,600);
   //shaderMousePressed();
 //}
 
@@ -204,7 +205,7 @@ function mouseReleased() {
   mouseIsReleased = true;
 
 //   if (!detecttouch){
-//   shaderMousePressed();
+  shaderMousePressed();
 // }
 }
 
