@@ -250,7 +250,7 @@ class Particle {
       if (this.diam > 0 && this.active && this.duration < 500 && this.count === 0) {
         if (this.firstrun) {
           this.fade = constrain(
-            map(this.diam, 0, 200, this.fill_alpha, 0),
+            map(this.diam, 0, 200, 255, 0),
             0,
             this.fill_alpha);
           p.push();
@@ -260,7 +260,7 @@ class Particle {
           p.pop();
         } else {
           this.fade = constrain(
-            map(this.diam, 0, 200, this.fill_alpha, 0),
+            map(this.diam, 0, 200, 255, 0),
             0,
             this.fill_alpha);
           p.push();
@@ -274,9 +274,10 @@ class Particle {
 
     this.outerDiam = this.outerDiam + 1.0;
 
-    if (this.diam == 586) {
+    if (this.outerDiam >= 500) {
       this.outerDiam = 0;
       this.count = this.count + 1;
+      this.diam = 0;
     }
 
   }
