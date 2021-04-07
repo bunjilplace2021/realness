@@ -180,7 +180,7 @@ function mousePressed() {
 
   mouseIsReleased = false;
   initload = false;
-  shaderMousePressed();
+//  shaderMousePressed();
 }
 
 function mouseReleased() {
