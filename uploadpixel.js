@@ -133,8 +133,8 @@ function shaderMousePressed(mx,my) {
         !window.recordingLimitReached && mousecount > 30
         ? window.auUUID
         : "noAudio",
-    mouseX_loc: mx,
-    mouseY_loc: my,
+    mouseX_loc: mouseX,
+    mouseY_loc: mouseY,
     rand: rand_gen,
     colour_loc: colour,
     deviceWidth: width,
