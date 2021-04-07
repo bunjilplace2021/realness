@@ -238,6 +238,7 @@ class Particle {
       this.intersect = 0.0;
       this.initload = false;
       this.count = 0;
+      this.outerDiam = 0;
       initload = false; //global flag
     }
   }
@@ -247,14 +248,14 @@ class Particle {
 
     for (var i = 0; i < 3; i++) {
       this.diam = this.outerDiam - 100 * i;
-      if (this.diam > 0 && this.active && this.duration < 500 && this.count === 0) {
+      if (this.diam > 0 && this.active && this.duration < 500 && this.radius === 0) {
         if (this.firstrun) {
           this.fade = constrain(
             map(this.diam, 0, 200, 255, 0),
             0,
             this.fill_alpha);
           p.push();
-          p.fill(80,this.fade);
+          p.fill(127,this.fade);
           p.noStroke();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
           p.pop();
@@ -264,7 +265,7 @@ class Particle {
             0,
             this.fill_alpha);
           p.push();
-          p.fill(80,this.fade);
+          p.fill(127,this.fade);
           p.noStroke();
           p.ellipse(this.position.x, this.position.y, this.diam);
           p.pop();
@@ -277,7 +278,7 @@ class Particle {
     if (this.outerDiam >= 500) {
       this.outerDiam = 0;
       //this.count = this.count + 1;
-      this.diam = 0;
+      //this.diam = 0;
     }
 
   }
