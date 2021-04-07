@@ -112,7 +112,7 @@ function pipShaderDraw() {
   pippg.rect(0, 0, width, height);
 }
 
-function shaderMousePressed() {
+function shaderMousePressed(mx,my) {
   if (webcam_permission) {
     webcamCheck();
   }
@@ -130,11 +130,11 @@ function shaderMousePressed() {
   var data = {
     uuid: uuid,
     audioUUID:
-        !window.recordingLimitReached && window.recording
+        !window.recordingLimitReached && mousecount > 30
         ? window.auUUID
         : "noAudio",
-    mouseX_loc: mouseX,
-    mouseY_loc: mouseY,
+    mouseX_loc: mx,
+    mouseY_loc: my,
     rand: rand_gen,
     colour_loc: colour,
     deviceWidth: width,
