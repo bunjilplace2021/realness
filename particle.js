@@ -309,7 +309,7 @@ class Particle {
 
           if (Array.isArray(window.audioUUIDs)){
         for (var i = 0; i < window.audioUUIDs.length; i++) {
-          if (this.active && this.audioUUID == window.audioUUIDs[i] && this.recordcount > 0 && !pixelShaderToggle && window.audioUUIDs.length > 0) {
+          if (this.active && this.audioUUID == window.audioUUIDs[i] && !pixelShaderToggle && window.audioUUIDs.length > 0) {
             this.audioBuffer(p);
           }
         }
