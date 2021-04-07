@@ -304,7 +304,7 @@ class Particle {
       if (this.firstrun) {
 
         if (this.audioUUID == window.audioUUID && this.recordcount > 0 && !pixelShaderToggle) {
-          this.audioBuffer(p);
+        //  this.audioBuffer(p);
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
         } else {
           p.ellipse(this.map_position.x, this.map_position.y, this.radius);
@@ -312,7 +312,7 @@ class Particle {
 
       } else {
         if (this.audioUUID == window.audioUUID && this.recordcount > 0 && !pixelShaderToggle) {
-          this.audioBuffer(p);
+        //  this.audioBuffer(p);
             p.ellipse(this.position.x, this.position.y, this.radius);
         } else {
           p.ellipse(this.position.x, this.position.y, this.radius);
