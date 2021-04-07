@@ -1,24 +1,32 @@
-import { Reverb, Delay, Gain, Filter, Chorus, Limiter } from "tone";
+import {
+  Reverb,
+  BiquadFilter,
+  Chorus,
+  Limiter,
+  Meter,
+  Volume,
+  FeedbackDelay,
+  Oscillator,
+} from "tone";
+import { soundLog } from "../utilityFunctions";
 
 class MasterBus {
   constructor(ctx) {
-    this.input = new Gain(0.8);
-    this.limiter = new Limiter(-12);
-
+    this.input = new Volume(3);
+    this.limiter = new Limiter(-6);
+    this.input.connect(this.limiter);
     this.effectsChain = [];
     this.ctx = ctx;
-
-    this.output = new Gain(1);
+    this.output = new Limiter(-6);
     this.dest = this.ctx.destination;
-
-    if (window.isMp3) {
-      this.chainEffect(this.limiter);
-    }
+    this.output.connect(this.dest);
+    this.dest.volume.value = 8;
+    this.chainEffect(this.limiter);
   }
   test() {
-    var oscillator = this.ctx.createOscillator();
+    var oscillator = new Oscillator(440);
     oscillator.frequency.setValueAtTime(440, this.ctx.currentTime);
-    oscillator.connect(this.output);
+    oscillator.connect(this.input);
     oscillator.start();
   }
   setVolume(val) {
@@ -34,7 +42,12 @@ class MasterBus {
     }
   }
   chorus(freq = 0.1, delay = 20, depth = 0.9) {
-    this.chorus = new Chorus(freq, delay, depth).start();
+    this.chorus = new Chorus({
+      frequency: freq,
+      delayTime: delay,
+      depth: depth,
+    }).start();
+
     this.chainEffect(this.chorus);
   }
   chainEffect(effect) {
@@ -52,10 +65,10 @@ class MasterBus {
       for (let i = 0; i < this.effectsChain.length - 1; i++) {
         this.effectsChain[i].connect(this.effectsChain[i + 1]);
       }
-      effectsOutput.toDestination();
+      effectsOutput.connect(this.output);
     } else {
       // there's just one effect. Just connect it
-      this.input.connect(this.effectsChain[0]).connect(this.dest);
+      this.input.connect(this.effectsChain[0]).connect(this.output);
     }
   }
   removeEffect(effect) {
@@ -64,12 +77,23 @@ class MasterBus {
   }
 
   lowpassFilter(frequency, resonance) {
-    this.filter = new Filter(frequency, "lowpass", -24, resonance);
+    this.filter = new BiquadFilter(frequency, "lowpass", resonance);
+    this.chainEffect(this.filter);
+  }
+  highpassFilter(frequency, resonance) {
+    this.filter = new BiquadFilter(frequency, "highpass", resonance);
     this.chainEffect(this.filter);
   }
   delay(time = 100, fbk = 0.5) {
-    this.masterDelay = new Delay(time, fbk);
+    this.masterDelay = new FeedbackDelay(time, fbk);
     this.chainEffect(this.masterDelay);
+  }
+  meterNode(node) {
+    this.meter = new Meter({ smoothing: 0.8 });
+    node.connect(this.meter);
+    window.meterLoop = setInterval(() => {
+      window.masterLevel = this.meter.getValue();
+    }, 300);
   }
   async reverb(reverbSwitch, preDelay = 0.3, decay = 4, wet = 1) {
     if (reverbSwitch) {
@@ -83,6 +107,14 @@ class MasterBus {
     } else {
       this.masterReverb && this.removeEffect(this.masterReverb);
     }
+  }
+  cheapDelay(delayTime = 0.3, maxDelay = 0.5, feedback = 0.4) {
+    this.cheapDelay = new FeedbackDelay({
+      delayTime,
+      maxDelay,
+      feedback,
+    });
+    this.chainEffect(this.cheapDelay);
   }
   disconnect() {
     this.dest.disconnect();

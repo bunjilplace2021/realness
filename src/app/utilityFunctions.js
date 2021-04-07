@@ -1,19 +1,16 @@
-import {
-  decodeAudioData,
-  OfflineAudioContext,
-} from "standardized-audio-context";
+import { decodeAudioData } from "standardized-audio-context";
+import { Meter } from "tone";
 
 export async function fetchSample(url, ctx, contentType = "audio/mpeg-3") {
   return fetch(url)
     .then((response) => response.arrayBuffer())
     .then((arrayBuffer) => ctx.decodeAudioData(arrayBuffer))
-    .catch((error) => console.log(error));
+    .catch((error) => soundLog(error));
 }
 
 export async function aacDecode(url, ctx) {
   let response;
   let arrBuffer;
-
   return new Promise(async (resolve, reject) => {
     try {
       response = await fetch(url, { mimeType: "audio/aac" });
@@ -41,7 +38,7 @@ export async function aacDecode(url, ctx) {
       });
     }
 
-    window.logging && console.log(audioBuffer);
+    soundLog(audioBuffer);
     resolve(audioBuffer);
   });
 }
@@ -72,8 +69,25 @@ export function once(func) {
   };
 }
 
+export function probeLevel(node, time = 10) {
+  console.log(node);
+  let seconds = 0;
+  const meter = new Meter();
+  node.connect(meter);
+  const metering = setInterval(() => {
+    console.log(meter.getValue());
+    seconds++;
+    if (seconds >= time) {
+      node.disconnect(meter);
+      clearInterval(metering);
+      seconds = 0;
+    }
+  }, 100);
+}
+
 export function throttle(fn, delay) {
   let scheduledId;
+
   return function throttled() {
     const context = this;
     const args = arguments;
@@ -84,24 +98,6 @@ export function throttle(fn, delay) {
       clearTimeout(scheduledId);
     }, delay);
   };
-}
-export async function safariFallback(url, ctx) {
-  return new Promise(async (resolve, reject) => {
-    resolve(url);
-
-    //   ctx.decodeAudioData = new webkitAudioContext().decodeAudioData;
-
-    //   ctx.rawContext._nativeContext.decodeAudioData(
-    //     arrayBuf,
-    //     function (buffer) {
-    //       resolve(buffer);
-    //     },
-    //     function (e) {
-    //       reject(e);
-    //     }
-    //   );
-    // });
-  });
 }
 
 //  map one range of values to another
@@ -121,89 +117,65 @@ export function isBetween(x, min, max) {
   return x >= min && x <= max;
 }
 
-export function resampleBuffer(input, target_rate) {
-  return new Promise(async (resolve, reject) => {
-    if (typeof target_rate != "number" && target_rate <= 0) {
-      reject("Samplerate is not a number");
-    }
-    if (!input) {
-      reject("Input buffer is undefined");
-    }
-    // if can set samplerate (eg.not on safari)
-    let resampling_ratio;
-
-    if (typeof input.sampleRate === Number) {
-      resampling_ratio = input.sampleRate / target_rate;
-    } else {
-      resampling_ratio = 44100 / target_rate;
-    }
-    let final_length = input.length * resampling_ratio;
-    let off = new OfflineAudioContext(
-      input.numberOfChannels,
-      final_length,
-      target_rate
-    );
-    // NORMALIZE AND FILTER BUFFERS
-    let source = off.createBufferSource();
-    const gainNode = off.createGain();
-    gainNode.gain.value = getIdealVolume(input);
-    window.logging && console.log(gainNode.gain.value);
-    source.buffer = input;
-    source.connect(gainNode);
-    gainNode.connect(off.destination);
-    source.start(0);
-    try {
-      resolve(await off.startRendering());
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-export function getNodes(obj) {
-  Object.entries(obj).forEach((entry) => {
-    if (entry[1] !== null) {
-      const node = entry[1];
-      console.log(typeof node);
-      if (typeof node === "object") {
-      }
-    }
-  });
-}
-
 export function getIdealVolume(buffer) {
-  if (!typeof buffer === Object) {
-    soundLog("buffer is invalid. Skipping");
-    reject(false);
-  }
-  if (buffer) {
-    var decodedBuffer = buffer.getChannelData(0);
-    var sliceLen = Math.floor(buffer.sampleRate * 0.05);
-    var averages = [];
-    var sum = 0.0;
-    for (var i = 0; i < decodedBuffer.length; i++) {
-      sum += decodedBuffer[i] ** 2;
-      if (i % sliceLen === 0) {
-        sum = Math.sqrt(sum / sliceLen);
-        averages.push(sum);
-        sum = 0;
-      }
+  return new Promise((resolve, reject) => {
+    // TODO: ADD GETCHANNELDATA CHECK
+
+    if (!typeof buffer === Object) {
+      soundLog("buffer is invalid. Skipping");
+      reject(false);
     }
-    // Ascending sort of the averages array
-    averages.sort(function (a, b) {
-      return a - b;
-    });
-    // Take the average at the 95th percentile
-    var a = averages[Math.floor(averages.length * 0.95)];
-
-    var gain = 1.0 / a;
-    // Perform some clamping
-    //   gain = Math.max(gain, 0.02);
-
-    //   gain = Math.min(gain, 2000.0);
-
-    return gain / 10.0;
-  }
+    if (buffer) {
+      const decodedBuffer = buffer.getChannelData(0);
+      const sliceLen = Math.floor(buffer.sampleRate * 0.05);
+      let averages = [];
+      let sum = 0.0;
+      for (var i = 0; i < decodedBuffer.length; i++) {
+        sum += decodedBuffer[i] ** 2;
+        if (i % sliceLen === 0) {
+          sum = Math.sqrt(sum / sliceLen);
+          averages.push(sum);
+          sum = 0;
+        }
+      }
+      // Ascending sort of the averages array
+      averages.sort((a, b) => a - b);
+      // Take the average at the 95th percentile
+      let a = averages[Math.floor(averages.length * 0.95)];
+      let gain = 1.0 / a;
+      let diff = 1.0 - a;
+      soundLog("INITIAL GAIN:" + gain / 10);
+      soundLog("DIFF:" + diff);
+      let safeVal;
+      if (diff > 0.999) {
+        soundLog("possible error. being safe");
+        safeVal = 3000;
+        gain = gain / 0.3;
+      } else {
+        safeVal = 7000;
+        // soundLog("Difference:" + diff);
+        // if (gain <= 1.0) {
+        //   gain = gain / 20;
+        // }
+        // if (gain <= 5.0) {
+        //   gain = gain / 10;
+        // }
+        // if (gain <= 15.0) {
+        //   gain = gain / 4;
+        // }
+        // if (gain <= 30.0 && gain >= 15.0) {
+        //   gain = gain / 1.5;
+        // }
+        // if (gain < 100 && gain > 30) {
+        //   gain = gain / 2;
+        // }
+      }
+      // gain = Math.min(gain, safeVal);
+      // gain = Math.max(gain, 3);
+      soundLog(`Adjusted gain x ${gain / 10}`);
+      resolve((gain / 10.0).toFixed(2));
+    }
+  });
 }
 export function safariPolyFill(safariAudioTrack) {
   safariAudioTrack = new Audio();
@@ -235,8 +207,8 @@ export function soundLog(str) {
 }
 
 export function checkFileVolume(buf) {
-  if (buf) {
-    window.logging && console.log(buf.getChannelData(0).length);
+  if (buf.getChannelData) {
+    window.logging && soundLog(buf.getChannelData(0).length);
     if (buf.getChannelData(0).length < 65536) {
       if (Math.max(...buf.getChannelData(0)) > 0) {
         return true;
@@ -247,4 +219,10 @@ export function checkFileVolume(buf) {
   } else {
     return false;
   }
+}
+
+if (!Array.prototype.last) {
+  Array.prototype.last = function () {
+    return this[this.length - 1];
+  };
 }

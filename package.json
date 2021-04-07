@@ -24,8 +24,7 @@
   "dependencies": {
     "audio-recorder-polyfill": "^0.4.1",
     "firebase": "^8.0.2",
-    "lodash": "^4.17.20",
-    "tone": "^14.7.58"
+    "tone": "^14.8.9"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
@@ -41,8 +40,10 @@
     "style-loader": "^2.0.0",
     "terser-webpack-plugin": "^5.0.3",
     "util": "^0.12.3",
+    "web-audio-peak-meter": "^2.0.1",
     "webpack": "^5.4.0",
     "webpack-cli": "^4.2.0",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "worker-loader": "^3.0.7"
   }
 }

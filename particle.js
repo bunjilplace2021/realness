@@ -1,13 +1,23 @@
 class Particle {
-  constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID) {
+  constructor(x, y, rand, img_, devWidth, devHeight, touchTime, part_UUID, part_audioUUID) {
     this.origposition = createVector(x, y);
     this.map_position = createVector(
-      constrain(map(x, 0, devWidth, 0, width),0,width),
-      constrain(map(y, 0, devHeight, 0, height),0,height));
+      constrain(map(x, 0, devWidth, 0, width), 0, width),
+      constrain(map(y, 0, devHeight, 0, height), 0, height)
+    );
     this.alignpixel = 100;
     this.position = createVector(
-      constrain(round(this.map_position.x / this.alignpixel) * this.alignpixel, this.alignpixel, width - this.alignpixel),
-      constrain(round(this.map_position.y / this.alignpixel) * this.alignpixel, this.alignpixel, height - this.alignpixel));
+      constrain(
+        round(this.map_position.x / this.alignpixel) * this.alignpixel,
+        this.alignpixel,
+        width - this.alignpixel
+      ),
+      constrain(
+        round(this.map_position.y / this.alignpixel) * this.alignpixel,
+        this.alignpixel,
+        height - this.alignpixel
+      )
+    );
     this.resize_position = createVector();
     this.velocity = createVector();
     this.acceleration = createVector();
@@ -34,7 +44,8 @@ class Particle {
     this.recordcount = 0.0;
     this.initload = initload;
     this.outerDiam = 0;
-
+    this.audioUUID = part_audioUUID;
+    this.count = 0;
   }
 
   colour() {
@@ -88,7 +99,7 @@ class Particle {
       this.fill_col = lerpColor(
         this.col,
         this.fill_col,
-        map(this.duration, 0, 800, 0, 1)
+        constrain(map(this.duration, 100, 800, 0, 1), 0, 1)
       );
       this.strokeweight = lerp(5, 0, map(this.duration, 0, 800, 0, 1));
     }
@@ -96,13 +107,17 @@ class Particle {
 
   holdevent(p) {
 
-
     if (window.recording && this.duration < 51 && this.firstrun) {
       this.recording = true;
     }
 
-    if (this.UUID == uuid && this.recording && this.active && this.recordcount == 0 && window.recordingLimitReached == false) {
-
+    if (
+      this.UUID == uuid &&
+      this.recording &&
+      this.active &&
+      this.recordcount == 0 &&
+      window.recordingLimitReached == false
+    ) {
       for (var i = 0; i < 3; i++) {
         this.diam = this.outerDiam - 100 * i;
         if (this.diam > 0) {
@@ -117,10 +132,11 @@ class Particle {
 
       if (this.outerDiam >= 500) {
         this.recordcount = this.recordcount + 1;
+        this.outerDiam = 0;
       }
-
+    }
   }
-}
+
 
   run(p) {
     this.update();
@@ -163,9 +179,15 @@ class Particle {
     );
 
     this.resize_position.x = constrain(
-      round(this.resize_position.x / this.alignpixel) * this.alignpixel, this.alignpixel, width - this.alignpixel);
+      round(this.resize_position.x / this.alignpixel) * this.alignpixel,
+      this.alignpixel,
+      width - this.alignpixel
+    );
     this.resize_position.y = constrain(
-      round(this.resize_position.y / this.alignpixel) * this.alignpixel, this.alignpixel, height - this.alignpixel);
+      round(this.resize_position.y / this.alignpixel) * this.alignpixel,
+      this.alignpixel,
+      height - this.alignpixel
+    );
 
     this.resize = 0.2 * int(random(1, 3)) + width * 0.0001;
     this.maxradius = width >= height ? width : height;
@@ -215,23 +237,54 @@ class Particle {
       this.firstrun = false;
       this.intersect = 0.0;
       this.initload = false;
+      this.count = 0;
       initload = false; //global flag
-
-      // dispatch radiusLimit event
-      window.dispatchEvent(window.radiusLimit);
-
     }
   }
+
+  audioBuffer(p) {
+
+
+    for (var i = 0; i < 3; i++) {
+      this.diam = this.outerDiam - 100 * i;
+      if (this.diam > 0 && this.active && this.count < 2) {
+        if (this.firstrun) {
+          this.fade = constrain(
+            map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
+            0,
+            this.fill_alpha);
+          p.push();
+          p.fill(this.fade);
+          p.noStroke();
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam+this.radius);
+          p.pop();
+        } else {
+          this.fade = constrain(
+            map(this.diam, 0, 200, this.fill_alpha*0.5, 0),
+            0,
+            this.fill_alpha);
+          p.push();
+          p.fill(this.fade);
+          p.noStroke();
+          p.ellipse(this.position.x, this.position.y, this.diam+this.radius);
+          p.pop();
+        }
+      }
+    }
+
+    this.outerDiam = this.outerDiam + 3;
+
+     if (this.diam == 586){
+      this.outerDiam = 0;
+      this.count = this.count + 1;
+     }
+
+  }
+
 
   // Method to display
   display(p) {
     p.push();
-
-    // if (pixelShaderToggle && this.UUID == uuid) {
-    //   p.stroke(255, this.fill_alpha);
-    // } else {
-    //   p.noStroke();
-    // }
 
     if (!pixelShaderToggle && this.UUID != uuid && this.firstrun) {
       p.strokeWeight(this.strokeweight);
@@ -244,12 +297,26 @@ class Particle {
     p.ellipseMode(CENTER);
 
     if (this.initload) {
+
       p.ellipse(this.position.x, this.position.y, this.radius);
+
     } else {
       if (this.firstrun) {
-        p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0 && !pixelShaderToggle) {
+        //  this.audioBuffer(p);
+          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+        } else {
+          p.ellipse(this.map_position.x, this.map_position.y, this.radius);
+        }
+
       } else {
-        p.ellipse(this.position.x, this.position.y, this.radius);
+        if (this.audioUUID == window.audioUUID && this.recordcount > 0 && !pixelShaderToggle) {
+        //  this.audioBuffer(p);
+            p.ellipse(this.position.x, this.position.y, this.radius);
+        } else {
+          p.ellipse(this.position.x, this.position.y, this.radius);
+        }
       }
     }
     p.pop();
@@ -257,6 +324,12 @@ class Particle {
 
   isDead() {
     if (!this.alive && !this.active) {
+      window.logging && console.log("pixel is dead");
+      // setTimeout makes it async
+      setTimeout(() => {
+        window.dispatchEvent(window.radiusLimit);
+      });
+
       return true;
     } else {
       return false;

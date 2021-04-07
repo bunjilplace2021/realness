@@ -1,11 +1,3 @@
-//  DEBOUNCE UI SOUNDS FOR PERFORMANCE
-function pixelSoundEvent(pixelX, pixelY) {
-  window.pixelAddEvent.data = {
-    pixelX,
-    pixelY,
-  };
-  window.dispatchEvent(window.pixelAddEvent);
-}
 function firebasesetup() {
   var firebaseConfig = {
     apiKey: "AIzaSyAbb8-7skMg99nzAlvUaqR6vfQvD7q_7Vs",
@@ -29,13 +21,11 @@ function firebasesetup() {
 }
 
 function gotData(data) {
+  console.time("getting data");
   var test = data.val();
   var keys = Object.keys(test);
 
   //   FIRE EVENT LISTENER
-  if (!window.isMuted) {
-    window.debounce(pixelSoundEvent(~~test.mouseX_loc, ~~test.mouseY_loc), 10);
-  }
 
   ps.addParticle(
     test.mouseX_loc,
@@ -45,7 +35,23 @@ function gotData(data) {
     test.deviceWidth,
     test.deviceHeight,
     test.touchTime,
-    test.uuid
+    test.uuid,
+    test.audioUUID
+  );
+  console.timeEnd("getting data");
+  if (!window.isMuted) {
+    pixelSoundEvent(test.mouseX_loc, test.mouseY_loc);
+  }
+}
+
+function pixelSoundEvent(pixelX, pixelY) {
+  window.dispatchEvent(
+    new CustomEvent("pixel_added", {
+      detail: {
+        pixelX,
+        pixelY,
+      },
+    })
   );
 }
 

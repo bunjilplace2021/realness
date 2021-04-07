@@ -6,14 +6,15 @@ class ParticleSystem {
     this.particles = [];
   }
 
-  addParticle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID) {
+  addParticle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID, part_audioUUID) {
     if (x !== undefined && y !== undefined) {
       this.particles.push(
-        new Particle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID)
+        new Particle(x, y, rand, img, devWidth, devHeight, touchTime, part_UUID, part_audioUUID)
       );
       particlecount = this.particles.length;
     } else {
       this.particles.push(new Particle(this.origin.x, this.origin.y));
+      //  DEBOUNCE UI SOUNDS FOR PERFORMANCE
     }
   }
 

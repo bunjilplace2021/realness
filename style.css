@@ -17,16 +17,15 @@ body {
   align-items: center;
   font-family: "Avenir Next", "Avenir", "Nunito Sans", sans-serif;
   -webkit-user-select: none;
+  user-select: none;
   touch-action: manipulation;
-
 }
 
 canvas {
   display: block;
   -webkit-user-select: none;
+  user-select: none;
   touch-action: manipulation;
-
-
 }
 
 video {
@@ -45,10 +44,11 @@ img {
   overflow: hidden;
   position: fixed;
   top: 0;
-  bottom: top;
+  bottom: auto;
   width: 100%;
   background-color: rgba(0, 0, 0, 0);
   padding-left: 1em;
+  z-index: 1;
 }
 
 .topnav #myLinks {
@@ -70,6 +70,11 @@ img {
   transition: all 0.3s ease;
 }
 
+.topnav .fa {
+padding-right:1.0rem ; */
+
+}
+
 .topnav a.menu_text {
   top: 0;
   bottom: auto;
@@ -82,23 +87,6 @@ img {
   visibility: visible;
 }
 
-/* #recordButton {
-  text-align: center;
-}
-
-#recordButton:hover {
-  opacity: 0.5;
-  transition: opacity 0.3s ease-out;
-}
-
-.red {
-  color: red;
-}
-
-#mute {
-  transition: opacity 0.3s ease-out;
-  color: white;
-} */
 
 .tooltip {
   position: relative;
@@ -123,41 +111,6 @@ img {
 }
 
 
-
-@media (hover: none) {
-
-
-  .tooltip .tooltiptext {
-    top: 25%;
-    left: 92%;
-    visibility: visible;
-    margin-left: -10px;
-    font-size: calc(0.25em + 0.5vw);
-    width: calc(100% / 6);
-}
-}
-
-@media (hover: none ) and (orientation: landscape) {
-  .tooltip .tooltiptext {
-    top: 10%;
-    left: 90%;
-    font-size: calc(0.2em + 0.5vw);
-}
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .topnav a:hover {
-    background-color: none;
-    color: white;
-    opacity: 1.0;
-  }
-
-  .tooltip:hover .tooltiptext {
-    visibility: visible;
-
-  }
-}
-
 .active {
   background-color: #4caf50;
   color: white;
@@ -166,14 +119,17 @@ img {
 .content {
   position: absolute;
   overflow-y: auto;
-  width: 80%;
-  height: 70vh;
+  width: 100vw;
+  height: 100vh;
+  /* -webkit-animation: fadeIn 3s linear forwards;
+  animation: fadeIn 3s linear forwards; */
+
 }
 
-
-
 /* if backdrop support: very transparent and blurred */
-@supports ((-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))) {
+@supports (
+  (-webkit-backdrop-filter: blur(none)) or (backdrop-filter: blur(none))
+) {
   .content {
     -webkit-backdrop-filter: blur(30px);
     backdrop-filter: blur(30px);
@@ -191,7 +147,7 @@ img {
   text-decoration: none;
   background: transparent;
   color: white;
-  padding-left: .5em;
+  padding-right: 0.5em;
 }
 
 /* Add a hover effect if you want */
@@ -199,13 +155,15 @@ img {
   opacity: 0.8;
 }
 
-
 .content #myInfo {
   display: none;
   background: none;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 6rem;
   color: white;
+  -webkit-animation: fadeIn 1s linear forwards;
+  animation: fadeIn 1s linear forwards;
+
 }
 
 .flex-container {
@@ -227,23 +185,24 @@ img {
 
 /* Responsive layout - makes a one column-layout instead of a two-column layout */
 @media (hover: none) {
-  .flex-item-right, .flex-item-left {
+  .flex-item-right,
+  .flex-item-left {
     flex: 100%;
   }
 }
-
 
 .content #instructions {
   display: none;
   background: none;
   overflow-y: auto;
-  padding: 1rem;
+   padding: 30vw;
   color: white;
   font-size: calc(0.8em + 0.2vh);
-  padding-top:5%;
-  padding-left: 25%;
-  padding-right: 25%;
-
+  position: absolute;
+  top: 40%;
+    left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
 }
 
 .content a:link {
@@ -267,8 +226,14 @@ img {
   width: 100vw;
   text-align: center;
   background: none;
-  position: absolute;
   color: white;
+  position: absolute;
+  -webkit-animation: fadeinout 3s linear forwards;
+  animation: fadeinout 3s linear forwards;
+  top: 40%;
+    left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
 }
 
 #camera_inst {
@@ -277,17 +242,28 @@ img {
   text-align: center;
   background: none;
   position: absolute;
+  -webkit-animation: fadeinout 3s linear forwards;
+  animation: fadeinout 3s linear forwards;
   color: white;
+  top: 40%;
+    left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
 }
-
 
 #record_limit {
   display: none;
-  width: 100%;
+  width: 100vw;
   text-align: center;
   background: none;
-  position: absolute;
   color: white;
+  position: absolute;
+  -webkit-animation: fadeinout 3s linear forwards;
+  animation: fadeinout 3s linear forwards;
+  top: 40%;
+    left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
 }
 
 #mouse_inst {
@@ -298,10 +274,13 @@ img {
   padding: 1rem;
   color: white;
   font-size: calc(0.8em + 0.2vh);
-  padding-top:25vh;
-  padding-left: 25%;
-  padding-right: 25%;
-
+  position: absolute;
+  -webkit-animation: fadeinout 3s linear forwards;
+  animation: fadeinout 3s linear forwards;
+  top: 40%;
+    left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
 }
 
 #tap_inst {
@@ -312,24 +291,101 @@ img {
   padding: 1rem;
   color: white;
   font-size: calc(0.8em + 0.2vh);
-  padding-top:25vh;
-  padding-left: 25%;
-  padding-right: 25%;
+  position: absolute;
+  -webkit-animation: fadeinout 3s linear forwards;
+  animation: fadeinout 3s linear forwards;
+  top: 40%;
+    left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
 }
 
-
-
+#webcam_inst {
+  display: none;
+  text-align: center;
+  background: none;
+  overflow-y: auto;
+  padding: 1rem;
+  color: white;
+  font-size: calc(0.8em + 0.2vh);
+  position: absolute;
+  -webkit-animation: fadeinout 3s linear forwards;
+  animation: fadeinout 3s linear forwards;
+  top: 40%;
+    left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
+}
 
 @media (hover: none) {
+
+.topnav{
+  top: auto;
+  bottom: 0;
+  position:fixed;
+  z-index: 1;
+}
+
+.topnav a:hover {
+  background-color: transparent;
+  opacity: 1;
+}
+
+.topnav .fa {
+  padding-left: 0;
+
+}
+
+.content {
+  position: absolute;
+  overflow-y: auto;
+  width:100vw;
+  height:100vh;
+  -webkit-overflow-scrolling: touch;
+}
+
+.content #myInfo {
+  padding: 3rem;
+}
+
+  .tooltip .tooltiptext {
+    top: 25%;
+    left: 92%;
+    visibility: visible;
+    margin-left: -15px;
+    font-size: calc(0.25em + 0.5vw);
+    width: calc(100% / 6);
+  }
+}
+
+@media (hover: none) and (orientation: portrait) {
+
+  .topnav .fa {
+    font-size: calc(1em + 2vw);
+  }
+
+}
+
+@media (hover: none) and (orientation: landscape) {
+  .tooltip .tooltiptext {
+    top: 10%;
+    left: 90%;
+    font-size: calc(0.2em + 0.5vw);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
   .topnav a:hover {
-    background-color: transparent;
+    background-color: none;
+    color: white;
     opacity: 1;
   }
 
-  .content {
-    -webkit-overflow-scrolling: touch;
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
   }
 }
+
 
 .topnav a {
   font-size: calc(1em + 0.5vw);
@@ -347,8 +403,33 @@ img {
   font-size: 1em;
 }
 
-
+/* Remove padding on mutebutton to fix centering */
+#mute{
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
 /* CLASS FOR DISABLED BUTTONS -- USED FOR MUTE BUTTON */
 .disabled {
   opacity: 0.2;
+}
+
+@-webkit-keyframes fadeinout {
+  0%,100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes fadeinout {
+  0%,100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@-webkit-keyframes fadeIn {
+0% {opacity:0;}
+100% {opacity:1;}
+}
+
+@keyframes fadeIn {
+0% {opacity:0;}
+100% {opacity:1;}
 }
