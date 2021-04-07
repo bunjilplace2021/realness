@@ -161,7 +161,6 @@ function particle_draw(p) {
     mousecount = mousecount + 1;
     if (mousecount === 30 && mousePressed) {
       window.dispatchEvent(window.down);
-      desktopHoldEvent(mouseX,mouseY);
       if (window.recordingLimitReached) {
         document.getElementById("record_limit").style.display = "block";
         setTimeout(function time() {
@@ -182,10 +181,9 @@ function mousePressed() {
   mouseIsReleased = false;
   initload = false;
 
- if (detecttouch){
-//  setTimeout(shaderMousePressed,200);
-shaderMousePressed();
-}
+//  if (detecttouch){
+  setTimeout(shaderMousePressed,200);
+//}
 
 
 }
@@ -200,9 +198,9 @@ function mouseReleased() {
   mousecount = 0;
   mouseIsReleased = true;
 
-  if (!detecttouch){
-  shaderMousePressed();
-}
+//   if (!detecttouch){
+//   shaderMousePressed();
+// }
 }
 
 function keyPressed() {
