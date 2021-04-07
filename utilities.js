@@ -195,7 +195,6 @@ function infoInstructions() {
     myLinks.style.display = "block";
   }
 
-
   if(detecttouch && instload_toggle){
 menuicon.classList.toggle("fa-angle-double-right");
 }else{

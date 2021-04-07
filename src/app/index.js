@@ -62,6 +62,7 @@ let recordedBuffer = null;
 window.recordingLimitReached = false;
 window.recording = false;
 window.isMuted = true;
+window.audioUUIDs = [];
 
 // switch logging
 process.env.NODE_ENV === "development"
@@ -114,7 +115,7 @@ subOsc.filter = new BiquadFilter({
 });
 const noise = new Noise({
   type: "pink",
-  volume: isMobile || window.safari ? -6 : -14,
+  volume: isMobile || window.safari ? -14 : -14,
 });
 // DOM ELEMENTS
 const muteButton = document.querySelector("#mute");
@@ -134,7 +135,7 @@ const initSound = async () => {
   try {
     !r.stream && (await r.getPermissions());
   } catch (error) {
-    console.log(error);
+    soundLog(error);
   }
 };
 /* EVENT LISTENERS */
@@ -192,12 +193,20 @@ const checkOutput = (node) => {
   const tempMeter = new Meter();
   node.connect(tempMeter);
   let value = tempMeter.getValue();
-  console.log(value);
+  soundLog(value);
   tempMeter.disconnect();
   return value;
 };
 //  MAIN FUNCTIONS
+const pushUUID = async (uuid) => {
+  try {
+    const filenamePattern = /(\w{8}(-\w{4}){3}-\w{12}?)/;
 
+    window.audioUUIDs.push(uuid.match(filenamePattern)[0]);
+  } catch (error) {
+    console.log("Safari does not support lookbehind regex");
+  }
+};
 const reloadBuffers = async (customBuffer = null) => {
   return new Promise(async (resolve, reject) => {
     window.loadingBuffers = true;
@@ -207,11 +216,11 @@ const reloadBuffers = async (customBuffer = null) => {
       let returnedBuffers = await getBuffers(window.isMp3);
 
       try {
-        console.log("reloading buffers");
-        // console.log(returnedBuffers);
+        soundLog("reloading buffers");
+        // soundLog(returnedBuffers);
         returnedBuffers.forEach(async (buf, i) => {
           try {
-            console.log("changing buffers");
+            soundLog("changing buffers");
             synths[i].grainOutput.gain.setValueAtTime(
               buf.idealGain,
               soundtrackAudioCtx.currentTime
@@ -222,7 +231,7 @@ const reloadBuffers = async (customBuffer = null) => {
               0
             );
           } catch (error) {
-            console.log("buffercopy failed... reverting to original buffer");
+            soundLog("buffercopy failed... reverting to original buffer");
           }
 
           synths[i].reloadBuffers();
@@ -233,13 +242,13 @@ const reloadBuffers = async (customBuffer = null) => {
         window.loadingBuffers = false;
         resolve(true);
       } catch (err) {
-        console.log("error resolving buffers");
+        soundLog("error resolving buffers");
         reloadBuffers();
       }
     } else {
       window.customBuffer = true;
       soundLog("CUSTOM BUFFER!");
-      console.log(customBuffer);
+      soundLog(customBuffer);
       customBuffer.idealGain = await getIdealVolume(customBuffer);
       synths.forEach((synth) => {
         try {
@@ -270,6 +279,8 @@ const startRecording = async () => {
   return new Promise(async (resolve, reject) => {
     if (window.MediaRecorder && recordingAllowed && !window.isMuted) {
       try {
+        window.audioUUIDs.push(f.audioUUID);
+        console.log(window.audioUUIDs);
         let maxLength = setTimeout(() => {
           soundLog("hit max length, stopping.");
           resolve(true);
@@ -300,14 +311,14 @@ const stopRecording = async () => {
     }
     await reloadBuffers(recordedBuffer);
 
-    window.audioUUID = f.audioUUID;
-
     soundLog("stopped user recording #" + recordings);
-    soundLog("User Audio UUID " + window.audioUUID);
+    soundLog(
+      "User Audio UUID " + window.audioUUIDs[window.audioUUIDs.length - 1]
+    );
     f.uploadSample(r.audioBlob);
     window.recording = false;
 
-    console.log(soundtrackAudioCtx.state);
+    soundLog(soundtrackAudioCtx.state);
     if (soundtrackAudioCtx.state === "suspended") {
       await initSound();
     }
@@ -386,16 +397,24 @@ const getBuffers = async (mp3Supported) => {
       );
     }
     let buffers;
-
+    console.log(f.audioUUID);
+    window.audioUUIDs = window.audioUUIDs.filter(
+      (uuid) => uuid === f.audioUUID
+    );
+    urls.forEach((url) => {
+      pushUUID(url);
+    });
+    console.log(window.audioUUIDs);
     try {
       buffers = await Promise.all(bufPromises);
       if (buffers.includes(undefined)) {
-        console.log("buffer array included undefined buffer. Trying again");
+        soundLog("buffer array included undefined buffer. Trying again");
         buffers = await getBuffers(mp3Supported);
       }
       buffers.forEach(async (buffer) => {
         buffer.idealGain = await getIdealVolume(buffer);
       });
+
       resolve(buffers);
     } catch (error) {
       soundLog("invalid audio file, trying again");
@@ -411,7 +430,7 @@ const loadSynths = async () => {
     try {
       returnedBuffers = await getBuffers(window.isMp3);
     } catch (error) {
-      console.log(error);
+      soundLog(error);
       returnedBuffers = await getBuffers(window.isMp3);
     }
 
@@ -522,7 +541,7 @@ const pollValues = () => {
       );
     }
   } catch (error) {
-    console.warn("particle system not defined, threw error" + error);
+    // console.warn("particle system not defined, threw error" + error);
   }
 };
 
@@ -561,6 +580,7 @@ const main = async () => {
 main();
 
 const debug = () => {
+  window.f = f;
   window.synths = synths;
   window.ctx = soundtrackAudioCtx;
   window.sourceCount =

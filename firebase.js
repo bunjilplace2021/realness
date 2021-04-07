@@ -35,7 +35,8 @@ function gotData(data) {
     test.deviceWidth,
     test.deviceHeight,
     test.touchTime,
-    test.uuid
+    test.uuid,
+    test.audioUUID
   );
   console.timeEnd("getting data");
   if (!window.isMuted) {
