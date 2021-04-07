@@ -42,6 +42,10 @@ let text_interval_time = 3000;
 
 let mx, my;
 
+let runanim = false;
+let diam = 0;
+let outerDiam = 0;
+
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new CustomEvent("pixel_added", {
   detail: {},
@@ -143,6 +147,10 @@ function particle_draw(p) {
     //  p.clear();
   }
 
+
+
+  circtimer();
+
   ps.run(p);
   ps.intersection();
   ps.resize_window();
@@ -183,8 +191,8 @@ function mousePressed() {
   mouseIsReleased = false;
   initload = false;
 
- mx = mouseX;
- my = mouseY;
+ // mx = mouseX;
+ // my = mouseY;
 
 //  if (detecttouch){
 //  setTimeout(shaderMousePressed,600);

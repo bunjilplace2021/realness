@@ -141,7 +141,7 @@ class Particle {
   run(p) {
     this.update();
     this.display(p);
-    this.holdevent(p);
+  //  this.holdevent(p);
     //console.log(width,height,this.position.x,this.position.y,this.map_position.x,this.map_position.y);
   }
 
