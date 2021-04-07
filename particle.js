@@ -276,7 +276,7 @@ class Particle {
 
     if (this.outerDiam >= 500) {
       this.outerDiam = 0;
-      this.count = this.count + 1;
+      //this.count = this.count + 1;
       this.diam = 0;
     }
 
