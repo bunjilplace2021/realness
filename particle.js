@@ -252,7 +252,7 @@ class Particle {
           this.fade = constrain(
             map(this.diam, 0, 200, this.fill_alpha * 0.5, 0),
             0,
-            this.fill_alpha);
+            this.fill_alpha * 0.5);
           p.push();
           p.fill(this.fade);
           p.noStroke();
@@ -262,7 +262,7 @@ class Particle {
           this.fade = constrain(
             map(this.diam, 0, 200, this.fill_alpha * 0.5, 0),
             0,
-            this.fill_alpha);
+            this.fill_alpha * 0.5);
           p.push();
           p.fill(this.fade);
           p.noStroke();
