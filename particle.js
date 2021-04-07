@@ -254,7 +254,7 @@ class Particle {
             0,
             this.fill_alpha * 0.5);
           p.push();
-          p.fill(this.fade);
+          p.fill(this.fade,this.fade);
           p.noStroke();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam + this.radius);
           p.pop();
@@ -264,7 +264,7 @@ class Particle {
             0,
             this.fill_alpha * 0.5);
           p.push();
-          p.fill(this.fade);
+          p.fill(this.fade,this.fade);
           p.noStroke();
           p.ellipse(this.position.x, this.position.y, this.diam + this.radius);
           p.pop();
