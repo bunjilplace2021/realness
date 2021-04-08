@@ -40,9 +40,6 @@ class FireBaseAudio {
   }
   generateUUID() {
     this.audioUUID = uuidv4();
-    this.audioRef = this.storageRef.child(
-      `audio-${this.audioUUID}.${this.suffix}`
-    );
   }
   async listAll() {
     this.files = await this.storageRef.list({ maxResults: 20 });
@@ -83,7 +80,7 @@ class FireBaseAudio {
 
   async uploadSample(blob) {
     // upload audio to firebase storage
-    this.generateUUID();
+
     this.uploadTask = this.audioRef.put(blob, { contentType: blob.type });
     this.uploadTask.on(
       "state_changed",
