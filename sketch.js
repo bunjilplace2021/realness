@@ -40,6 +40,12 @@ let detecttouch = false;
 
 let text_interval_time = 3000;
 
+let mx, my;
+
+let runanim = false;
+let diam = 0;
+let outerDiam = 0;
+
 // ADD EVENT LISTENER TO WINDOW -- TRIGGERS UI SOUND
 window.pixelAddEvent = new CustomEvent("pixel_added", {
   detail: {},
@@ -141,6 +147,12 @@ function particle_draw(p) {
     //  p.clear();
   }
 
+
+if (!window.isMuted){
+  circtimer();
+}
+  
+
   ps.run(p);
   ps.intersection();
   ps.resize_window();
@@ -177,9 +189,19 @@ function mousePressed() {
 
   //sample and upload pixel to firebase
 
-  shaderMousePressed();
+
   mouseIsReleased = false;
   initload = false;
+
+ // mx = mouseX;
+ // my = mouseY;
+
+//  if (detecttouch){
+//  setTimeout(shaderMousePressed,600);
+  //shaderMousePressed();
+//}
+
+
 }
 
 function mouseReleased() {
@@ -191,6 +213,10 @@ function mouseReleased() {
 
   mousecount = 0;
   mouseIsReleased = true;
+
+//   if (!detecttouch){
+  shaderMousePressed();
+// }
 }
 
 function keyPressed() {
