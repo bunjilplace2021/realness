@@ -148,8 +148,10 @@ function particle_draw(p) {
   }
 
 
-
+if (!window.isMuted){
   circtimer();
+}
+  
 
   ps.run(p);
   ps.intersection();
