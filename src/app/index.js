@@ -63,6 +63,7 @@ window.recordingLimitReached = false;
 window.recording = false;
 window.isMuted = true;
 window.audioUUIDs = [];
+window.auUUID;
 
 // switch logging
 process.env.NODE_ENV === "development"
@@ -204,7 +205,7 @@ const pushUUID = async (uuid) => {
 
     window.audioUUIDs.push(uuid.match(filenamePattern)[0]);
   } catch (error) {
-    console.log("Safari does not support lookbehind regex");
+    soundLog("Safari does not support lookbehind regex");
   }
 };
 const reloadBuffers = async (customBuffer = null) => {
@@ -283,7 +284,7 @@ const startRecording = async () => {
           (uuid) => uuid === f.audioUUID
         );
         window.audioUUIDs.push(f.audioUUID);
-        console.log(window.audioUUIDs);
+        soundLog(window.audioUUIDs);
         let maxLength = setTimeout(() => {
           soundLog("hit max length, stopping.");
           resolve(true);
@@ -400,14 +401,18 @@ const getBuffers = async (mp3Supported) => {
       );
     }
     let buffers;
-    console.log(f.audioUUID);
+    soundLog(f.audioUUID);
+
+    window.auUUID = f.audioUUID;
+    soundLog(window.auUUID);
+
     window.audioUUIDs = window.audioUUIDs.filter(
       (uuid) => uuid === f.audioUUID
     );
     urls.forEach((url) => {
       pushUUID(url);
     });
-    console.log(window.audioUUIDs);
+    soundLog(window.audioUUIDs);
     try {
       buffers = await Promise.all(bufPromises);
       if (buffers.includes(undefined)) {
