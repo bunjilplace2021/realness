@@ -255,7 +255,7 @@ class Particle {
             0,
             this.fill_alpha);
           p.push();
-          p.fill(40,this.fade);
+          p.fill(60,this.fade);
           p.noStroke();
           p.ellipse(this.map_position.x, this.map_position.y, this.diam);
           p.pop();
@@ -265,7 +265,7 @@ class Particle {
             0,
             this.fill_alpha);
           p.push();
-          p.fill(40,this.fade);
+          p.fill(60,this.fade);
           p.noStroke();
           p.ellipse(this.position.x, this.position.y, this.diam);
           p.pop();
@@ -273,7 +273,7 @@ class Particle {
       }
     }
 
-    this.outerDiam = this.outerDiam + 1.0;
+    this.outerDiam = this.resize * 2.0;
 
     if (this.outerDiam >= 500) {
       this.outerDiam = 0;
