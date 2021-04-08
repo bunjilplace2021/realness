@@ -298,7 +298,7 @@ class Particle {
     p.fill(this.fill_col);
     p.ellipseMode(CENTER);
 
-    if (this.initload) {
+if (this.initload) {
           p.ellipse(this.position.x, this.position.y, this.radius);
         } else {
           if (this.firstrun) {
@@ -310,7 +310,7 @@ class Particle {
 
 
           if (Array.isArray(window.audioUUIDs)){
-        for (var i = 0; i < window.audioUUIDs.length; i++) {
+             for (var i = 0; i < window.audioUUIDs.length; i++) {
           if (this.active && this.audioUUID == window.audioUUIDs[i] && !pixelShaderToggle && window.audioUUIDs.length > 0) {
             this.audioBuffer(p);
           }

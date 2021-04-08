@@ -402,8 +402,10 @@ const getBuffers = async (mp3Supported) => {
     }
     let buffers;
     console.log(f.audioUUID);
+  
     window.auUUID = f.audioUUID;
     console.log(window.auUUID);
+
 
     window.audioUUIDs = window.audioUUIDs.filter(
       (uuid) => uuid === f.audioUUID
