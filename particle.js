@@ -255,9 +255,9 @@ class Particle {
             0,
             this.fill_alpha);
           p.push();
-          p.fill(127,this.fade);
+          p.fill(80,this.fade);
           p.noStroke();
-          p.ellipse(this.map_position.x, this.map_position.y, this.diam);
+          p.ellipse(this.map_position.x, this.map_position.y, this.diam+this.radius);
           p.pop();
         } else {
           this.fade = constrain(
@@ -265,15 +265,15 @@ class Particle {
             0,
             this.fill_alpha);
           p.push();
-          p.fill(127,this.fade);
+          p.fill(80,this.fade);
           p.noStroke();
-          p.ellipse(this.position.x, this.position.y, this.diam);
+          p.ellipse(this.position.x, this.position.y, this.diam+this.radius);
           p.pop();
         }
       }
     }
 
-    this.outerDiam = this.outerDiam + 1.0;
+    this.outerDiam = this.outerDiam + 0.5;
 
     if (this.outerDiam >= 500) {
       this.outerDiam = 0;
