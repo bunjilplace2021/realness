@@ -117,7 +117,7 @@ function pipShaderDraw() {
   pippg.rect(0, 0, width, height);
 }
 
-function shaderMousePressed(mx,my) {
+function shaderMousePressed() {
   if (webcam_permission) {
     webcamCheck();
   }
@@ -130,13 +130,12 @@ function shaderMousePressed(mx,my) {
 
   let rand_gen = floor(random(0, 3));
 
-
   // texture upside down?
   var data = {
     uuid: uuid,
     audioUUID:
-        !window.recordingLimitReached && window.recording
-        ? window.auUUID
+      window.audioUUID && !window.recordingLimitReached
+        ? window.audioUUID
         : "noAudio",
     mouseX_loc: mouseX,
     mouseY_loc: mouseY,
