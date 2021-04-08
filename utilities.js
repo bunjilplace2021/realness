@@ -195,7 +195,6 @@ function infoInstructions() {
     myLinks.style.display = "block";
   }
 
-
   if(detecttouch && instload_toggle){
 menuicon.classList.toggle("fa-angle-double-right");
 }else{
@@ -373,41 +372,3 @@ function fullScreenMenu() {
     }
   }
 }
-
-function circtimer(){
-
-  if (mousecount === 30 && mouseIsPressed){
-     x = mouseX;
-     y = mouseY;
-     runanim = true;
-  }
-
-
-  if (runanim && !window.recordingLimitReached && !window.isMuted){
-    circ(x,y);
-  }
-
-}
-
-function circ(x,y){
-
-  for (var i = 0; i < 3; i++) {
-
-        diam = outerDiam - 100 * i;
-        if (diam > 0) {
-          let fade = map(diam, 0, 200, 255, 0);
-          particlepg.push();
-          particlepg.fill(fade);
-          particlepg.noStroke();
-          particlepg.ellipse(x, y, diam);
-          particlepg.pop();
-        }
-      }
-
-      outerDiam = outerDiam + 3;
-
-      if (outerDiam >= 500 ) {
-        outerDiam = 0;
-        runanim = false;
-      }
-    }

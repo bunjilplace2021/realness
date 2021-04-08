@@ -63,7 +63,6 @@ window.recordingLimitReached = false;
 window.recording = false;
 window.isMuted = true;
 window.audioUUIDs = [];
-window.auUUID;
 
 // switch logging
 process.env.NODE_ENV === "development"
