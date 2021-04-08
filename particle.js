@@ -273,7 +273,7 @@ class Particle {
       }
     }
 
-    this.outerDiam = this.resize * 2.0;
+    this.outerDiam = this.outerDiam + 1.0;
 
     if (this.outerDiam >= 500) {
       this.outerDiam = 0;
