@@ -11,6 +11,7 @@ let coltoggle = false;
 let color_lerp = 0;
 let backgroundcol;
 let webcam_permission = false;
+let avgBrightness;
 
 let amt, startColor, newColor;
 let rect;
@@ -44,7 +45,13 @@ function shaderSetup() {
 
 function shaderDraw() {
 
-let avgBrightness = averageBrightness(cam,cam.width,cam.height);
+
+if (webcam && webcam_permission && cam.width > 0 && cam.height > 0){
+avgBrightness = averageBrightness(cam,cam.width,cam.height);
+}else{
+avgBrightness = 1.0;
+}
+
 
   // shader() sets the active shader with our shader
   pixelpg.shader(pixelShader);
