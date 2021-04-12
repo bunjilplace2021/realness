@@ -176,7 +176,7 @@ function shaderMousePressed(mx,my) {
     }
   }
 
-  if (webcam && !menu_loc && instload_toggle == false) {
+  if (webcam && !menu_loc && instload_toggle == false && didactic_toggle == false) {
     test.push(data);
     console.log(data);
   }
