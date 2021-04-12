@@ -38,7 +38,7 @@ var isWKWebView = false;
 
 let detecttouch = false;
 
-let text_interval_time = 3000;
+let text_interval_time = 4000;
 
 let mx, my;
 
@@ -151,7 +151,7 @@ function particle_draw(p) {
 if (!window.isMuted){
   circtimer();
 }
-  
+
 
   ps.run(p);
   ps.intersection();

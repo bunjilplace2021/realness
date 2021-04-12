@@ -67,7 +67,7 @@ img {
   text-align: center;
   text-decoration: none;
   padding: 2vh 0;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
 }
 
 .topnav .fa {
@@ -121,8 +121,8 @@ padding-right:1.0rem ; */
   overflow-y: auto;
   width: 100vw;
   height: 100vh;
-  /* -webkit-animation: fadeIn 3s linear forwards;
-  animation: fadeIn 3s linear forwards; */
+  /* -webkit-animation: fadeIn 4s linear forwards;
+  animation: fadeIn 4s linear forwards; */
 
 }
 
@@ -228,8 +228,8 @@ padding-right:1.0rem ; */
   background: none;
   color: white;
   position: absolute;
-  -webkit-animation: fadeinout 3s linear forwards;
-  animation: fadeinout 3s linear forwards;
+  -webkit-animation: fadeinout 4s linear forwards;
+  animation: fadeinout 4s linear forwards;
   top: 40%;
     left: 50%;
         margin-right: -50%;
@@ -242,8 +242,8 @@ padding-right:1.0rem ; */
   text-align: center;
   background: none;
   position: absolute;
-  -webkit-animation: fadeinout 3s linear forwards;
-  animation: fadeinout 3s linear forwards;
+  -webkit-animation: fadeinout 4s linear forwards;
+  animation: fadeinout 4s linear forwards;
   color: white;
   top: 40%;
     left: 50%;
@@ -258,8 +258,8 @@ padding-right:1.0rem ; */
   background: none;
   color: white;
   position: absolute;
-  -webkit-animation: fadeinout 3s linear forwards;
-  animation: fadeinout 3s linear forwards;
+  -webkit-animation: fadeinout 4s linear forwards;
+  animation: fadeinout 4s linear forwards;
   top: 40%;
     left: 50%;
         margin-right: -50%;
@@ -275,8 +275,8 @@ padding-right:1.0rem ; */
   color: white;
   font-size: calc(0.8em + 0.2vh);
   position: absolute;
-  -webkit-animation: fadeinout 3s linear forwards;
-  animation: fadeinout 3s linear forwards;
+  -webkit-animation: fadeinout 4s linear forwards;
+  animation: fadeinout 4s linear forwards;
   top: 40%;
     left: 50%;
         margin-right: -50%;
@@ -292,8 +292,8 @@ padding-right:1.0rem ; */
   color: white;
   font-size: calc(0.8em + 0.2vh);
   position: absolute;
-  -webkit-animation: fadeinout 3s linear forwards;
-  animation: fadeinout 3s linear forwards;
+  -webkit-animation: fadeinout 4s linear forwards;
+  animation: fadeinout 4s linear forwards;
   top: 40%;
     left: 50%;
         margin-right: -50%;
@@ -309,8 +309,8 @@ padding-right:1.0rem ; */
   color: white;
   font-size: calc(0.8em + 0.2vh);
   position: absolute;
-  -webkit-animation: fadeinout 3s linear forwards;
-  animation: fadeinout 3s linear forwards;
+  -webkit-animation: fadeinout 4s linear forwards;
+  animation: fadeinout 4s linear forwards;
   top: 40%;
     left: 50%;
         margin-right: -50%;
