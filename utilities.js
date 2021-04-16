@@ -236,6 +236,13 @@ menuicon.classList.toggle("fa-angle-double-right");
   }
 }
 
+function soundVolume(){
+  document.getElementById("sound_volume").style.display = "block";
+  setTimeout(function time() {
+    document.getElementById("sound_volume").style.display = "none";
+  }, text_interval_time);
+}
+
 function webcamInst() {
   if (webcam_init_inst) {
     document.getElementById("webcam_inst").style.display = "block";

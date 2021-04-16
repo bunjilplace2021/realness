@@ -146,6 +146,7 @@ playButton.addEventListener("click", () => {
   initSound();
   clearTimeout(playTimeout);
   hidePlayButton(playButton, muteButton);
+  soundVolume();
 });
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = async () => {
@@ -401,7 +402,7 @@ const getBuffers = async (mp3Supported) => {
     }
     let buffers;
     console.log(f.audioUUID);
-  
+
     window.auUUID = f.audioUUID;
     console.log(window.auUUID);
 

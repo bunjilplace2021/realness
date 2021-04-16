@@ -228,6 +228,7 @@ padding-right:1.0rem ; */
   background: none;
   color: white;
   position: absolute;
+  font-size: calc(0.8em + 0.2vh);
   -webkit-animation: fadeinout 4s linear forwards;
   animation: fadeinout 4s linear forwards;
   top: 40%;
@@ -242,6 +243,7 @@ padding-right:1.0rem ; */
   text-align: center;
   background: none;
   position: absolute;
+  font-size: calc(0.8em + 0.2vh);
   -webkit-animation: fadeinout 4s linear forwards;
   animation: fadeinout 4s linear forwards;
   color: white;
@@ -258,6 +260,23 @@ padding-right:1.0rem ; */
   background: none;
   color: white;
   position: absolute;
+  font-size: calc(0.8em + 0.2vh);
+  -webkit-animation: fadeinout 4s linear forwards;
+  animation: fadeinout 4s linear forwards;
+  top: 40%;
+    left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%);
+}
+
+#sound_volume {
+  display: none;
+  width: 100vw;
+  text-align: center;
+  background: none;
+  color: white;
+  position: absolute;
+  font-size: calc(0.8em + 0.2vh);
   -webkit-animation: fadeinout 4s linear forwards;
   animation: fadeinout 4s linear forwards;
   top: 40%;
