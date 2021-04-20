@@ -277,8 +277,8 @@ padding-right:1.0rem ; */
   color: white;
   position: absolute;
   font-size: calc(0.8em + 0.2vh);
-  -webkit-animation: fadeinout 4s linear forwards;
-  animation: fadeinout 4s linear forwards;
+  -webkit-animation: fadeinout 5s linear forwards;
+  animation: fadeinout 5s linear forwards;
   top: 40%;
     left: 50%;
         margin-right: -50%;

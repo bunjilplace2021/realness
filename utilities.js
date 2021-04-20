@@ -240,7 +240,7 @@ function soundVolume(){
   document.getElementById("sound_volume").style.display = "block";
   setTimeout(function time() {
     document.getElementById("sound_volume").style.display = "none";
-  }, text_interval_time);
+  }, text_interval_time + 1000);
 }
 
 function webcamInst() {
