@@ -42,25 +42,26 @@ function quickGet(p, x, y) {
   return components;
 }
 
-
-function averageBrightness(p,w,h) {  //use cam width & height
+function averageBrightness(p, w, h) {
+  //use cam width & height
   p.loadPixels();
-      if (p.pixels.length > 0) { // don't forget this!
-          var total = 0;
-          var i = 0;
-          for (var y = 0; y < h; y++) {
-              for (var x = 0; x < w; x++) {
-                  var redValue = p.pixels[i];
-                  total += redValue;
-                  i += 4;
-              }
-          }
-          var n = w * h;
-          var avg = int(total / n);
-          //select('#average-value').elt.innerText = avg;
-          //select('#average-color').elt.style.backgroundColor = 'rgb(' + avg + ',' + avg + ',' + avg + ')';
+  if (p.pixels.length > 0) {
+    // don't forget this!
+    var total = 0;
+    var i = 0;
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < w; x++) {
+        var redValue = p.pixels[i];
+        total += redValue;
+        i += 4;
       }
-  return constrain(map(avg,0,127,0,1),0,1);
+    }
+    var n = w * h;
+    var avg = int(total / n);
+    //select('#average-value').elt.innerText = avg;
+    //select('#average-color').elt.style.backgroundColor = 'rgb(' + avg + ',' + avg + ',' + avg + ')';
+  }
+  return constrain(map(avg, 0, 127, 0, 1), 0, 1);
 }
 
 //browser checks
@@ -187,20 +188,19 @@ function infoInstructions() {
   if (instload_toggle) {
     document.getElementById("menu_txt").style.display = "block";
     document.getElementById("myLinks").style.display = "none";
-    document.getElementById("top").style.backgroundColor =
-      "rgba(0, 0, 0, 0.)";
-    document.getElementById("instructions").style.webkitBackdropFilter = "blur(0px)";
+    document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.)";
+    document.getElementById("instructions").style.webkitBackdropFilter =
+      "blur(0px)";
     document.getElementById("instructions").style.backdropFilter = "blur(0px)";
   } else {
     myLinks.style.display = "block";
   }
 
-
-  if(detecttouch && instload_toggle){
-menuicon.classList.toggle("fa-angle-double-right");
-}else{
-  menuicon.classList.toggle("fa-window-close");
-}
+  if (detecttouch && instload_toggle) {
+    menuicon.classList.toggle("fa-angle-double-right");
+  } else {
+    menuicon.classList.toggle("fa-window-close");
+  }
 
   myLinks.style.display = "block";
 
@@ -214,7 +214,6 @@ menuicon.classList.toggle("fa-angle-double-right");
 
   if (instruction_toggle) {
     document.getElementById("menu_txt").style.display = "none";
-
   } else {
     myInfo.style.display = "none";
     myInfo.style.background = "none";
@@ -236,12 +235,17 @@ menuicon.classList.toggle("fa-angle-double-right");
   }
 }
 
-function soundVolume(){
-  document.getElementById("sound_volume").style.display = "block";
-  setTimeout(function time() {
-    document.getElementById("sound_volume").style.display = "none";
-  }, text_interval_time + 1000);
+function soundVolume() {
+  // only show if no other instructions are on screen
+  if (!instruction_toggle) {
+    document.getElementById("sound_volume").style.display = "block";
+    setTimeout(function time() {
+      document.getElementById("sound_volume").style.display = "none";
+    }, text_interval_time + 1000);
+  }
 }
+
+window.soundVolume = soundVolume;
 
 function webcamInst() {
   if (webcam_init_inst) {
@@ -256,12 +260,14 @@ function webcamInst() {
 }
 
 function mouseinst() {
+  window.initinst = initinst;
   if (!detecttouch) {
     if (initinst) {
       document.getElementById("mouse_inst").style.display = "block";
       setTimeout(function time() {
         document.getElementById("mouse_inst").style.display = "none";
         initinst = false;
+        window.initinst = initinst;
       }, text_interval_time);
     } else {
       document.getElementById("mouse_inst").style.display = "none";
@@ -272,6 +278,7 @@ function mouseinst() {
       setTimeout(function time() {
         document.getElementById("tap_inst").style.display = "none";
         initinst = false;
+        window.initinst = initinst;
       }, text_interval_time);
     } else {
       document.getElementById("tap_inst").style.display = "none";
@@ -294,7 +301,6 @@ function didactic() {
     myInfo.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
     myInfo.style.webkitBackdropFilter = "blur(30px)";
     myInfo.style.backdropFilter = "blur(30px)";
-
   } else {
     myInfo.style.display = "none";
     myInfo.style.overflowY = "hidden";
@@ -312,11 +318,10 @@ function init_instructions() {
 
   document.getElementById("menu_txt").style.display = "block";
   document.getElementById("myLinks").style.display = "none";
-  document.getElementById("top").style.backgroundColor =
-    "rgba(0, 0, 0, 0.)";
-  document.getElementById("instructions").style.webkitBackdropFilter = "blur(0px)";
+  document.getElementById("top").style.backgroundColor = "rgba(0, 0, 0, 0.)";
+  document.getElementById("instructions").style.webkitBackdropFilter =
+    "blur(0px)";
   document.getElementById("instructions").style.backdropFilter = "blur(0px)";
-
 
   if (instload_toggle) {
     instructions.style.display = "block";
@@ -381,40 +386,35 @@ function fullScreenMenu() {
   }
 }
 
-function circtimer(){
-
-  if (mousecount === 30 && mouseIsPressed){
-     x = mouseX;
-     y = mouseY;
-     runanim = true;
+function circtimer() {
+  if (mousecount === 30 && mouseIsPressed) {
+    x = mouseX;
+    y = mouseY;
+    runanim = true;
   }
 
-
-  if (runanim && !window.recordingLimitReached && !window.isMuted){
-    circ(x,y);
+  if (runanim && !window.recordingLimitReached && !window.isMuted) {
+    circ(x, y);
   }
-
 }
 
-function circ(x,y){
-
+function circ(x, y) {
   for (var i = 0; i < 3; i++) {
-
-        diam = outerDiam - 100 * i;
-        if (diam > 0) {
-          let fade = map(diam, 0, 200, 255, 0);
-          particlepg.push();
-          particlepg.fill(fade);
-          particlepg.noStroke();
-          particlepg.ellipse(x, y, diam);
-          particlepg.pop();
-        }
-      }
-
-      outerDiam = outerDiam + 3;
-
-      if (outerDiam >= 500 ) {
-        outerDiam = 0;
-        runanim = false;
-      }
+    diam = outerDiam - 100 * i;
+    if (diam > 0) {
+      let fade = map(diam, 0, 200, 255, 0);
+      particlepg.push();
+      particlepg.fill(fade);
+      particlepg.noStroke();
+      particlepg.ellipse(x, y, diam);
+      particlepg.pop();
     }
+  }
+
+  outerDiam = outerDiam + 3;
+
+  if (outerDiam >= 500) {
+    outerDiam = 0;
+    runanim = false;
+  }
+}

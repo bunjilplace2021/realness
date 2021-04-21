@@ -138,6 +138,16 @@ const initSound = async () => {
     soundLog(error);
   }
 };
+
+// show sound unmuting prompt
+
+const showPromptTimer = setInterval(() => {
+  // Only show if initial instructions are not showing and mouse instructions are not showing
+  if (window.isMuted && !window.initinst && !window.instload_toggle) {
+    window.soundVolume();
+  }
+}, 1000);
+
 /* EVENT LISTENERS */
 playButton.addEventListener("click", () => {
   const playTimeout = setTimeout(() => {
@@ -146,7 +156,6 @@ playButton.addEventListener("click", () => {
   initSound();
   clearTimeout(playTimeout);
   hidePlayButton(playButton, muteButton);
-  soundVolume();
 });
 // allow unmuting once synths loaded from firebase
 muteButton.onclick = async () => {
@@ -166,6 +175,7 @@ muteButton.onclick = async () => {
       stopAudio();
     }
   }
+  clearInterval(showPromptTimer);
 };
 
 // RADIUS LIMIT LISTENER
@@ -405,7 +415,6 @@ const getBuffers = async (mp3Supported) => {
 
     window.auUUID = f.audioUUID;
     console.log(window.auUUID);
-
 
     window.audioUUIDs = window.audioUUIDs.filter(
       (uuid) => uuid === f.audioUUID
